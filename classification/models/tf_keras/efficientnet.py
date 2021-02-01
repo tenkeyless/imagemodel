@@ -146,42 +146,32 @@ References
 ----------
 - [EfficientNet: Rethinking Model Scaling for Convolutional Neural Networks](https://arxiv.org/abs/1905.11946) (ICML 2019)
 
-
-Arguments
----------
-include_top: Whether to include the fully-connected
-    layer at the top of the network. Defaults to True.
-weights: One of `None` (random initialization),
-        'imagenet' (pre-training on ImageNet),
-        or the path to the weights file to be loaded. Defaults to 'imagenet'.
-input_tensor: Optional Keras tensor
-    (i.e. output of `layers.Input()`)
-    to use as image input for the model.
-input_shape: Optional shape tuple, only to be specified
-    if `include_top` is False.
-    It should have exactly 3 inputs channels.
-pooling: Optional pooling mode for feature extraction
-    when `include_top` is `False`. Defaults to None.
-    - `None` means that the output of the model will be
-        the 4D tensor output of the
-        last convolutional layer.
-    - `avg` means that global average pooling
-        will be applied to the output of the
-        last convolutional layer, and thus
-        the output of the model will be a 2D tensor.
-    - `max` means that global max pooling will
-        be applied.
-classes: Optional number of classes to classify images
-    into, only to be specified if `include_top` is True, and
-    if no `weights` argument is specified. Defaults to 1000 (number of
-    ImageNet classes).
-classifier_activation: A `str` or callable. The activation function to use
-    on the "top" layer. Ignored unless `include_top=True`. Set
-    `classifier_activation=None` to return the logits of the "top" layer.
-    Defaults to 'softmax'.
+Parameters
+----------
+include_top : bool, optional, default=True
+    네트워크 top에 완전 연결 레이어를 포함할지 여부.
+weights : str, optional, default="imagenet"
+    `None`(무작위 초기화), 'imagenet' (ImageNet에 대해 사전 트레이닝) 중 하나 또는 로드할 가중치 파일의 경로입니다.
+input_tensor : [type], optional, default=None
+    모델의 이미지 입력으로 사용할 선택적 Keras 텐서(즉, `layers.Input()`의 출력).
+input_shape : [type], optional, default=None
+    선택적 shape 튜플, `include_top`이 False인 경우에만 지정됩니다.
+    정확히 3개 입력 채널이 있어야 합니다.
+pooling : [type], optional, default=None
+    `include_top`이 `False` 인 경우, 특성 추출을 위한 선택적 풀링 모드
+    - `None` 모델의 출력이 마지막 컨볼루션 레이어의 4D 텐서 출력이 됨을 의미합니다.
+    - `avg` 글로벌 평균 풀링이 마지막 컨볼루션 레이어의 출력에 적용됨을 의미합니다. 따라서, 모델의 출력은 2D 텐서가 됩니다.
+    - `max` 글로벌 최대 풀링이 적용됨을 의미합니다.
+classes : int, optional, default=1000
+    이미지를 분류할 클래스 수 (선택 사항). `include_top`이  True이고, `weights` 인수가 지정되지 않은 경우에만 지정됩니다.
+classifier_activation : str or callable, optional, default="softmax"
+    `str` 또는 callable. "top" 레이어에서 사용할 활성화 함수입니다.
+    `include_top=True`가 아니면 무시됩니다.
+    "top" 레이어의 로짓을 반환하려면, `classifier_activation=None`을 설정하십시오.
 
 Returns
 -------
+`keras.Model`
     `keras.Model` 인스턴스.
 """
 
@@ -250,7 +240,7 @@ def EfficientNet(
         - `max` 글로벌 최대 풀링이 적용됨을 의미합니다.
     classes : int, optional, default=1000
         이미지를 분류할 클래스 수 (선택 사항). `include_top`이  True이고, `weights` 인수가 지정되지 않은 경우에만 지정됩니다.
-    classifier_activation : str, optional, default="softmax"
+    classifier_activation : str or callable, optional, default="softmax"
         `str` 또는 callable. "top" 레이어에서 사용할 활성화 함수입니다.
         `include_top=True`가 아니면 무시됩니다.
         "top" 레이어의 로짓을 반환하려면, `classifier_activation=None`을 설정하십시오.

@@ -355,7 +355,7 @@ def DenseNet121(
     pooling=None,
     classes=1000,
 ):
-    """Instantiates the Densenet121 architecture."""
+    """Densenet121 아키텍쳐를 인스턴스화 합니다."""
     return DenseNet(
         [6, 12, 24, 16],
         include_top,
@@ -378,7 +378,7 @@ def DenseNet169(
     pooling=None,
     classes=1000,
 ):
-    """Instantiates the Densenet169 architecture."""
+    """Densenet169 아키텍쳐를 인스턴스화 합니다."""
     return DenseNet(
         [6, 12, 32, 32],
         include_top,
@@ -401,7 +401,7 @@ def DenseNet201(
     pooling=None,
     classes=1000,
 ):
-    """Instantiates the Densenet201 architecture."""
+    """Densenet201 아키텍쳐를 인스턴스화 합니다."""
     return DenseNet(
         [6, 12, 48, 32],
         include_top,
@@ -432,50 +432,43 @@ decode_predictions.__doc__ = imagenet_utils.decode_predictions.__doc__
 
 DOC = """
 
-  Reference:
-  - [Densely Connected Convolutional Networks](
-      https://arxiv.org/abs/1608.06993) (CVPR 2017)
+Reference
+---------
+- [Densely Connected Convolutional Networks](https://arxiv.org/abs/1608.06993) (CVPR 2017)
 
-  Optionally loads weights pre-trained on ImageNet.
-  Note that the data format convention used by the model is
-  the one specified in your Keras config at `~/.keras/keras.json`.
+선택적으로 ImageNet에서 사전 트레이닝된 가중치를 로드합니다.
+모델에서 사용하는 데이터 형식 규칙은 Keras 구성 `~/.keras/keras.json`에 지정된 규칙입니다.
 
-  Note: each Keras Application expects a specific kind of input preprocessing.
-  For DenseNet, call `tf.keras.applications.densenet.preprocess_input` on your
-  inputs before passing them to the model.
+참고 : 각 Keras 애플리케이션에는 특정 종류의 입력 전처리가 필요합니다.
+DenseNet 경우, 입력을 모델에 전달하기 전에 입력에 대해,
+`tf.keras.applications.densenet.preprocess_input`을 호출해야 합니다.
 
-  Arguments:
-    include_top: whether to include the fully-connected
-      layer at the top of the network.
-    weights: one of `None` (random initialization),
-      'imagenet' (pre-training on ImageNet),
-      or the path to the weights file to be loaded.
-    input_tensor: optional Keras tensor (i.e. output of `layers.Input()`)
-      to use as image input for the model.
-    input_shape: optional shape tuple, only to be specified
-      if `include_top` is False (otherwise the input shape
-      has to be `(224, 224, 3)` (with `'channels_last'` data format)
-      or `(3, 224, 224)` (with `'channels_first'` data format).
-      It should have exactly 3 inputs channels,
-      and width and height should be no smaller than 32.
-      E.g. `(200, 200, 3)` would be one valid value.
-    pooling: Optional pooling mode for feature extraction
-      when `include_top` is `False`.
-      - `None` means that the output of the model will be
-          the 4D tensor output of the
-          last convolutional block.
-      - `avg` means that global average pooling
-          will be applied to the output of the
-          last convolutional block, and thus
-          the output of the model will be a 2D tensor.
-      - `max` means that global max pooling will
-          be applied.
-    classes: optional number of classes to classify images
-      into, only to be specified if `include_top` is True, and
-      if no `weights` argument is specified.
+Parameters
+----------
+include_top : bool, optional, default=True
+    네트워크 top에 완전 연결 레이어를 포함할지 여부.
+weights : str, optional, default="imagenet"
+    `None`(무작위 초기화), 'imagenet' (ImageNet에 대해 사전 트레이닝) 중 하나 또는 로드할 가중치 파일의 경로입니다.
+input_tensor : [type], optional, default=None
+    모델의 이미지 입력으로 사용할 선택적 Keras 텐서(즉, `layers.Input()`의 출력).
+input_shape : [type], optional, default=None
+    선택적 shape 튜플, `include_top`이 False인 경우에만 지정됩니다.
+    (그렇지 않으면 입력 shape은 `(224, 224, 3)` (`'channels_last'` 데이터 형식을 사용하는 경우) 또는
+    `(3, 224, 224)` (`'channels_first'` 데이터 형식을 사용하는 경우)이어야 합니다.)
+    정확히 3개 입력 채널이 있어야 합니다. 그리고 너비와 높이는 32보다 커야합니다.
+    예) `(200, 200, 3)` 유효한 값입니다.
+pooling : [type], optional, default=None
+    `include_top`이 `False` 인 경우, 특성 추출을 위한 선택적 풀링 모드
+    - `None` 모델의 출력이 마지막 컨볼루션 레이어의 4D 텐서 출력이 됨을 의미합니다.
+    - `avg` 글로벌 평균 풀링이 마지막 컨볼루션 레이어의 출력에 적용됨을 의미합니다. 따라서, 모델의 출력은 2D 텐서가 됩니다.
+    - `max` 글로벌 최대 풀링이 적용됨을 의미합니다.
+classes : int, optional, default=1000
+    이미지를 분류할 클래스 수 (선택 사항). `include_top`이  True이고, `weights` 인수가 지정되지 않은 경우에만 지정됩니다.
 
-  Returns:
-    A Keras model instance.
+Returns
+-------
+`keras.Model`
+    `keras.Model` 인스턴스.
 """
 
 setattr(DenseNet121, "__doc__", DenseNet121.__doc__ + DOC)
