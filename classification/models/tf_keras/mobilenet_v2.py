@@ -119,7 +119,7 @@ def MobileNetV2(
         - `alpha` > 1.0이면, 각 레이어의 필터 수를 비례적으로 늘립니다.
         - `alpha` = 1이면, 논문으로부터의 기본 필터 수가 각 레이어에 사용됩니다.
     include_top : bool, optional, default=True
-        네트워크 상단에 완전 연결 레이어를 포함할지 여부
+        네트워크 상단에 있는 완전 연결 레이어를 포함할지 여부
     weights : str, optional, default="imagenet"
         `None`(무작위 초기화), `'imagenet'`(ImageNet에 대해 사전 트레이닝된) 또는 로드할 가중치 파일의 경로 중 하나입니다.
     input_tensor : [type], optional, default=None
