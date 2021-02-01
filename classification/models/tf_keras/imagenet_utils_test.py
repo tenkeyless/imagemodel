@@ -13,7 +13,7 @@
 # limitations under the License.
 # ==============================================================================
 """
-Tests for imagenet_utils.
+imagenet_utils을 위한 테스트.
 """
 from __future__ import absolute_import
 from __future__ import division

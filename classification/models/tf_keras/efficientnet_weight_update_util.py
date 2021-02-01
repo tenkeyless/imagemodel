@@ -13,26 +13,21 @@
 # limitations under the License.
 # ==============================================================================
 r"""
-Utils for EfficientNet models for Keras.
+Keras 용 EfficientNet 모델 용 유틸리티.
 
-Write weights from  ckpt file as in original repo
-(https://github.com/tensorflow/tpu/tree/master/models/official/efficientnet)
-to h5 file for keras implementation of the models.
+모델의 keras 구현을 위해 [원래 repo](https://github.com/tensorflow/tpu/tree/master/models/official/efficientnet)의 ckpt 파일의 가중치를 h5 파일에 씁니다.
 
-Usage:
+사용:
 
-# use checkpoint efficientnet-b0/model.ckpt (can be downloaded from
-# https://storage.googleapis.com/cloud-tpu-checkpoints/
-#     efficientnet/ckptsaug/efficientnet-b0.tar.gz)
-# to update weight without top layers, saving to efficientnetb0_notop.h5
+# 체크 포인트 efficientnet-b0/model.ckpt(https://storage.googleapis.com/cloud-tpu-checkpoints/efficientnet/ckptsaug/efficientnet-b0.tar.gz 에서 다운로드 가능)를 사용하여, 
+# 최상위 레이어없이 가중치를 업데이트하고 efficientnetb0_notop.h5로 저장합니다.
+
 python efficientnet_weight_update_util.py --model b0 --notop \
     --ckpt efficientnet-b0/model.ckpt --o efficientnetb0_notop.h5
 
-# use checkpoint noisy_student_efficientnet-b3/model.ckpt (providing
-# improved result for b3, can be downloaded from
-# https://storage.googleapis.com/cloud-tpu-checkpoints/
-#     efficientnet/noisystudent/noisy_student_efficientnet-b3.tar.gz)
-# to update weight with top layers, saving to efficientnetb3_new.h5
+# 체크 포인트 noisy_student_efficientnet-b3/model.ckpt(b3에 대한 개선된 결과 제공, https://storage.googleapis.com/cloud-tpu-checkpoints/efficientnet/noisystudent/noisy_student_efficientnet-b3.tar.gz 에서 다운로드 가능)를 사용하여 
+# 최상위 레이어의 가중치를 업데이트하고, efficientnetb3_new.h5에 저장합니다.
+
 python efficientnet_weight_update_util.py --model b3 --notop \
     --ckpt noisy_student_efficientnet-b3/model.ckpt --o efficientnetb3_new.h5
 
@@ -50,17 +45,19 @@ from tensorflow.keras.applications import efficientnet
 
 
 def write_ckpt_to_h5(path_h5, path_ckpt, keras_model, use_ema=True):
-    """Map the weights in checkpoint file (tf) to h5 file (keras).
+    """
+    체크포인트 파일(tf)의 가중치를 h5 파일(keras)에 매핑합니다.
 
-    Args:
-      path_h5: str, path to output hdf5 file to write weights loaded from ckpt
-        files.
-      path_ckpt: str, path to the ckpt files (e.g. 'efficientnet-b0/model.ckpt')
-        that records efficientnet weights from original repo
-        https://github.com/tensorflow/tpu/tree/master/models/official/efficientnet
-      keras_model: keras model, built from keras.applications efficientnet
-        functions (e.g. EfficientNetB0)
-      use_ema: Bool, whether to use ExponentialMovingAverage result or not
+    Parameters
+    ----------
+    path_h5 : str
+        ckpt 파일로부터 로드된 가중치를 쓰기 위한, 출력 hdf5 파일 경로입니다.
+    path_ckpt : str
+        원본 저장소(https://github.com/tensorflow/tpu/tree/master/models/official/efficientnet)로부터 efficientnet 가중치를 기록하는 ckpt 파일(예 : 'efficientnet-b0/model.ckpt')의 경로
+    keras_model : [type]
+        keras.applications efficientnet 함수에서 빌드된 keras 모델 (예 : EfficientNetB0)
+    use_ema : bool, optional, default=True
+        ExponentialMovingAverage 결과 사용 여부
     """
     model_name_keras = keras_model.name
     model_name_tf = model_name_keras.replace("efficientnet", "efficientnet-")
@@ -127,13 +124,20 @@ def write_ckpt_to_h5(path_h5, path_ckpt, keras_model, use_ema=True):
 
 
 def get_variable_names_from_ckpt(path_ckpt, use_ema=True):
-    """Get list of tensor names from checkpoint.
+    """
+    체크 포인트에서 텐서 이름 목록을 가져옵니다.
 
-    Args:
-      path_ckpt: str, path to the ckpt files
-      use_ema: Bool, whether to use ExponentialMovingAverage result or not.
-    Returns:
-      List of variable names from checkpoint.
+    Parameters
+    ----------
+    path_ckpt : str
+        ckpt 파일 경로
+    use_ema : bool, optional, default=True
+        ExponentialMovingAverage 결과 사용 여부
+
+    Returns
+    -------
+    [type]
+        체크 포인트의 변수 이름 목록입니다.
     """
     v_all = tf.train.list_variables(path_ckpt)
 
@@ -151,7 +155,9 @@ def get_variable_names_from_ckpt(path_ckpt, use_ema=True):
 
 
 def get_tf_blocks(tf_weight_names):
-    """Extract the block names from list of full weight names."""
+    """
+    전체 가중치 이름 목록에서 블록 이름을 추출합니다.
+    """
     # Example: 'efficientnet-b0/blocks_0/conv2d/kernel' -> 'blocks_0'
     tf_blocks = {x.split("/")[1] for x in tf_weight_names if "block" in x}
     # sort by number
@@ -160,7 +166,9 @@ def get_tf_blocks(tf_weight_names):
 
 
 def get_keras_blocks(keras_weight_names):
-    """Extract the block names from list of full weight names."""
+    """
+    전체 가중치 이름 목록에서 블록 이름을 추출합니다.
+    """
     # example: 'block1a_dwconv/depthwise_kernel:0' -> 'block1a'
     keras_blocks = {x.split("_")[0] for x in keras_weight_names if "block" in x}
     return sorted(keras_blocks)
@@ -169,21 +177,29 @@ def get_keras_blocks(keras_weight_names):
 def keras_name_to_tf_name_stem_top(
     keras_name, use_ema=True, model_name_tf="efficientnet-b0"
 ):
-    """Mapping name in h5 to ckpt that is in stem or top (head).
+    """
+    h5의 이름을 stem 또는 top(헤드)에 있는 ckpt에 매핑합니다.
 
-    we map name keras_name that points to a weight in h5 file
-    to a name of weight in ckpt file.
+    h5 파일의 가중치를 가리키는 이름 keras_name을 ckpt 파일의 가중치 이름에 매핑합니다.
 
-    Args:
-      keras_name: str, the name of weight in the h5 file of keras implementation
-      use_ema: Bool, use the ExponentialMovingAverage resuolt in ckpt or not
-      model_name_tf: str, the name of model in ckpt.
+    Parameters
+    ----------
+    keras_name : str
+        keras 구현의 h5 파일에 있는 가중치 이름
+    use_ema : bool, optional, default=True
+        ckpt에서 ExponentialMovingAverage 결과 사용 여부
+    model_name_tf : str, optional, default="efficientnet-b0"
+        ckpt의 모델 이름.
 
-    Returns:
-      String for the name of weight as in ckpt file.
+    Returns
+    -------
+    [type]
+        ckpt 파일에서와 같이, 가중치 이름에 대한 문자열입니다.
 
-    Raises:
-      KeyError: if we cannot parse the keras_name.
+    Raises
+    ------
+    KeyError
+        keras_name을 파싱할 수 없는 경우.
     """
     if use_ema:
         ema = "/ExponentialMovingAverage"
@@ -227,25 +243,34 @@ def keras_name_to_tf_name_block(
     use_ema=True,
     model_name_tf="efficientnet-b0",
 ):
-    """Mapping name in h5 to ckpt that belongs to a block.
-
-    we map name keras_name that points to a weight in h5 file
-    to a name of weight in ckpt file.
-
-    Args:
-      keras_name: str, the name of weight in the h5 file of keras implementation
-      keras_block: str, the block name for keras implementation (e.g. 'block1a')
-      tf_block: str, the block name for tf implementation (e.g. 'blocks_0')
-      use_ema: Bool, use the ExponentialMovingAverage resuolt in ckpt or not
-      model_name_tf: str, the name of model in ckpt.
-
-    Returns:
-      String for the name of weight as in ckpt file.
-
-    Raises:
-      ValueError if keras_block does not show up in keras_name
     """
+    h5의 이름을 블록에 속한 ckpt에 매핑합니다.
 
+    h5 파일의 가중치를 가리키는 이름 keras_name을 ckpt 파일의 가중치 이름에 매핑합니다.
+
+    Parameters
+    ----------
+    keras_name : str
+        keras 구현의 h5 파일에 있는 가중치 이름
+    keras_block : str, optional, default="block1a"
+        keras 구현을 위한 블록 이름 (예 : 'block1a')
+    tf_block : str, optional, default="blocks_0"
+        tf 구현을 위한 블록 이름 (예 : 'blocks_0')
+    use_ema : bool, optional, default=True
+        ckpt에서 ExponentialMovingAverage 결과 사용 여부
+    model_name_tf : str, optional, default="efficientnet-b0"
+        ckpt의 모델 이름.
+
+    Returns
+    -------
+    [type]
+        ckpt 파일에서와 같이 가중치 이름에 대한 문자열입니다.
+
+    Raises
+    ------
+    ValueError
+        keras_block이 keras_name에 표시되지 않는 경우
+    """
     if keras_block not in keras_name:
         raise ValueError(
             "block name {} not found in {}".format(keras_block, keras_name)
@@ -313,18 +338,24 @@ def keras_name_to_tf_name_block(
 def check_match(
     keras_block, tf_block, keras_weight_names, tf_weight_names, model_name_tf
 ):
-    """Check if the weights in h5 and ckpt match.
+    """
+    h5와 ckpt의 가중치가 일치하는지 확인합니다.
 
-    we match each name from keras_weight_names that is in keras_block
-    and check if there is 1-1 correspondence to names from tf_weight_names
-    that is in tf_block
+    keras_block에 있는 keras_weight_names의 각 이름을 일치시키고,
+    tf_block에 있는 tf_weight_names의 이름에 일대일 대응이 되는지 확인합니다.
 
-    Args:
-      keras_block: str, the block name for keras implementation (e.g. 'block1a')
-      tf_block: str, the block name for tf implementation (e.g. 'blocks_0')
-      keras_weight_names: list of str, weight names in keras implementation
-      tf_weight_names: list of str, weight names in tf implementation
-      model_name_tf: str, the name of model in ckpt.
+    Parameters
+    ----------
+    keras_block : str
+        keras 구현을 위한 블록 이름 (예 : 'block1a')
+    tf_block : str
+        tf 구현을 위한 블록 이름 (예 : 'blocks_0')
+    keras_weight_names : List[str]
+        keras 구현의 가중치 이름
+    tf_weight_names : List[str]
+        tf 구현의 가중치 이름
+    model_name_tf : str
+        ckpt의 모델 이름.
     """
     names_from_keras = set()
     for x in keras_weight_names:

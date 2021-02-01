@@ -13,7 +13,7 @@
 # limitations under the License.
 # ==============================================================================
 """
-Integration tests for Keras applications.
+Keras applications을 위한 통합 테스트.
 """
 
 from __future__ import absolute_import
@@ -86,19 +86,16 @@ TEST_IMAGE_PATH = (
 )
 _IMAGENET_CLASSES = 1000
 
-# Add a flag to define which application module file is tested.
-# This is set as an 'arg' in the build target to guarantee that
-# it only triggers the tests of the application models in the module
-# if that module file has been modified.
+# 테스트 할 application 모듈 파일을 정의하는 플래그를 추가하십시오.
+# 모듈 파일이 수정된 경우에만, 모듈의 application 모델 테스트를 트리거하도록 보장하기 위한, 빌드 타겟에서 'arg'로 설정됩니다.
 FLAGS = flags.FLAGS
 flags.DEFINE_string("module", None, "Application module used in this test.")
 
 
 def _get_elephant(target_size):
-    # For models that don't include a Flatten step,
-    # the default is to accept variable-size inputs
-    # even when loading ImageNet weights (since it is possible).
-    # In this case, default to 299x299.
+    # Flatten 단계를 포함하지 않는 모델의 경우,
+    # 기본값은 ImageNet 가중치를 로드할 때에도 가변 크기 입력을 허용하는 것입니다 (가능하므로).
+    # 이 경우 기본값은 299x299입니다.
     if target_size[0] is None:
         target_size = (299, 299)
     test_image = data_utils.get_file("elephant.jpg", TEST_IMAGE_PATH)

@@ -13,7 +13,7 @@
 # limitations under the License.
 # ==============================================================================
 """
-Integration tests for Keras applications.
+Keras applications을 위한 통합 테스트.
 """
 
 from __future__ import absolute_import
