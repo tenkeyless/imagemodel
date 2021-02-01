@@ -89,63 +89,60 @@ def ResNet(
     **kwargs
 ):
     """
-    Instantiates the ResNet, ResNetV2, and ResNeXt architecture.
+    ResNet, ResNetV2, 및 ResNeXt 아키텍쳐의 인스턴스화.
 
-    Reference:
-    - [Deep Residual Learning for Image Recognition](
-        https://arxiv.org/abs/1512.03385) (CVPR 2015)
+    선택적으로 ImageNet에서 사전 트레이닝된 가중치를 로드합니다.
+    모델에서 사용하는 데이터 형식 규칙은 Keras 구성 `~/.keras/keras.json`에 지정된 규칙입니다.
 
-    Optionally loads weights pre-trained on ImageNet.
-    Note that the data format convention used by the model is
-    the one specified in your Keras config at `~/.keras/keras.json`.
+    References
+    ----------
+    - [Deep Residual Learning for Image Recognition](https://arxiv.org/abs/1512.03385) (CVPR 2015)
 
-    Arguments:
-      stack_fn: a function that returns output tensor for the
-        stacked residual blocks.
-      preact: whether to use pre-activation or not
-        (True for ResNetV2, False for ResNet and ResNeXt).
-      use_bias: whether to use biases for convolutional layers or not
-        (True for ResNet and ResNetV2, False for ResNeXt).
-      model_name: string, model name.
-      include_top: whether to include the fully-connected
-        layer at the top of the network.
-      weights: one of `None` (random initialization),
-        'imagenet' (pre-training on ImageNet),
-        or the path to the weights file to be loaded.
-      input_tensor: optional Keras tensor
-        (i.e. output of `layers.Input()`)
-        to use as image input for the model.
-      input_shape: optional shape tuple, only to be specified
-        if `include_top` is False (otherwise the input shape
-        has to be `(224, 224, 3)` (with `channels_last` data format)
-        or `(3, 224, 224)` (with `channels_first` data format).
-        It should have exactly 3 inputs channels.
-      pooling: optional pooling mode for feature extraction
-        when `include_top` is `False`.
-        - `None` means that the output of the model will be
-            the 4D tensor output of the
-            last convolutional layer.
-        - `avg` means that global average pooling
-            will be applied to the output of the
-            last convolutional layer, and thus
-            the output of the model will be a 2D tensor.
-        - `max` means that global max pooling will
-            be applied.
-      classes: optional number of classes to classify images
-        into, only to be specified if `include_top` is True, and
-        if no `weights` argument is specified.
-      classifier_activation: A `str` or callable. The activation function to use
-        on the "top" layer. Ignored unless `include_top=True`. Set
-        `classifier_activation=None` to return the logits of the "top" layer.
-      **kwargs: For backwards compatibility only.
-    Returns:
-      A `keras.Model` instance.
+    Parameters
+    ----------
+    stack_fn : [type]
+        stacked residual 블록에 대한 출력 텐서를 반환하는 함수.
+    preact : [type]
+        사전 활성화(pre-activation) 사용 여부. (ResNetV2의 경우 True, ResNet 및 ResNeXt의 경우 False)
+    use_bias : [type]
+        컨볼루션 레이어에 바이어스를 사용할지 여부. (ResNet 및 ResNetV2의 경우 True, ResNeXt의 경우 False)
+    model_name : str, optional, default="resnet"
+        모델 이름
+    include_top : bool, optional, default=True
+        네트워크 상단에 있는 완전 연결 레이어를 포함할지 여부
+    weights : str, optional, default="imagenet"
+        `None`(무작위 초기화), 'imagenet' (ImageNet에 대해 사전 트레이닝) 중 하나 또는 로드할 가중치 파일의 경로입니다.
+    input_tensor : [type], optional, default=None
+        모델의 이미지 입력으로 사용할 선택적 Keras 텐서(즉, `layers.Input()`의 출력).
+    input_shape : [type], optional, default=None
+        선택적 shape 튜플, `include_top`이 `False`인 경우에만 지정됩니다.
+        (그렇지 않으면 입력 shape은 `(224, 224, 3)` (`'channels_last'` 데이터 형식을 사용하는 경우) 또는
+        `(3, 224, 224)` (`'channels_first'` 데이터 형식을 사용하는 경우)이어야 합니다.)
+        정확히 3개 입력 채널이 있어야 합니다.
+    pooling : [type], optional, default=None
+        `include_top`이 `False`인 경우, 특성 추출을 위한 선택적 풀링 모드입니다.
+        - `None`은 모델의 출력이 마지막 컨볼루션 블록의 4D 텐서 출력이 될 것임을 의미합니다.
+        - `avg`는 글로벌 평균 풀링이 마지막 컨볼루션 블록의 출력에 적용되므로, 모델의 출력이 2D텐서가 될 것임을 의미합니다.
+        - 'max'는 글로벌 최대 풀링이 적용됨을 의미합니다.
+    classes : int, optional, default=1000
+        이미지를 분류할 클래스 수. `include_top`이 `True`이고, `weights` 인수가 지정되지 않은 경우에만, 지정합니다.
+    classifier_activation : str or callable, optional, default="softmax"
+        "top" 레이어에서 사용할 활성화 함수입니다. `include_top=True`가 아니면 무시됩니다.
+        "top" 레이어의 로짓을 반환하려면, `classifier_activation=None`을 설정하십시오.
+    **kwargs:
+        이전 버전과의 호환성 만을 위해.
 
-    Raises:
-      ValueError: in case of invalid argument for `weights`,
-        or invalid input shape.
-      ValueError: if `classifier_activation` is not `softmax` or `None` when
-        using a pretrained top layer.
+    Returns
+    -------
+    `keras.Model`
+        `keras.Model` 인스턴스.
+
+    Raises
+    ------
+    ValueError
+        `weights`에 대한 인수가 잘못되었거나, 입력 shape이 잘못된 경우.
+    ValueError
+        사전 트레이닝된 top 레이어를 사용할 때, `classifier_activation`이 `softmax` 또는 `None`이 아닌 경우
     """
     global layers
     if "layers" in kwargs:
@@ -153,22 +150,21 @@ def ResNet(
     else:
         layers = VersionAwareLayers()
     if kwargs:
-        raise ValueError("Unknown argument(s): %s" % (kwargs,))
+        raise ValueError("알 수 없는 인수(들): %s" % (kwargs,))
     if not (weights in {"imagenet", None} or file_io.file_exists_v2(weights)):
         raise ValueError(
-            "The `weights` argument should be either "
-            "`None` (random initialization), `imagenet` "
-            "(pre-training on ImageNet), "
-            "or the path to the weights file to be loaded."
+            "`weights` 인수는 `None` (무작위 초기화), "
+            "`imagenet` (ImageNet에 대해 사전 트레이닝된) 또는, "
+            "로드할 가중치 파일의 경로여야 합니다."
         )
 
     if weights == "imagenet" and include_top and classes != 1000:
         raise ValueError(
-            'If using `weights` as `"imagenet"` with `include_top`'
-            " as true, `classes` should be 1000"
+            '`include_top`이 true이고, `"imagenet"`으로 `weights`를 사용하는 경우,'
+            "`classes`는 1000이어야 합니다."
         )
 
-    # Determine proper input shape
+    # 적절한 입력 shape을 결정합니다.
     input_shape = imagenet_utils.obtain_input_shape(
         input_shape,
         default_size=224,
@@ -218,17 +214,16 @@ def ResNet(
         elif pooling == "max":
             x = layers.GlobalMaxPooling2D(name="max_pool")(x)
 
-    # Ensure that the model takes into account
-    # any potential predecessors of `input_tensor`.
+    # 모델이 `input_tensor`의 잠재적 선행자(potential predecessors)를 고려하는지 확인합니다.
     if input_tensor is not None:
         inputs = layer_utils.get_source_inputs(input_tensor)
     else:
         inputs = img_input
 
-    # Create model.
+    # 모델 생성
     model = training.Model(inputs, x, name=model_name)
 
-    # Load weights.
+    # 가중치 불러오기
     if (weights == "imagenet") and (model_name in WEIGHTS_HASHES):
         if include_top:
             file_name = model_name + "_weights_tf_dim_ordering_tf_kernels.h5"
@@ -250,19 +245,28 @@ def ResNet(
 
 
 def block1(x, filters, kernel_size=3, stride=1, conv_shortcut=True, name=None):
-    """A residual block.
+    """
+    A residual block.
 
-    Arguments:
-      x: input tensor.
-      filters: integer, filters of the bottleneck layer.
-      kernel_size: default 3, kernel size of the bottleneck layer.
-      stride: default 1, stride of the first layer.
-      conv_shortcut: default True, use convolution shortcut if True,
-          otherwise identity shortcut.
-      name: string, block label.
+    Parameters
+    ----------
+    x : [type]
+        입력 텐서
+    filters : int
+        bottleneck 레이어의 필터.
+    kernel_size : int, optional, default=3
+        bottleneck 레이어의 커널 크기.
+    stride : int, optional, default=1
+        첫 번째 레이어의 stride.
+    conv_shortcut : bool, optional, default=True
+        True면 컨볼루션 shortcut을 사용하고, 그렇지 않으면 identity shortcut을 사용합니다.
+    name : [type], optional, default=None
+        블록 라벨
 
-    Returns:
-      Output tensor for the residual block.
+    Returns
+    -------
+    [type]
+        residual 블록에 대한 출력 텐서.
     """
     bn_axis = 3 if backend.image_data_format() == "channels_last" else 1
 
@@ -299,17 +303,26 @@ def block1(x, filters, kernel_size=3, stride=1, conv_shortcut=True, name=None):
 
 
 def stack1(x, filters, blocks, stride1=2, name=None):
-    """A set of stacked residual blocks.
+    """
+    stacked residual 블록 집합입니다.
 
-    Arguments:
-      x: input tensor.
-      filters: integer, filters of the bottleneck layer in a block.
-      blocks: integer, blocks in the stacked blocks.
-      stride1: default 2, stride of the first layer in the first block.
-      name: string, stack label.
+    Parameters
+    ----------
+    x : [type]
+        입력 텐서
+    filters : int
+        블록에서 bottleneck 레이어의 필터 수.
+    blocks : int
+        블록에서 stacked 블록의 블록 수
+    stride1 : int, optional, default=2
+        첫 번째 블록의 첫 번째 레이어의 stride.
+    name : [type], optional, default=None
+        스택 라벨
 
-    Returns:
-      Output tensor for the stacked blocks.
+    Returns
+    -------
+    [type]
+        stacked 블록에 대한 출력 텐서.
     """
     x = block1(x, filters, stride=stride1, name=name + "_block1")
     for i in range(2, blocks + 1):
@@ -318,19 +331,28 @@ def stack1(x, filters, blocks, stride1=2, name=None):
 
 
 def block2(x, filters, kernel_size=3, stride=1, conv_shortcut=False, name=None):
-    """A residual block.
+    """
+    residual 블록.
 
-    Arguments:
-        x: input tensor.
-        filters: integer, filters of the bottleneck layer.
-        kernel_size: default 3, kernel size of the bottleneck layer.
-        stride: default 1, stride of the first layer.
-        conv_shortcut: default False, use convolution shortcut if True,
-          otherwise identity shortcut.
-        name: string, block label.
+    Parameters
+    ----------
+    x : [type]
+        입력 텐서
+    filters : int
+        bottleneck 레이어의 필터 수.
+    kernel_size : int, optional, default=3
+        bottleneck 레이어의 커널 크기.
+    stride : int, optional, default=1
+        첫 번째 레이어의 stride.
+    conv_shortcut : bool, optional, default=False
+        True면 컨볼루션 shortcut을 사용하고, 그렇지 않으면 identity shortcut을 사용합니다.
+    name : [type], optional, default=None
+        블록 라벨
 
-    Returns:
-      Output tensor for the residual block.
+    Returns
+    -------
+    [type]
+        residual 블록에 대한 출력 텐서.
     """
     bn_axis = 3 if backend.image_data_format() == "channels_last" else 1
 
@@ -369,17 +391,26 @@ def block2(x, filters, kernel_size=3, stride=1, conv_shortcut=False, name=None):
 
 
 def stack2(x, filters, blocks, stride1=2, name=None):
-    """A set of stacked residual blocks.
+    """
+    stacked residual 블록의 세트
 
-    Arguments:
-        x: input tensor.
-        filters: integer, filters of the bottleneck layer in a block.
-        blocks: integer, blocks in the stacked blocks.
-        stride1: default 2, stride of the first layer in the first block.
-        name: string, stack label.
+    Parameters
+    ----------
+    x : [type]
+        입력 텐서
+    filters : int
+        블록에서 bottleneck 레이어의 필터 수.
+    blocks : int
+        블록에서 stacked 블록의 블록 수
+    stride1 : int, optional, default=2
+        첫 번째 블록의 첫 번째 레이어의 stride.
+    name : [type], optional, default=None
+        스택 라벨
 
-    Returns:
-        Output tensor for the stacked blocks.
+    Returns
+    -------
+    [type]
+        stacked 블록에 대한 출력 텐서.
     """
     x = block2(x, filters, conv_shortcut=True, name=name + "_block1")
     for i in range(2, blocks):
@@ -391,20 +422,30 @@ def stack2(x, filters, blocks, stride1=2, name=None):
 def block3(
     x, filters, kernel_size=3, stride=1, groups=32, conv_shortcut=True, name=None
 ):
-    """A residual block.
+    """
+    residual 블록.
 
-    Arguments:
-      x: input tensor.
-      filters: integer, filters of the bottleneck layer.
-      kernel_size: default 3, kernel size of the bottleneck layer.
-      stride: default 1, stride of the first layer.
-      groups: default 32, group size for grouped convolution.
-      conv_shortcut: default True, use convolution shortcut if True,
-          otherwise identity shortcut.
-      name: string, block label.
+    Parameters
+    ----------
+    x : [type]
+        입력 텐서
+    filters : int
+        bottleneck 레이어의 필터 수.
+    kernel_size : int, optional, default=3
+        bottleneck 레이어의 커널 크기.
+    stride : int, optional, default=1
+        첫 번째 레이어의 stride.
+    groups : int, optional, default=32
+        grouped 컨볼루션에 대한 그룹 크기.
+    conv_shortcut : bool, optional, default=True
+        True면 컨볼루션 shortcut을 사용하고, 그렇지 않으면 identity shortcut을 사용합니다.
+    name : [type], optional, default=None
+        블록 라벨
 
-    Returns:
-      Output tensor for the residual block.
+    Returns
+    -------
+    [type]
+        residual 블록에 대한 출력 텐서.
     """
     bn_axis = 3 if backend.image_data_format() == "channels_last" else 1
 
@@ -461,18 +502,30 @@ def block3(
 
 
 def stack3(x, filters, blocks, stride1=2, groups=32, name=None):
-    """A set of stacked residual blocks.
+    """
+    stacked residual 블록의 세트
 
-    Arguments:
-      x: input tensor.
-      filters: integer, filters of the bottleneck layer in a block.
-      blocks: integer, blocks in the stacked blocks.
-      stride1: default 2, stride of the first layer in the first block.
-      groups: default 32, group size for grouped convolution.
-      name: string, stack label.
+    Parameters
+    ----------
+    x : [type]
+        입력 텐서
+    filters : int
+        블록에서 bottleneck 레이어의 필터 수.
+    blocks : int
+        블록에서 stacked 블록의 블록 수
+    stride1 : int, optional, default=2
+        첫 번째 블록의 첫 번째 레이어의 stride.
+    groups : int, optional, default=32
+        grouped 컨볼루션에 대한 그룹 크기.
+    groups : int, optional
+        [description], by default 32
+    name : [type], optional, default=None
+        스택 라벨
 
-    Returns:
-      Output tensor for the stacked blocks.
+    Returns
+    -------
+    [type]
+        stacked 블록에 대한 출력 텐서.
     """
     x = block3(x, filters, stride=stride1, groups=groups, name=name + "_block1")
     for i in range(2, blocks + 1):
@@ -500,7 +553,9 @@ def ResNet50(
     classes=1000,
     **kwargs
 ):
-    """Instantiates the ResNet50 architecture."""
+    """
+    ResNet50 아키텍쳐의 인스턴스화.
+    """
 
     def stack_fn(x):
         x = stack1(x, 64, 3, stride1=1, name="conv2")
@@ -533,7 +588,9 @@ def ResNet101(
     classes=1000,
     **kwargs
 ):
-    """Instantiates the ResNet101 architecture."""
+    """
+    ResNet101 아키텍쳐의 인스턴스화.
+    """
 
     def stack_fn(x):
         x = stack1(x, 64, 3, stride1=1, name="conv2")
@@ -566,7 +623,9 @@ def ResNet152(
     classes=1000,
     **kwargs
 ):
-    """Instantiates the ResNet152 architecture."""
+    """
+    ResNet152 아키텍쳐의 인스턴스화.
+    """
 
     def stack_fn(x):
         x = stack1(x, 64, 3, stride1=1, name="conv2")
@@ -614,50 +673,43 @@ decode_predictions.__doc__ = imagenet_utils.decode_predictions.__doc__
 
 DOC = """
 
-  Reference:
-  - [Deep Residual Learning for Image Recognition](
-      https://arxiv.org/abs/1512.03385) (CVPR 2015)
+선택적으로 ImageNet에서 사전 트레이닝된 가중치를 로드합니다.
+모델에서 사용하는 데이터 형식 규칙은 Keras 구성 `~/.keras/keras.json`에 지정된 규칙입니다.
 
-  Optionally loads weights pre-trained on ImageNet.
-  Note that the data format convention used by the model is
-  the one specified in your Keras config at `~/.keras/keras.json`.
+참고 : 각 Keras 애플리케이션에는 특정 종류의 입력 전처리가 필요합니다.
+ResNet 경우, 입력을 모델에 전달하기 전에 입력에 대해,
+`tf.keras.applications.resnet.preprocess_input`을 호출해야 합니다.
 
-  Note: each Keras Application expects a specific kind of input preprocessing.
-  For ResNet, call `tf.keras.applications.resnet.preprocess_input` on your
-  inputs before passing them to the model.
+References
+----------
+- [Deep Residual Learning for Image Recognition](https://arxiv.org/abs/1512.03385) (CVPR 2015)
 
-  Arguments:
-    include_top: whether to include the fully-connected
-      layer at the top of the network.
-    weights: one of `None` (random initialization),
-      'imagenet' (pre-training on ImageNet),
-      or the path to the weights file to be loaded.
-    input_tensor: optional Keras tensor (i.e. output of `layers.Input()`)
-      to use as image input for the model.
-    input_shape: optional shape tuple, only to be specified
-      if `include_top` is False (otherwise the input shape
-      has to be `(224, 224, 3)` (with `'channels_last'` data format)
-      or `(3, 224, 224)` (with `'channels_first'` data format).
-      It should have exactly 3 inputs channels,
-      and width and height should be no smaller than 32.
-      E.g. `(200, 200, 3)` would be one valid value.
-    pooling: Optional pooling mode for feature extraction
-      when `include_top` is `False`.
-      - `None` means that the output of the model will be
-          the 4D tensor output of the
-          last convolutional block.
-      - `avg` means that global average pooling
-          will be applied to the output of the
-          last convolutional block, and thus
-          the output of the model will be a 2D tensor.
-      - `max` means that global max pooling will
-          be applied.
-    classes: optional number of classes to classify images
-      into, only to be specified if `include_top` is True, and
-      if no `weights` argument is specified.
+Parameters
+----------
+include_top : bool
+    네트워크 상단에 있는 완전 연결 레이어를 포함할지 여부
+weights : str
+    `None`(무작위 초기화), 'imagenet' (ImageNet에 대해 사전 트레이닝) 중 하나 또는 로드할 가중치 파일의 경로입니다.
+input_tensor : [type]
+    모델의 이미지 입력으로 사용할 선택적 Keras 텐서(즉, `layers.Input()`의 출력).
+input_shape : [type]
+    선택적 shape 튜플, `include_top`이 `False`인 경우에만 지정됩니다.
+    (그렇지 않으면 입력 shape은 `(224, 224, 3)` (`'channels_last'` 데이터 형식을 사용하는 경우) 또는
+    `(3, 224, 224)` (`'channels_first'` 데이터 형식을 사용하는 경우)이어야 합니다.)
+    정확히 3개 입력 채널이 있어야 합니다. 그리고 너비와 높이는 32보다 커야합니다.
+        예) `(200, 200, 3)` 유효한 값입니다.
+pooling : [type]
+    `include_top`이 `False`인 경우, 특성 추출을 위한 선택적 풀링 모드입니다.
+    - `None`은 모델의 출력이 마지막 컨볼루션 블록의 4D 텐서 출력이 될 것임을 의미합니다.
+    - `avg`는 글로벌 평균 풀링이 마지막 컨볼루션 블록의 출력에 적용되므로, 모델의 출력이 2D텐서가 될 것임을 의미합니다.
+    - 'max'는 글로벌 최대 풀링이 적용됨을 의미합니다.
+classes : int
+    이미지를 분류할 클래스 수. `include_top`이 `True`이고, `weights` 인수가 지정되지 않은 경우에만, 지정합니다.
 
-  Returns:
-    A Keras model instance.
+Returns
+-------
+`keras.Model`
+    `keras.Model` 인스턴스.
 """
 
 setattr(ResNet50, "__doc__", ResNet50.__doc__ + DOC)

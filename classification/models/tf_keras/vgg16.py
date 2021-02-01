@@ -56,83 +56,75 @@ def VGG16(
     classes=1000,
     classifier_activation="softmax",
 ):
-    """Instantiates the VGG16 model.
+    """
+    VGG16 모델을 인스턴스화합니다.
 
-    Reference:
-    - [Very Deep Convolutional Networks for Large-Scale Image Recognition](
-    https://arxiv.org/abs/1409.1556) (ICLR 2015)
+    기본값으로, ImageNet에 대해 사전 트레이닝된 가중치를 로드합니다. 다른 옵션은 '가중치'를 확인하십시오.
 
-    By default, it loads weights pre-trained on ImageNet. Check 'weights' for
-    other options.
+    이 모델은 'channels_first' 데이터 형식(채널, 높이, 너비) 또는 'channels_last' 데이터 형식(높이, 너비, 채널) 모두로 빌드할 수 있습니다.
 
-    This model can be built both with 'channels_first' data format
-    (channels, height, width) or 'channels_last' data format
-    (height, width, channels).
+    이 모델의 기본 입력 크기는 224x224입니다.
 
-    The default input size for this model is 224x224.
+    참고 : 각 Keras 애플리케이션에는 특정 종류의 입력 전처리가 필요합니다.
+    VGG16 경우, 입력을 모델에 전달하기 전에 입력에 대해,
+    `tf.keras.applications.vgg16.preprocess_input`을 호출해야 합니다.
 
-    Note: each Keras Application expects a specific kind of input preprocessing.
-    For VGG16, call `tf.keras.applications.vgg16.preprocess_input` on your
-    inputs before passing them to the model.
+    References
+    ----------
+    - [Very Deep Convolutional Networks for Large-Scale Image Recognition](https://arxiv.org/abs/1409.1556) (ICLR 2015)
 
-    Arguments:
-        include_top: whether to include the 3 fully-connected
-            layers at the top of the network.
-        weights: one of `None` (random initialization),
-              'imagenet' (pre-training on ImageNet),
-              or the path to the weights file to be loaded.
-        input_tensor: optional Keras tensor
-            (i.e. output of `layers.Input()`)
-            to use as image input for the model.
-        input_shape: optional shape tuple, only to be specified
-            if `include_top` is False (otherwise the input shape
-            has to be `(224, 224, 3)`
-            (with `channels_last` data format)
-            or `(3, 224, 224)` (with `channels_first` data format).
-            It should have exactly 3 input channels,
-            and width and height should be no smaller than 32.
-            E.g. `(200, 200, 3)` would be one valid value.
-        pooling: Optional pooling mode for feature extraction
-            when `include_top` is `False`.
-            - `None` means that the output of the model will be
-                the 4D tensor output of the
-                last convolutional block.
-            - `avg` means that global average pooling
-                will be applied to the output of the
-                last convolutional block, and thus
-                the output of the model will be a 2D tensor.
-            - `max` means that global max pooling will
-                be applied.
-        classes: optional number of classes to classify images
-            into, only to be specified if `include_top` is True, and
-            if no `weights` argument is specified.
-        classifier_activation: A `str` or callable. The activation function to use
-            on the "top" layer. Ignored unless `include_top=True`. Set
-            `classifier_activation=None` to return the logits of the "top" layer.
+    Parameters
+    ----------
+    include_top : bool, optional, default=True
+        네트워크 상단에 있는 완전 연결 3개 레이어를 포함할지 여부.
+    weights : str, optional, default="imagenet"
+        `None`(무작위 초기화), 'imagenet' (ImageNet에 대해 사전 트레이닝) 중 하나 또는 로드할 가중치 파일의 경로입니다.
+    input_tensor : [type], optional, default=None
+        모델의 이미지 입력으로 사용할 선택적 Keras 텐서(즉, `layers.Input()`의 출력).
+    input_shape : [type], optional, default=None
+        선택적 shape 튜플, `include_top`이 `False`인 경우에만 지정됩니다.
+        (그렇지 않으면 입력 shape은 `(224, 224, 3)` (`'channels_last'` 데이터 형식을 사용하는 경우) 또는
+        `(3, 224, 224)` (`'channels_first'` 데이터 형식을 사용하는 경우)이어야 합니다.)
+        정확히 3개 입력 채널이 있어야 합니다. 그리고 너비와 높이는 32보다 커야합니다.
+        예) `(200, 200, 3)` 유효한 값입니다.
+    pooling : [type], optional, default=None
+        `include_top`이 `False` 인 경우, 특성 추출을 위한 선택적 풀링 모드
+        - `None` 모델의 출력이 마지막 컨볼루션 블록의 4D 텐서 출력이 됨을 의미합니다.
+        - `avg` 글로벌 평균 풀링이 마지막 컨볼루션 블록의 출력에 적용됨을 의미합니다. 따라서, 모델의 출력은 2D 텐서가 됩니다.
+        - `max` 글로벌 최대 풀링이 적용됨을 의미합니다.
+    classes : int, optional, default=1000
+        이미지를 분류할 클래스 수 (선택 사항). `include_top`이 `True`이고, `weights` 인수가 지정되지 않은 경우에만 지정됩니다.
+    classifier_activation : str or callable, optional, default="softmax"
+        "top" 레이어에서 사용할 활성화 함수입니다.
+        `include_top=True`가 아니면 무시됩니다.
+        "top" 레이어의 로짓을 반환하려면, `classifier_activation=None`을 설정하십시오.
 
-    Returns:
-      A `keras.Model` instance.
+    Returns
+    -------
+    `keras.Model`
+        `keras.Model` 인스턴스.
 
-    Raises:
-      ValueError: in case of invalid argument for `weights`,
-        or invalid input shape.
-      ValueError: if `classifier_activation` is not `softmax` or `None` when
-        using a pretrained top layer.
+    Raises
+    ------
+    ValueError
+        `weights`에 대한 인수가 잘못되었거나, 입력 shape이 잘못된 경우.
+    ValueError
+        사전 트레이닝된 top 레이어를 사용할 때, `classifier_activation`이 `softmax` 또는 `None`이 아닌 경우
     """
     if not (weights in {"imagenet", None} or file_io.file_exists_v2(weights)):
         raise ValueError(
-            "The `weights` argument should be either "
-            "`None` (random initialization), `imagenet` "
-            "(pre-training on ImageNet), "
-            "or the path to the weights file to be loaded."
+            "`weights` 인수는 `None` (무작위 초기화), "
+            "`imagenet` (ImageNet에 대해 사전 트레이닝된) 또는, "
+            "로드할 가중치 파일의 경로여야 합니다."
         )
 
     if weights == "imagenet" and include_top and classes != 1000:
         raise ValueError(
-            'If using `weights` as `"imagenet"` with `include_top`'
-            " as true, `classes` should be 1000"
+            '`include_top`이 true이고, `"imagenet"`으로 `weights`를 사용하는 경우,'
+            "`classes`는 1000이어야 합니다."
         )
-    # Determine proper input shape
+
+    # 적절한 입력 shape을 결정합니다.
     input_shape = imagenet_utils.obtain_input_shape(
         input_shape,
         default_size=224,
@@ -219,16 +211,16 @@ def VGG16(
         elif pooling == "max":
             x = layers.GlobalMaxPooling2D()(x)
 
-    # Ensure that the model takes into account
-    # any potential predecessors of `input_tensor`.
+    # 모델이 `input_tensor`의 잠재적 선행자(potential predecessors)를 고려하는지 확인합니다.
     if input_tensor is not None:
         inputs = layer_utils.get_source_inputs(input_tensor)
     else:
         inputs = img_input
-    # Create model.
+
+    # 모델 생성
     model = training.Model(inputs, x, name="vgg16")
 
-    # Load weights.
+    # 가중치 불러오기
     if weights == "imagenet":
         if include_top:
             weights_path = data_utils.get_file(

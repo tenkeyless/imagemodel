@@ -57,77 +57,74 @@ def InceptionV3(
     classes=1000,
     classifier_activation="softmax",
 ):
-    """Instantiates the Inception v3 architecture.
+    """
+    Inception v3 아키텍처를 인스턴스화합니다.
 
-    Reference:
-    - [Rethinking the Inception Architecture for Computer Vision](
-        http://arxiv.org/abs/1512.00567) (CVPR 2016)
+    선택적으로 ImageNet에서 사전 트레이닝된 가중치를 로드합니다.
+    모델에서 사용하는 데이터 형식 규칙은 `tf.keras.backend.image_data_format()`에 지정된 규칙입니다.
 
-    Optionally loads weights pre-trained on ImageNet.
-    Note that the data format convention used by the model is
-    the one specified in the `tf.keras.backend.image_data_format()`.
+    참고 : 각 Keras 애플리케이션에는 특정 종류의 입력 전처리가 필요합니다.
+    InceptionV3 경우, 입력을 모델에 전달하기 전에 입력에 대해,
+    `tf.keras.applications.inception_v3.preprocess_input`을 호출해야 합니다.
 
-    Note: each Keras Application expects a specific kind of input preprocessing.
-    For InceptionV3, call `tf.keras.applications.inception_v3.preprocess_input`
-    on your inputs before passing them to the model.
+    Reference
+    ---------
+    - [Rethinking the Inception Architecture for Computer Vision](http://arxiv.org/abs/1512.00567) (CVPR 2016)
 
-    Arguments:
-      include_top: Boolean, whether to include the fully-connected
-        layer at the top, as the last layer of the network. Default to `True`.
-      weights: One of `None` (random initialization),
-        `imagenet` (pre-training on ImageNet),
-        or the path to the weights file to be loaded. Default to `imagenet`.
-      input_tensor: Optional Keras tensor (i.e. output of `layers.Input()`)
-        to use as image input for the model. `input_tensor` is useful for sharing
-        inputs between multiple different networks. Default to None.
-      input_shape: Optional shape tuple, only to be specified
-        if `include_top` is False (otherwise the input shape
-        has to be `(299, 299, 3)` (with `channels_last` data format)
-        or `(3, 299, 299)` (with `channels_first` data format).
-        It should have exactly 3 inputs channels,
-        and width and height should be no smaller than 75.
-        E.g. `(150, 150, 3)` would be one valid value.
-        `input_shape` will be ignored if the `input_tensor` is provided.
-      pooling: Optional pooling mode for feature extraction
-        when `include_top` is `False`.
-        - `None` (default) means that the output of the model will be
-            the 4D tensor output of the last convolutional block.
-        - `avg` means that global average pooling
-            will be applied to the output of the
-            last convolutional block, and thus
-            the output of the model will be a 2D tensor.
-        - `max` means that global max pooling will be applied.
-      classes: optional number of classes to classify images
-        into, only to be specified if `include_top` is True, and
-        if no `weights` argument is specified. Default to 1000.
-      classifier_activation: A `str` or callable. The activation function to use
-        on the "top" layer. Ignored unless `include_top=True`. Set
-        `classifier_activation=None` to return the logits of the "top" layer.
+    Parameters
+    ----------
+    include_top : bool, optional, default=True
+        네트워크 마지막 레이어로서, top의 완전 연결 레이어를 포함할지 여부.
+    weights : str, optional, default="imagenet"
+        `None`(무작위 초기화), 'imagenet' (ImageNet에 대해 사전 트레이닝) 중 하나 또는 로드할 가중치 파일의 경로입니다.
+    input_tensor : [type], optional, default=None
+        모델의 이미지 입력으로 사용할 선택적 Keras 텐서(즉, `layers.Input()`의 출력).
+        `input_tensor`는 여러 다른 네트워크간에 입력을 공유하는 데 유용합니다.
+    input_shape : [type], optional, default=None
+        선택적 shape 튜플, `include_top`이 `False`인 경우에만 지정됩니다.
+        (그렇지 않으면 입력 shape은 `(299, 299, 3)` (`'channels_last'` 데이터 형식을 사용하는 경우) 또는
+        `(3, 299, 299)` (`'channels_first'` 데이터 형식을 사용하는 경우)이어야 합니다.)
+        정확히 3개 입력 채널이 있어야 합니다. 그리고 너비와 높이는 75보다 커야합니다.
+        예) `(150, 150, 3)` 유효한 값입니다.
+        `input_tensor`가 제공되면, `input_shape`는 무시됩니다.
+    pooling : [type], optional, default=None
+        `include_top`이 `False` 인 경우, 특성 추출을 위한 선택적 풀링 모드
+        - `None` 모델의 출력이 마지막 컨볼루션 블록의 4D 텐서 출력이 됨을 의미합니다.
+        - `avg` 글로벌 평균 풀링이 마지막 컨볼루션 블록의 출력에 적용됨을 의미합니다. 따라서, 모델의 출력은 2D 텐서가 됩니다.
+        - `max` 글로벌 최대 풀링이 적용됨을 의미합니다.
+    classes : int, optional, default=1000
+        이미지를 분류할 클래스 수 (선택 사항). `include_top`이 `True`이고, `weights` 인수가 지정되지 않은 경우에만 지정됩니다.
+    classifier_activation : str or callable, optional, default="softmax"
+        "top" 레이어에서 사용할 활성화 함수입니다.
+        `include_top=True`가 아니면 무시됩니다.
+        "top" 레이어의 로짓을 반환하려면, `classifier_activation=None`을 설정하십시오.
 
-    Returns:
-      A `keras.Model` instance.
+    Returns
+    -------
+    `keras.Model`
+        `keras.Model` 인스턴스.
 
-    Raises:
-      ValueError: in case of invalid argument for `weights`,
-        or invalid input shape.
-      ValueError: if `classifier_activation` is not `softmax` or `None` when
-        using a pretrained top layer.
+    Raises
+    ------
+    ValueError
+        `weights`에 대한 인수가 잘못되었거나, 입력 shape이 잘못된 경우.
+    ValueError
+        사전 트레이닝된 top 레이어를 사용할 때, `classifier_activation`이 `softmax` 또는 `None`이 아닌 경우
     """
     if not (weights in {"imagenet", None} or file_io.file_exists_v2(weights)):
         raise ValueError(
-            "The `weights` argument should be either "
-            "`None` (random initialization), `imagenet` "
-            "(pre-training on ImageNet), "
-            "or the path to the weights file to be loaded."
+            "`weights` 인수는 `None` (무작위 초기화), "
+            "`imagenet` (ImageNet에 대해 사전 트레이닝된) 또는, "
+            "로드할 가중치 파일의 경로여야 합니다."
         )
 
     if weights == "imagenet" and include_top and classes != 1000:
         raise ValueError(
-            'If using `weights` as `"imagenet"` with `include_top`'
-            " as true, `classes` should be 1000"
+            '`include_top`이 true이고, `"imagenet"`으로 `weights`를 사용하는 경우,'
+            "`classes`는 1000이어야 합니다."
         )
 
-    # Determine proper input shape
+    # 적절한 입력 shape을 결정합니다.
     input_shape = imagenet_utils.obtain_input_shape(
         input_shape,
         default_size=299,
@@ -342,16 +339,16 @@ def InceptionV3(
         elif pooling == "max":
             x = layers.GlobalMaxPooling2D()(x)
 
-    # Ensure that the model takes into account
-    # any potential predecessors of `input_tensor`.
+    # 모델이 `input_tensor`의 잠재적 선행자(potential predecessors)를 고려하는지 확인합니다.
     if input_tensor is not None:
         inputs = layer_utils.get_source_inputs(input_tensor)
     else:
         inputs = img_input
-    # Create model.
+
+    # 모델 생성
     model = training.Model(inputs, x, name="inception_v3")
 
-    # Load weights.
+    # 가중치 불러오기
     if weights == "imagenet":
         if include_top:
             weights_path = data_utils.get_file(
@@ -375,21 +372,31 @@ def InceptionV3(
 
 
 def conv2d_bn(x, filters, num_row, num_col, padding="same", strides=(1, 1), name=None):
-    """Utility function to apply conv + BN.
+    """
+    conv + BN을 적용하는 유틸리티 함수입니다.
 
-    Arguments:
-      x: input tensor.
-      filters: filters in `Conv2D`.
-      num_row: height of the convolution kernel.
-      num_col: width of the convolution kernel.
-      padding: padding mode in `Conv2D`.
-      strides: strides in `Conv2D`.
-      name: name of the ops; will become `name + '_conv'`
-        for the convolution and `name + '_bn'` for the
-        batch norm layer.
+    Parameters
+    ----------
+    x : [type]
+        입력 텐서
+    filters : int
+        `Conv2D` 필터 수
+    num_row : [type]
+        컨볼루션 커널 높이
+    num_col : [type]
+        컨볼루션 커널 너비
+    padding : str, optional, default="same"
+        `Conv2D` 패딩 모드
+    strides : tuple, optional, default=(1, 1)
+        `Conv2D` 스트라이드
+    name : [type], optional, default=None
+        연산의 이름;
+        컨볼루션의 경우, `name + '_conv'`가 되고, 배치 표준 레이어의 경우, `name + '_bn'`이 됩니다.
 
-    Returns:
-      Output tensor after applying `Conv2D` and `BatchNormalization`.
+    Returns
+    -------
+    [type]
+        `Conv2D` 및 `BatchNormalization`을 적용한 후 텐서를 출력합니다.
     """
     if name is not None:
         bn_name = name + "_bn"

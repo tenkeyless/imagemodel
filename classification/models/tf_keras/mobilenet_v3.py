@@ -67,99 +67,86 @@ WEIGHTS_HASHES = {
 layers = VersionAwareLayers()
 
 
-BASE_DOCSTRING = """Instantiates the {name} architecture.
+BASE_DOCSTRING = """
+{name} 아키텍처를 인스턴스화합니다.
 
-  Reference:
-  - [Searching for MobileNetV3](
-      https://arxiv.org/pdf/1905.02244.pdf) (ICCV 2019)
+References
+----------
+- [Searching for MobileNetV3](https://arxiv.org/pdf/1905.02244.pdf) (ICCV 2019)
 
-  The following table describes the performance of MobileNets:
-  ------------------------------------------------------------------------
-  MACs stands for Multiply Adds
-  
-  |Classification Checkpoint|MACs(M)|Parameters(M)|Top1 Accuracy|Pixel1 CPU(ms)|
-  |---|---|---|---|---|
-  | mobilenet_v3_large_1.0_224              | 217 | 5.4 |   75.6   |   51.2  |
-  | mobilenet_v3_large_0.75_224             | 155 | 4.0 |   73.3   |   39.8  |
-  | mobilenet_v3_large_minimalistic_1.0_224 | 209 | 3.9 |   72.3   |   44.1  |
-  | mobilenet_v3_small_1.0_224              | 66  | 2.9 |   68.1   |   15.8  |
-  | mobilenet_v3_small_0.75_224             | 44  | 2.4 |   65.4   |   12.8  |
-  | mobilenet_v3_small_minimalistic_1.0_224 | 65  | 2.0 |   61.9   |   12.2  |
+다음 표는 MobileNet의 성능을 설명합니다.
+------------------------------------------------------------------------
+MACs은 Multiply Adds를 나타냅니다.
 
-  The weights for all 6 models are obtained and translated from the Tensorflow
-  checkpoints from TensorFlow checkpoints found [here]
-  (https://github.com/tensorflow/models/tree/master/research/slim/nets/mobilenet/README.md).
+|Classification Checkpoint|MACs(M)|Parameters(M)|Top1 Accuracy|Pixel1 CPU(ms)|
+|---|---|---|---|---|
+| mobilenet_v3_large_1.0_224              | 217 | 5.4 |   75.6   |   51.2  |
+| mobilenet_v3_large_0.75_224             | 155 | 4.0 |   73.3   |   39.8  |
+| mobilenet_v3_large_minimalistic_1.0_224 | 209 | 3.9 |   72.3   |   44.1  |
+| mobilenet_v3_small_1.0_224              | 66  | 2.9 |   68.1   |   15.8  |
+| mobilenet_v3_small_0.75_224             | 44  | 2.4 |   65.4   |   12.8  |
+| mobilenet_v3_small_minimalistic_1.0_224 | 65  | 2.0 |   61.9   |   12.2  |
 
-  Optionally loads weights pre-trained on ImageNet.
+6개 모델 모두에 대한 가중치는 [여기](https://github.com/tensorflow/models/tree/master/research/slim/nets/mobilenet/README.md)에 있는 TensorFlow 체크포인트로부터 가져와서 변환됩니다.
 
-  Note: each Keras Application expects a specific kind of input preprocessing.
-  For MobileNetV3, call
-  `tf.keras.applications.mobilenet_v3.preprocess_input` on your
-  inputs before passing them to the model.
+선택적으로 ImageNet에서 사전 트레이닝된 가중치를 로드합니다.
 
-  Arguments:
-    input_shape: Optional shape tuple, to be specified if you would
-      like to use a model with an input image resolution that is not
-      (224, 224, 3).
-      It should have exactly 3 inputs channels (224, 224, 3).
-      You can also omit this option if you would like
-      to infer input_shape from an input_tensor.
-      If you choose to include both input_tensor and input_shape then
-      input_shape will be used if they match, if the shapes
-      do not match then we will throw an error.
-      E.g. `(160, 160, 3)` would be one valid value.
-    alpha: controls the width of the network. This is known as the
-      depth multiplier in the MobileNetV3 paper, but the name is kept for
-      consistency with MobileNetV1 in Keras.
-      - If `alpha` < 1.0, proportionally decreases the number
-          of filters in each layer.
-      - If `alpha` > 1.0, proportionally increases the number
-          of filters in each layer.
-      - If `alpha` = 1, default number of filters from the paper
-          are used at each layer.
-    minimalistic: In addition to large and small models this module also
-      contains so-called minimalistic models, these models have the same
-      per-layer dimensions characteristic as MobilenetV3 however, they don't
-      utilize any of the advanced blocks (squeeze-and-excite units, hard-swish,
-      and 5x5 convolutions). While these models are less efficient on CPU, they
-      are much more performant on GPU/DSP.
-    include_top: Boolean, whether to include the fully-connected
-      layer at the top of the network. Defaults to `True`.
-    weights: String, one of `None` (random initialization),
-      'imagenet' (pre-training on ImageNet),
-      or the path to the weights file to be loaded.
-    input_tensor: Optional Keras tensor (i.e. output of
-      `layers.Input()`)
-      to use as image input for the model.
-    pooling: String, optional pooling mode for feature extraction
-      when `include_top` is `False`.
-      - `None` means that the output of the model
-          will be the 4D tensor output of the
-          last convolutional block.
-      - `avg` means that global average pooling
-          will be applied to the output of the
-          last convolutional block, and thus
-          the output of the model will be a
-          2D tensor.
-      - `max` means that global max pooling will
-          be applied.
-    classes: Integer, optional number of classes to classify images
-      into, only to be specified if `include_top` is True, and
-      if no `weights` argument is specified.
-    dropout_rate: fraction of the input units to drop on the last layer.
-    classifier_activation: A `str` or callable. The activation function to use
-      on the "top" layer. Ignored unless `include_top=True`. Set
-      `classifier_activation=None` to return the logits of the "top" layer.
+참고 : 각 Keras 애플리케이션에는 특정 종류의 입력 전처리가 필요합니다.
+MobileNetV3 경우, 입력을 모델에 전달하기 전에 입력에 대해,
+`tf.keras.applications.mobilenet_v3.preprocess_input`을 호출해야 합니다.
 
-  Returns:
-    A `keras.Model` instance.
+Parameters
+----------
+input_shape : [type], optional, default=None
+    입력 이미지 해상도가 (224, 224, 3)이 아닌 모델을 사용하려는 경우, 지정할 선택적인 shape 튜플입니다.
+    (224, 224, 3)같이, 정확히 3개 입력 채널이 있어야 합니다.
+    `input_tensor`에서 `input_shape`를 추론하려는 경우, 이 옵션을 생략할 수도 있습니다.
+    `input_tensor`와 `input_shape`를 모두 포함하도록 선택하면 일치하는 경우 input_shape가 사용되며, 
+    shape이 일치하지 않으면 오류가 발생합니다.
+    예) `(160, 160, 3)` 유효한 값입니다.
+alpha : float, optional, default=1.0
+    네트워크의 너비를 제어합니다.
+    이것은 MobileNetV3 논문에서 깊이 승수(depth multiplier)라고 알려져 있지만,
+    Keras의 `applications.MobileNetV1` 모델과 일관성을 유지하기 위해 이 이름이 유지됩니다.
+    - `alpha` < 1.0이면, 각 레이어의 필터 수를 비례적으로 줄입니다.
+    - `alpha` > 1.0이면, 각 레이어의 필터 수를 비례적으로 늘립니다.
+    - `alpha` = 1이면, 논문으로부터의 기본 필터 수가 각 레이어에 사용됩니다.
+minimalistic : bool, optional, default=False
+    크고 작은 모델 외에도, 이 모듈에는 소위 minimalistic 모델도 포함되어 있습니다. 
+    이러한 모델은 MobilenetV3와 동일한 레이어 별(per-layer) 차원 특성을 갖지만, 
+    고급 블록(squeeze-and-excite 유닛, hard-swish 및 5x5 컨볼루션)을 활용하지 않습니다.
+    이러한 모델은 CPU에서 덜 효율적이지만, GPU/DSP에서는 훨씬 더 성능이 좋습니다.
+include_top : bool, optional, default=True
+    네트워크 상단에 있는 완전 연결 레이어를 포함할지 여부
+weights : str, optional, default="imagenet"
+    `None`(무작위 초기화), `'imagenet'`(ImageNet에 대해 사전 트레이닝된) 또는 로드할 가중치 파일의 경로 중 하나입니다.
+input_tensor : [type], optional, default=None
+    모델의 이미지 입력으로 사용할 Optional Keras 텐서 (즉,`layers.Input()`의 출력)
+pooling : str, optional, default=None
+    `include_top`이 `False`인 경우, 특성 추출을 위한 선택적 풀링 모드입니다.
+    - `None`은 모델의 출력이 마지막 컨볼루션 블록의 4D 텐서 출력이 될 것임을 의미합니다.
+    - `avg`는 글로벌 평균 풀링이 마지막 컨볼루션 블록의 출력에 적용되므로, 모델의 출력이 2D텐서가 될 것임을 의미합니다.
+    - 'max'는 글로벌 최대 풀링이 적용됨을 의미합니다.
+classes : int, optional, default=1000
+    이미지를 분류할 클래스 수. `include_top`이 `True`이고, `weights` 인수가 지정되지 않은 경우에만, 지정합니다.
+dropout_rate : float, optional, default=0.2
+    마지막 레이어에 대해 드롭할 입력 유닛의 비율입니다.
+classifier_activation : str or callable, optional, default="softmax"
+    "top" 레이어에서 사용할 활성화 함수입니다. `include_top=True`가 아니면 무시됩니다.
+    "top" 레이어의 로짓을 반환하려면, `classifier_activation=None`을 설정하십시오.
 
-  Raises:
-    ValueError: in case of invalid argument for `weights`,
-      or invalid input shape or invalid alpha, rows when
-      weights='imagenet'
-    ValueError: if `classifier_activation` is not `softmax` or `None` when
-      using a pretrained top layer.
+Returns
+-------
+`keras.Model`
+    `keras.Model` 인스턴스.
+
+Raises
+------
+ValueError
+    `weights`에 대한 인수가 잘못되었거나, weights='imagenet'일 때,
+    입력 shape이 잘못된 경우 또는, alpha, rows가 잘못된 경우
+ValueError
+    사전 트레이닝된 top 레이어를 사용할 때, `classifier_activation`이 `softmax` 또는 `None`이 아닌 경우
 """
 
 
@@ -180,20 +167,19 @@ def MobileNetV3(
 ):
     if not (weights in {"imagenet", None} or file_io.file_exists_v2(weights)):
         raise ValueError(
-            "The `weights` argument should be either "
-            "`None` (random initialization), `imagenet` "
-            "(pre-training on ImageNet), "
-            "or the path to the weights file to be loaded."
+            "`weights` 인수는 `None` (무작위 초기화), "
+            "`imagenet` (ImageNet에 대해 사전 트레이닝된) 또는, "
+            "로드할 가중치 파일의 경로여야 합니다."
         )
 
     if weights == "imagenet" and include_top and classes != 1000:
         raise ValueError(
-            'If using `weights` as `"imagenet"` with `include_top` '
-            "as true, `classes` should be 1000"
+            '`include_top`이 true이고, `"imagenet"`으로 `weights`를 사용하는 경우,'
+            "`classes`는 1000이어야 합니다."
         )
 
-    # Determine proper input shape and default size.
-    # If both input_shape and input_tensor are used, they should match
+    # 적절한 입력 shape과 기본 크기를 결정합니다.
+    # input_shape 및 input_tensor가 모두 사용되는 경우, 일치해야 합니다.
     if input_shape is not None and input_tensor is not None:
         try:
             is_input_t_tensor = backend.is_keras_tensor(input_tensor)
@@ -204,7 +190,7 @@ def MobileNetV3(
                 )
             except ValueError:
                 raise ValueError(
-                    "input_tensor: ", input_tensor, "is not type input_tensor"
+                    "input_tensor: ", input_tensor, "가 input_tensor 타입이 아닙니다."
                 )
         if is_input_t_tensor:
             if backend.image_data_format == "channels_first":
@@ -212,25 +198,25 @@ def MobileNetV3(
                     raise ValueError(
                         "input_shape: ",
                         input_shape,
-                        "and input_tensor: ",
+                        "및 input_tensor: ",
                         input_tensor,
-                        "do not meet the same shape requirements",
+                        "동일한 shape 요구사항을 충족하지 않습니다.",
                     )
             else:
                 if backend.int_shape(input_tensor)[2] != input_shape[1]:
                     raise ValueError(
                         "input_shape: ",
                         input_shape,
-                        "and input_tensor: ",
+                        "및 input_tensor: ",
                         input_tensor,
-                        "do not meet the same shape requirements",
+                        "동일한 shape 요구사항을 충족하지 않습니다.",
                     )
         else:
             raise ValueError(
-                "input_tensor specified: ", input_tensor, "is not a keras tensor"
+                "input_tensor specified: ", input_tensor, "이 keras 텐서가 아닙니다."
             )
 
-    # If input_shape is None, infer shape from input_tensor
+    # input_shape가 None이면 input_tensor에서 shape을 추론합니다.
     if input_shape is None and input_tensor is not None:
 
         try:
@@ -241,7 +227,7 @@ def MobileNetV3(
                 input_tensor,
                 "is type: ",
                 type(input_tensor),
-                "which is not a valid type",
+                "이는 유효한 타입이 아닙니다.",
             )
 
         if backend.is_keras_tensor(input_tensor):
@@ -253,7 +239,7 @@ def MobileNetV3(
                 rows = backend.int_shape(input_tensor)[1]
                 cols = backend.int_shape(input_tensor)[2]
                 input_shape = (cols, rows, 3)
-    # If input_shape is None and input_tensor is None using standart shape
+    # input_shape가 None이고, input_tensor가 None인, 표준 shape을 사용하는 경우
     if input_shape is None and input_tensor is None:
         input_shape = (None, None, 3)
 
@@ -265,7 +251,7 @@ def MobileNetV3(
     cols = input_shape[col_axis]
     if rows and cols and (rows < 32 or cols < 32):
         raise ValueError(
-            "Input size must be at least 32x32; got `input_shape="
+            "Input 크기는 적어도 32x32 이어야 합니다.; 하지만, 다음의 shape을 받았습니다. `input_shape="
             + str(input_shape)
             + "`"
         )
@@ -277,17 +263,15 @@ def MobileNetV3(
             and alpha != 1.0
         ):
             raise ValueError(
-                "If imagenet weights are being loaded, "
-                "alpha can be one of `0.75`, `1.0` for non minimalistic"
-                " or `1.0` for minimalistic only."
+                "imagenet 가중치가 로드되는 경우, "
+                "alpha는 non minimalistic에 대해 `0.75`, `1.0` 중 하나이어야 하고, "
+                "minimalistic에 대해 `1.0` 이어야 합니다."
             )
 
         if rows != cols or rows != 224:
             logging.warning(
-                "`input_shape` is undefined or non-square, "
-                "or `rows` is not 224."
-                " Weights for input shape (224, 224) will be"
-                " loaded as the default."
+                "`input_shape`가 정의되지 않았거나, 정사각형이 아니거나, `rows`가 224가 아닙니다. "
+                "입력 shape (224, 224)에 대한 가중치가 기본값으로 로드됩니다."
             )
 
     if input_tensor is None:
@@ -323,8 +307,7 @@ def MobileNetV3(
 
     last_conv_ch = _depth(backend.int_shape(x)[channel_axis] * 6)
 
-    # if the width multiplier is greater than 1 we
-    # increase the number of output channels
+    # 너비 승수가 1보다 크면, 출력 채널 수를 늘립니다.
     if alpha > 1.0:
         last_point_ch = _depth(last_point_ch * alpha)
     x = layers.Conv2D(
@@ -356,17 +339,17 @@ def MobileNetV3(
             x = layers.GlobalAveragePooling2D(name="avg_pool")(x)
         elif pooling == "max":
             x = layers.GlobalMaxPooling2D(name="max_pool")(x)
-    # Ensure that the model takes into account
-    # any potential predecessors of `input_tensor`.
+
+    # 모델이 `input_tensor`의 잠재적 선행자(potential predecessors)를 고려하는지 확인합니다.
     if input_tensor is not None:
         inputs = layer_utils.get_source_inputs(input_tensor)
     else:
         inputs = img_input
 
-    # Create model.
+    # 모델 생성
     model = models.Model(inputs, x, name="MobilenetV3" + model_type)
 
-    # Load weights.
+    # 가중치 불러오기
     if weights == "imagenet":
         model_name = "{}{}_224_{}_float".format(
             model_type, "_minimalistic" if minimalistic else "", str(alpha)
@@ -504,11 +487,10 @@ def hard_swish(x):
     return layers.Multiply()([hard_sigmoid(x), x])
 
 
-# This function is taken from the original tf repo.
-# It ensures that all layers have a channel number that is divisible by 8
-# It can be seen here:
-# https://github.com/tensorflow/models/blob/master/research/
-# slim/nets/mobilenet/mobilenet.py
+# 이 함수는 원본 tf 저장소에서 가져왔습니다.
+# 이는 모든 레이어가 8로 나눌 수 있는 채널 숫자를 갖도록 합니다.
+# 여기에서 볼 수 있습니다.
+# https://github.com/tensorflow/models/blob/master/research/slim/nets/mobilenet/mobilenet.py
 
 
 def _depth(v, divisor=8, min_value=None):

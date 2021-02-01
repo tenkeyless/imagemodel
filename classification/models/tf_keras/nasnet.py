@@ -16,17 +16,14 @@
 """
 Keras 용 NASNet-A 모델.
 
-NASNet refers to Neural Architecture Search Network, a family of models
-that were designed automatically by learning the model architectures
-directly on the dataset of interest.
+NASNet은, 관심 데이터 세트에 대해 직접 모델 아키텍처를 학습하여 자동으로 설계된 모델 제품군인, 
+신경 아키텍처 검색 네트워크(Neural Architecture Search Network)를 말합니다.
 
-Here we consider NASNet-A, the highest performance model that was found
-for the CIFAR-10 dataset, and then extended to ImageNet 2012 dataset,
-obtaining state of the art performance on CIFAR-10 and ImageNet 2012.
-Only the NASNet-A models, and their respective weights, which are suited
-for ImageNet 2012 are provided.
+여기에서 우리는 NASNet-A를 고려하여, CIFAR-10 데이터 세트에서 최고 성능 모델을 찾은 다음, ImageNet 2012 데이터 세트로 확장하여, 
+CIFAR-10 및 ImageNet 2012에 대해 최첨단 성능을 얻었습니다.
+ImageNet 2012에 적합한, NASNet-A 모델과 각각의 가중치만, 제공됩니다.
 
-The below table describes the performance on ImageNet 2012:
+아래 표는 ImageNet 2012에 대한 성능을 설명합니다.
 --------------------------------------------------------------------------------
 |      Architecture       | Top-1 Acc | Top-5 Acc |  Multiply-Adds |  Params (M)|
 --------------------------------------------------------------------------------
@@ -78,103 +75,96 @@ def NASNet(
     default_size=None,
     classifier_activation="softmax",
 ):
-    """Instantiates a NASNet model.
+    """
+    NASNet 모델을 인스턴스화합니다.
 
-    Reference:
-    - [Learning Transferable Architectures for Scalable Image Recognition](
-        https://arxiv.org/abs/1707.07012) (CVPR 2018)
+    선택적으로 ImageNet에서 사전 트레이닝된 가중치를 로드합니다.
+    모델에서 사용하는 데이터 형식 규칙은 Keras 구성 `~/.keras/keras.json`에 지정된 규칙입니다.
 
-    Optionally loads weights pre-trained on ImageNet.
-    Note that the data format convention used by the model is
-    the one specified in your Keras config at `~/.keras/keras.json`.
+    References
+    ----------
+    - [Learning Transferable Architectures for Scalable Image Recognition](https://arxiv.org/abs/1707.07012) (CVPR 2018)
 
-    Arguments:
-      input_shape: Optional shape tuple, the input shape
-        is by default `(331, 331, 3)` for NASNetLarge and
-        `(224, 224, 3)` for NASNetMobile.
-        It should have exactly 3 input channels,
-        and width and height should be no smaller than 32.
-        E.g. `(224, 224, 3)` would be one valid value.
-      penultimate_filters: Number of filters in the penultimate layer.
-        NASNet models use the notation `NASNet (N @ P)`, where:
-            -   N is the number of blocks
-            -   P is the number of penultimate filters
-      num_blocks: Number of repeated blocks of the NASNet model.
-        NASNet models use the notation `NASNet (N @ P)`, where:
-            -   N is the number of blocks
-            -   P is the number of penultimate filters
-      stem_block_filters: Number of filters in the initial stem block
-      skip_reduction: Whether to skip the reduction step at the tail
-        end of the network.
-      filter_multiplier: Controls the width of the network.
-        - If `filter_multiplier` < 1.0, proportionally decreases the number
-            of filters in each layer.
-        - If `filter_multiplier` > 1.0, proportionally increases the number
-            of filters in each layer.
-        - If `filter_multiplier` = 1, default number of filters from the
-             paper are used at each layer.
-      include_top: Whether to include the fully-connected
-        layer at the top of the network.
-      weights: `None` (random initialization) or
-          `imagenet` (ImageNet weights)
-      input_tensor: Optional Keras tensor (i.e. output of
-        `layers.Input()`)
-        to use as image input for the model.
-      pooling: Optional pooling mode for feature extraction
-        when `include_top` is `False`.
-        - `None` means that the output of the model
-            will be the 4D tensor output of the
-            last convolutional block.
-        - `avg` means that global average pooling
-            will be applied to the output of the
-            last convolutional block, and thus
-            the output of the model will be a
-            2D tensor.
-        - `max` means that global max pooling will
-            be applied.
-      classes: Optional number of classes to classify images
-        into, only to be specified if `include_top` is True, and
-        if no `weights` argument is specified.
-      default_size: Specifies the default image size of the model
-      classifier_activation: A `str` or callable. The activation function to use
-        on the "top" layer. Ignored unless `include_top=True`. Set
-        `classifier_activation=None` to return the logits of the "top" layer.
+    Parameters
+    ----------
+    input_shape : [type], optional, default=None
+        선택적 shape 튜플.
+        입력 shape은 NASNetLarge에 대해 기본값이 `(331, 331, 3)`이고, NASNetMobile에 대해 `(224, 224, 3)`입니다.
+        정확히 3개 입력 채널이 있어야 합니다. 그리고 너비와 높이는 32보다 커야합니다.
+        예) `(224, 224, 3)` 유효한 값입니다.
+    penultimate_filters : int, optional, default=4032
+        두 번째(penultimate) 레이어의 필터 수입니다.
+        NASNet 모델은 `NASNet (N @ P)` 표기법을 사용합니다. 여기서 :
+        - N은 블록의 수 입니다.
+        - P은 두 번째(penultimate) 필터의 수 입니다.
+    num_blocks : int, optional, default=6
+        NASNet 모델의 반복되는 블록 수입니다.
+        NASNet 모델은 `NASNet (N @ P)` 표기법을 사용합니다. 여기서 :
+        - N은 블록의 수 입니다.
+        - P은 두 번째(penultimate) 필터의 수 입니다.
+    stem_block_filters : int, optional, default=96
+        초기 스템(stem) 블록의 필터 수
+    skip_reduction : bool, optional, default=True
+        네트워크의 끝 부분에서 감소(reduction) 단계를 스킵할지 여부입니다.
+    filter_multiplier : int, optional, default=2
+        네트워크의 너비를 제어합니다.
+        - `filter_multiplier` < 1.0이면, 각 레이어의 필터 수를 비례적으로 줄입니다.
+        - `filter_multiplier` > 1.0이면, 각 레이어의 필터 수를 비례적으로 늘립니다.
+        - `filter_multiplier` = 1이면, 논문으로부터의 기본 필터 수가 각 레이어에 사용됩니다.
+    include_top : bool, optional, default=True
+        네트워크 상단에 있는 완전 연결 레이어를 포함할지 여부
+    weights : [type], optional, default=None
+        `None`(무작위 초기화), `'imagenet'`(ImageNet에 대해 사전 트레이닝된) 중 하나입니다.
+    input_tensor : [type], optional, default=None
+        모델의 이미지 입력으로 사용할 Optional Keras 텐서 (즉,`layers.Input()`의 출력)
+    pooling : [type], optional, default=None
+        `include_top`이 `False`인 경우, 특성 추출을 위한 선택적 풀링 모드입니다.
+        - `None`은 모델의 출력이 마지막 컨볼루션 블록의 4D 텐서 출력이 될 것임을 의미합니다.
+        - `avg`는 글로벌 평균 풀링이 마지막 컨볼루션 블록의 출력에 적용되므로, 모델의 출력이 2D텐서가 될 것임을 의미합니다.
+        - 'max'는 글로벌 최대 풀링이 적용됨을 의미합니다.
+    classes : int, optional, default=1000
+        이미지를 분류할 클래스 수. `include_top`이 `True`이고, `weights` 인수가 지정되지 않은 경우에만, 지정합니다.
+    default_size : [type], optional, default=None
+        Specifies the default image size of the model
+    classifier_activation : str or callable, optional, default "softmax"
+        "top" 레이어에서 사용할 활성화 함수입니다. `include_top=True`가 아니면 무시됩니다.
+        "top" 레이어의 로짓을 반환하려면, `classifier_activation=None`을 설정하십시오.
 
-    Returns:
-      A `keras.Model` instance.
+    Returns
+    -------
+    `keras.Model`
+        `keras.Model` 인스턴스.
 
-    Raises:
-      ValueError: In case of invalid argument for `weights`,
-        invalid input shape or invalid `penultimate_filters` value.
-      ValueError: if `classifier_activation` is not `softmax` or `None` when
-        using a pretrained top layer.
+    Raises
+    ------
+    ValueError
+        `weights`에 대한 인수가 잘못되었거나, 입력 shape이 잘못된 경우, 또는 `penultimate_filters` 값이 잘못된 경우
+    ValueError
+        사전 트레이닝된 top 레이어를 사용할 때, `classifier_activation`이 `softmax` 또는 `None`이 아닌 경우
     """
     if not (weights in {"imagenet", None} or file_io.file_exists_v2(weights)):
         raise ValueError(
-            "The `weights` argument should be either "
-            "`None` (random initialization), `imagenet` "
-            "(pre-training on ImageNet), "
-            "or the path to the weights file to be loaded."
+            "`weights` 인수는 `None` (무작위 초기화), "
+            "`imagenet` (ImageNet에 대해 사전 트레이닝된) 또는, "
+            "로드할 가중치 파일의 경로여야 합니다."
         )
 
     if weights == "imagenet" and include_top and classes != 1000:
         raise ValueError(
-            'If using `weights` as `"imagenet"` with `include_top` '
-            "as true, `classes` should be 1000"
+            '`include_top`이 true이고, `"imagenet"`으로 `weights`를 사용하는 경우,'
+            "`classes`는 1000이어야 합니다."
         )
 
     if isinstance(input_shape, tuple) and None in input_shape and weights == "imagenet":
         raise ValueError(
-            "When specifying the input shape of a NASNet"
-            " and loading `ImageNet` weights, "
-            "the input_shape argument must be static "
-            "(no None entries). Got: `input_shape=" + str(input_shape) + "`."
+            "NASNet의 입력 shape을 지정하고, `ImageNet` 가중치를 로드할 때, input_shape 인수는 정적(static)이어야 합니다. (None 항목 없음)"
+            "다음을 받았습니다.: `input_shape=" + str(input_shape) + "`."
         )
 
     if default_size is None:
         default_size = 331
 
-    # Determine proper input shape and default size.
+    # 적절한 입력 shape과 기본 크기를 결정합니다.
     input_shape = imagenet_utils.obtain_input_shape(
         input_shape,
         default_size=default_size,
@@ -186,15 +176,10 @@ def NASNet(
 
     if backend.image_data_format() != "channels_last":
         logging.warning(
-            "The NASNet family of models is only available "
-            'for the input data format "channels_last" '
-            "(width, height, channels). "
-            "However your settings specify the default "
-            'data format "channels_first" (channels, width, height).'
-            ' You should set `image_data_format="channels_last"` '
-            "in your Keras config located at ~/.keras/keras.json. "
-            "The model being returned right now will expect inputs "
-            'to follow the "channels_last" data format.'
+            'NASNet 모델 제품군은 입력 데이터 형식 "channels_last"(너비, 높이, 채널)만 사용할 수 있습니다. '
+            '그러나 당신의 설정은 기본 데이터 형식 "channels_first"(채널, 너비, 높이)를 지정하고 있습니다. '
+            '`~/.keras/keras.json`에 있는 당신의 Keras 구성에서 `image_data_format = "channels_last"`로 설정해야 합니다.'
+            '지금 반환되는 모델은 입력이 "channels_last" 데이터 형식을 따를 것으로 예상됩니다.'
         )
         backend.set_image_data_format("channels_last")
         old_data_format = "channels_first"
@@ -211,8 +196,7 @@ def NASNet(
 
     if penultimate_filters % (24 * (filter_multiplier ** 2)) != 0:
         raise ValueError(
-            "For NASNet-A models, the `penultimate_filters` must be a multiple "
-            "of 24 * (`filter_multiplier` ** 2). Current value: %d"
+            "NASNet-A 모델의 경우, `penultimate_filters` 는 24 * (`filter_multiplier` ** 2)의 곱이어야 합니다. 현재 값 : %d"
             % penultimate_filters
         )
 
@@ -281,8 +265,7 @@ def NASNet(
         elif pooling == "max":
             x = layers.GlobalMaxPooling2D()(x)
 
-    # Ensure that the model takes into account
-    # any potential predecessors of `input_tensor`.
+    # 모델이 `input_tensor`의 잠재적 선행자(potential predecessors)를 고려하는지 확인합니다.
     if input_tensor is not None:
         inputs = layer_utils.get_source_inputs(input_tensor)
     else:
@@ -290,7 +273,7 @@ def NASNet(
 
     model = training.Model(inputs, x, name="NASNet")
 
-    # Load weights.
+    # 가중치 불러오기
     if weights == "imagenet":
         if default_size == 224:  # mobile version
             if include_top:
@@ -325,10 +308,7 @@ def NASNet(
                 )
             model.load_weights(weights_path)
         else:
-            raise ValueError(
-                "ImageNet weights can only be loaded with NASNetLarge"
-                " or NASNetMobile"
-            )
+            raise ValueError("ImageNet 가중치는 NASNetLarge 또는 NASNetMobile로만 로드할 수 있습니다.")
     elif weights is not None:
         model.load_weights(weights)
 
@@ -349,59 +329,54 @@ def NASNetMobile(
     pooling=None,
     classes=1000,
 ):
-    """Instantiates a Mobile NASNet model in ImageNet mode.
+    """
+    ImageNet 모드에서, NASNet 모델을 인스턴스화합니다.
 
-    Reference:
-    - [Learning Transferable Architectures for Scalable Image Recognition](
-        https://arxiv.org/abs/1707.07012) (CVPR 2018)
+    선택적으로 ImageNet에서 사전 트레이닝된 가중치를 로드합니다.
+    모델에서 사용하는 데이터 형식 규칙은 Keras 구성 `~/.keras/keras.json`에 지정된 규칙입니다.
 
-    Optionally loads weights pre-trained on ImageNet.
-    Note that the data format convention used by the model is
-    the one specified in your Keras config at `~/.keras/keras.json`.
+    참고 : 각 Keras 애플리케이션에는 특정 종류의 입력 전처리가 필요합니다.
+    NASNet 경우, 입력을 모델에 전달하기 전에 입력에 대해,
+    `tf.keras.applications.nasnet.preprocess_input`을 호출해야 합니다.
 
-    Note: each Keras Application expects a specific kind of input preprocessing.
-    For NASNet, call `tf.keras.applications.nasnet.preprocess_input` on your
-    inputs before passing them to the model.
+    References
+    ----------
+    - [Learning Transferable Architectures for Scalable Image Recognition](https://arxiv.org/abs/1707.07012) (CVPR 2018)
 
-    Arguments:
-        input_shape: Optional shape tuple, only to be specified
-            if `include_top` is False (otherwise the input shape
-            has to be `(224, 224, 3)` for NASNetMobile
-            It should have exactly 3 inputs channels,
-            and width and height should be no smaller than 32.
-            E.g. `(224, 224, 3)` would be one valid value.
-        include_top: Whether to include the fully-connected
-            layer at the top of the network.
-        weights: `None` (random initialization) or
-            `imagenet` (ImageNet weights)
-            For loading `imagenet` weights, `input_shape` should be (224, 224, 3)
-        input_tensor: Optional Keras tensor (i.e. output of
-            `layers.Input()`)
-            to use as image input for the model.
-        pooling: Optional pooling mode for feature extraction
-            when `include_top` is `False`.
-            - `None` means that the output of the model
-                will be the 4D tensor output of the
-                last convolutional layer.
-            - `avg` means that global average pooling
-                will be applied to the output of the
-                last convolutional layer, and thus
-                the output of the model will be a
-                2D tensor.
-            - `max` means that global max pooling will
-                be applied.
-        classes: Optional number of classes to classify images
-            into, only to be specified if `include_top` is True, and
-            if no `weights` argument is specified.
+    Parameters
+    ----------
+    input_shape : [type], optional, default=None
+        선택적 shape 튜플.
+        `include_top`이 `False`인 경우에만 지정됩니다.
+        (그렇지 않으면, NASNetMobile에 대해 입력 shape이 `(224, 224, 3)` 이어야 합니다.)
+        정확히 3개 입력 채널이 있어야 합니다. 그리고 너비와 높이는 32보다 커야합니다.
+        예) `(224, 224, 3)` 유효한 값입니다.
+    include_top : bool, optional, default=True
+        네트워크 상단에 있는 완전 연결 레이어를 포함할지 여부
+    weights : str, optional, default="imagenet"
+        `None`(무작위 초기화), 'imagenet' (ImageNet에 대해 사전 트레이닝) 중 하나.
+        'imagenet' 가중치를 불러오는 경우, `input_shape`이 (224, 224, 3) 이어야 합니다.
+    input_tensor : [type], optional, default=None
+        모델의 이미지 입력으로 사용할 Optional Keras 텐서 (즉,`layers.Input()`의 출력)
+    pooling : [type], optional, default=None
+        `include_top`이 `False`인 경우, 특성 추출을 위한 선택적 풀링 모드입니다.
+        - `None`은 모델의 출력이 마지막 컨볼루션 블록의 4D 텐서 출력이 될 것임을 의미합니다.
+        - `avg`는 글로벌 평균 풀링이 마지막 컨볼루션 블록의 출력에 적용되므로, 모델의 출력이 2D텐서가 될 것임을 의미합니다.
+        - 'max'는 글로벌 최대 풀링이 적용됨을 의미합니다.
+    classes : int, optional, default=1000
+        이미지를 분류할 클래스 수. `include_top`이 `True`이고, `weights` 인수가 지정되지 않은 경우에만, 지정합니다.
 
-    Returns:
-        A Keras model instance.
+    Returns
+    -------
+    `keras.Model`
+        `keras.Model` 인스턴스.
 
-    Raises:
-        ValueError: In case of invalid argument for `weights`,
-            or invalid input shape.
-        RuntimeError: If attempting to run this model with a
-            backend that does not support separable convolutions.
+    Raises
+    ------
+    ValueError
+        `weights`에 대한 인수가 잘못되었거나, 입력 shape이 잘못된 경우.
+    RuntimeError
+        separable 컨볼루션을 지원하지 않는 백엔드로 이 모델을 실행하려는 경우.
     """
     return NASNet(
         input_shape,
@@ -428,59 +403,55 @@ def NASNetLarge(
     pooling=None,
     classes=1000,
 ):
-    """Instantiates a NASNet model in ImageNet mode.
+    """
+    ImageNet 모드에서, NASNet 모델을 인스턴스화합니다.
 
-    Reference:
-    - [Learning Transferable Architectures for Scalable Image Recognition](
-        https://arxiv.org/abs/1707.07012) (CVPR 2018)
+    선택적으로 ImageNet에서 사전 트레이닝된 가중치를 로드합니다.
+    모델에서 사용하는 데이터 형식 규칙은 Keras 구성 `~/.keras/keras.json`에 지정된 규칙입니다.
 
-    Optionally loads weights pre-trained on ImageNet.
-    Note that the data format convention used by the model is
-    the one specified in your Keras config at `~/.keras/keras.json`.
+    참고 : 각 Keras 애플리케이션에는 특정 종류의 입력 전처리가 필요합니다.
+    NASNet 경우, 입력을 모델에 전달하기 전에 입력에 대해,
+    `tf.keras.applications.nasnet.preprocess_input`을 호출해야 합니다.
 
-    Note: each Keras Application expects a specific kind of input preprocessing.
-    For NASNet, call `tf.keras.applications.nasnet.preprocess_input` on your
-    inputs before passing them to the model.
+    References
+    ----------
+    - [Learning Transferable Architectures for Scalable Image Recognition](https://arxiv.org/abs/1707.07012) (CVPR 2018)
 
-    Arguments:
-        input_shape: Optional shape tuple, only to be specified
-            if `include_top` is False (otherwise the input shape
-            has to be `(331, 331, 3)` for NASNetLarge.
-            It should have exactly 3 inputs channels,
-            and width and height should be no smaller than 32.
-            E.g. `(224, 224, 3)` would be one valid value.
-        include_top: Whether to include the fully-connected
-            layer at the top of the network.
-        weights: `None` (random initialization) or
-            `imagenet` (ImageNet weights)
-            For loading `imagenet` weights, `input_shape` should be (331, 331, 3)
-        input_tensor: Optional Keras tensor (i.e. output of
-            `layers.Input()`)
-            to use as image input for the model.
-        pooling: Optional pooling mode for feature extraction
-            when `include_top` is `False`.
-            - `None` means that the output of the model
-                will be the 4D tensor output of the
-                last convolutional layer.
-            - `avg` means that global average pooling
-                will be applied to the output of the
-                last convolutional layer, and thus
-                the output of the model will be a
-                2D tensor.
-            - `max` means that global max pooling will
-                be applied.
-        classes: Optional number of classes to classify images
-            into, only to be specified if `include_top` is True, and
-            if no `weights` argument is specified.
 
-    Returns:
-        A Keras model instance.
+    Parameters
+    ----------
+    input_shape : [type], optional, default=None
+        선택적 shape 튜플.
+        `include_top`이 `False`인 경우에만 지정됩니다.
+        (그렇지 않으면, NASNetLarge에 대해 입력 shape이 `(331, 331, 3)` 이어야 합니다.)
+        정확히 3개 입력 채널이 있어야 합니다. 그리고 너비와 높이는 32보다 커야합니다.
+        예) `(224, 224, 3)` 유효한 값입니다.
+    include_top : bool, optional, default=True
+        네트워크 상단에 있는 완전 연결 레이어를 포함할지 여부
+    weights : str, optional, default="imagenet"
+        `None`(무작위 초기화), 'imagenet' (ImageNet에 대해 사전 트레이닝) 중 하나.
+        'imagenet' 가중치를 불러오는 경우, `input_shape`이 (331, 331, 3) 이어야 합니다.
+    input_tensor : [type], optional, default=None
+        모델의 이미지 입력으로 사용할 Optional Keras 텐서 (즉,`layers.Input()`의 출력)
+    pooling : [type], optional, default=None
+        `include_top`이 `False`인 경우, 특성 추출을 위한 선택적 풀링 모드입니다.
+        - `None`은 모델의 출력이 마지막 컨볼루션 블록의 4D 텐서 출력이 될 것임을 의미합니다.
+        - `avg`는 글로벌 평균 풀링이 마지막 컨볼루션 블록의 출력에 적용되므로, 모델의 출력이 2D텐서가 될 것임을 의미합니다.
+        - 'max'는 글로벌 최대 풀링이 적용됨을 의미합니다.
+    classes : int, optional, default=1000
+        이미지를 분류할 클래스 수. `include_top`이 `True`이고, `weights` 인수가 지정되지 않은 경우에만, 지정합니다.
 
-    Raises:
-        ValueError: in case of invalid argument for `weights`,
-            or invalid input shape.
-        RuntimeError: If attempting to run this model with a
-            backend that does not support separable convolutions.
+    Returns
+    -------
+    `keras.Model`
+        `keras.Model` 인스턴스.
+
+    Raises
+    ------
+    ValueError
+        `weights`에 대한 인수가 잘못되었거나, 입력 shape이 잘못된 경우.
+    RuntimeError
+        separable 컨볼루션을 지원하지 않는 백엔드로 이 모델을 실행하려는 경우.
     """
     return NASNet(
         input_shape,
@@ -501,17 +472,26 @@ def NASNetLarge(
 def _separable_conv_block(
     ip, filters, kernel_size=(3, 3), strides=(1, 1), block_id=None
 ):
-    """Adds 2 blocks of [relu-separable conv-batchnorm].
+    """
+    [relu-separable conv-batchnorm]의 두 블록을 추가합니다.
 
-    Arguments:
-        ip: Input tensor
-        filters: Number of output filters per layer
-        kernel_size: Kernel size of separable convolutions
-        strides: Strided convolution for downsampling
-        block_id: String block_id
+    Parameters
+    ----------
+    ip : [type]
+        입력 텐서
+    filters : [type]
+        레이어 당 출력 필터 수
+    kernel_size : tuple, optional, default=(3, 3)
+        separable 컨볼루션의 커널 크기
+    strides : tuple, optional, default=(1, 1)
+        다운 샘플링을 위한 스트라이드 컨볼루션
+    block_id : [type], optional, default=None
+        시작하는 block_id
 
-    Returns:
-        A Keras tensor
+    Returns
+    -------
+    [type]
+        Keras 텐서
     """
     channel_dim = 1 if backend.image_data_format() == "channels_first" else -1
 
@@ -559,18 +539,26 @@ def _separable_conv_block(
 
 
 def _adjust_block(p, ip, filters, block_id=None):
-    """Adjusts the input `previous path` to match the shape of the `input`.
+    """
+    입력 `previous path`를 `input`의 shape과 일치하도록 조정합니다.
 
-    Used in situations where the output number of filters needs to be changed.
+    필터의 출력 개수를 변경해야 하는 상황에서 사용됩니다.
 
-    Arguments:
-        p: Input tensor which needs to be modified
-        ip: Input tensor whose shape needs to be matched
-        filters: Number of output filters to be matched
-        block_id: String block_id
+    Parameters
+    ----------
+    p : [type]
+        수정되어야 하는 입력 텐서
+    ip : [type]
+        shape이 일치해야 하는 입력 텐서
+    filters : [type]
+        일치시킬 출력 필터 수
+    block_id : [type], optional, default=None
+        시작하는 block_id
 
-    Returns:
-        Adjusted Keras tensor
+    Returns
+    -------
+    [type]
+        조정된 Keras 텐서
     """
     channel_dim = 1 if backend.image_data_format() == "channels_first" else -1
     img_dim = 2 if backend.image_data_format() == "channels_first" else -2
@@ -649,16 +637,24 @@ def _adjust_block(p, ip, filters, block_id=None):
 
 
 def _normal_a_cell(ip, p, filters, block_id=None):
-    """Adds a Normal cell for NASNet-A (Fig. 4 in the paper).
+    """
+    NASNet-A 용 Normal 셀을 추가합니다. (논문의 Fig. 4)
 
-    Arguments:
-        ip: Input tensor `x`
-        p: Input tensor `p`
-        filters: Number of output filters
-        block_id: String block_id
+    Parameters
+    ----------
+    ip : [type]
+        입력 텐서 `x`
+    p : [type]
+        입력 텐서 `p`
+    filters : [type]
+        출력 필터 수
+    block_id : [type], optional, default=None
+        시작하는 block_id
 
-    Returns:
-        A Keras tensor
+    Returns
+    -------
+    [type]
+        Keras 텐서
     """
     channel_dim = 1 if backend.image_data_format() == "channels_first" else -1
 
@@ -739,16 +735,24 @@ def _normal_a_cell(ip, p, filters, block_id=None):
 
 
 def _reduction_a_cell(ip, p, filters, block_id=None):
-    """Adds a Reduction cell for NASNet-A (Fig. 4 in the paper).
+    """
+    NASNet-A 용 Reduction 셀을 추가합니다. (논문의 Fig. 4)
 
-    Arguments:
-      ip: Input tensor `x`
-      p: Input tensor `p`
-      filters: Number of output filters
-      block_id: String block_id
+    Parameters
+    ----------
+    ip : [type]
+        입력 텐서 `x`
+    p : [type]
+        입력 텐서 `p`
+    filters : [type]
+        출력 필터 수
+    block_id : [type], optional, default=None
+        시작하는 block_id
 
-    Returns:
-      A Keras tensor
+    Returns
+    -------
+    [type]
+        Keras 텐서
     """
     channel_dim = 1 if backend.image_data_format() == "channels_first" else -1
 

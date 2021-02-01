@@ -16,27 +16,18 @@
 """
 Keras 용 MobileNet v1 모델.
 
-MobileNet is a general architecture and can be used for multiple use cases.
-Depending on the use case, it can use different input layer size and
-different width factors. This allows different width models to reduce
-the number of multiply-adds and thereby
-reduce inference cost on mobile devices.
+MobileNet은 일반적인 아키텍처이며 여러 사용 사례에 사용할 수 있습니다.
+사용 사례에 따라, 다른 입력 레이어 크기와 다른 너비 factor를 사용할 수 있습니다.
+이를 통해 서로 다른 너비 모델이 multiply-adds 횟수를 줄여, 모바일 장치에 대해 추론 비용을 줄일 수 있습니다.
 
-MobileNets support any input size greater than 32 x 32, with larger image sizes
-offering better performance.
-The number of parameters and number of multiply-adds
-can be modified by using the `alpha` parameter,
-which increases/decreases the number of filters in each layer.
-By altering the image size and `alpha` parameter,
-all 16 models from the paper can be built, with ImageNet weights provided.
+MobileNets는 32 x 32보다 큰 모든 입력 크기를 지원하며, 더 큰 이미지 크기는 더 나은 성능을 제공합니다.
+매개 변수 수와 multiply-adds 수는, 각 레이어의 필터 수를 증가/감소시키는, `alpha` 매개변수를 사용하여 수정할 수 있습니다.
+이미지 크기와 `alpha` 매개변수를 변경하여, ImageNet 가중치를 제공되는, 논문의 16개 모델을 모두 제작할 수 있습니다.
 
-The paper demonstrates the performance of MobileNets using `alpha` values of
-1.0 (also called 100 % MobileNet), 0.75, 0.5 and 0.25.
-For each of these `alpha` values, weights for 4 different input image sizes
-are provided (224, 192, 160, 128).
+이 논문은 1.0(100 % MobileNet이라고도 함), 0.75, 0.5 및 0.25의 `alpha`값을 사용하여, MobileNet의 성능을 보여줍니다.
+이러한 `alpha` 값 각각에 대해, 4가지 입력 이미지 크기(224, 192, 160, 128)에 대한 가중치가 제공됩니다.
 
-The following table describes the size and accuracy of the 100% MobileNet
-on size 224 x 224:
+다음 표는 크기 224 x 224에서 100 % MobileNet의 크기와 정확도를 설명합니다.
 ----------------------------------------------------------------------------
 Width Multiplier (alpha) | ImageNet Acc |  Multiply-Adds (M) |  Params (M)
 ----------------------------------------------------------------------------
@@ -46,10 +37,9 @@ Width Multiplier (alpha) | ImageNet Acc |  Multiply-Adds (M) |  Params (M)
 |   0.25 MobileNet-224   |    50.6 %     |        41         |     0.5     |
 ----------------------------------------------------------------------------
 
-The following table describes the performance of
-the 100 % MobileNet on various input sizes:
+다음 표는 다양한 입력 크기에 대해 100 % MobileNet의 성능을 설명합니다.
 ------------------------------------------------------------------------
-      Resolution      | ImageNet Acc | Multiply-Adds (M) | Params (M)
+|     Resolution      | ImageNet Acc | Multiply-Adds (M) | Params (M)  |
 ------------------------------------------------------------------------
 |  1.0 MobileNet-224  |    70.6 %    |        529        |     4.2     |
 |  1.0 MobileNet-192  |    69.1 %    |        529        |     4.2     |
@@ -94,70 +84,71 @@ def MobileNet(
     classifier_activation="softmax",
     **kwargs
 ):
-    """Instantiates the MobileNet architecture.
+    """
+    MobileNet 아키텍처를 인스턴스화합니다.
 
-    Reference:
-    - [MobileNets: Efficient Convolutional Neural Networks
-       for Mobile Vision Applications](
-        https://arxiv.org/abs/1704.04861)
+    선택적으로 ImageNet에서 사전 트레이닝된 가중치를 로드합니다.
+    모델에서 사용하는 데이터 형식 규칙은 `tf.keras.backend.image_data_format()`에 지정된 규칙입니다.
 
-    Optionally loads weights pre-trained on ImageNet.
-    Note that the data format convention used by the model is
-    the one specified in the `tf.keras.backend.image_data_format()`.
+    참고 : 각 Keras 애플리케이션에는 특정 종류의 입력 전처리가 필요합니다.
+    MobileNet의 경우, 입력을 모델에 전달하기 전에 입력에 대해,
+    `tf.keras.applications.mobilenet.preprocess_input`을 호출해야 합니다.
 
-    Note: each Keras Application expects a specific kind of input preprocessing.
-    For MobileNet, call `tf.keras.applications.mobilenet.preprocess_input`
-    on your inputs before passing them to the model.
+    References
+    ----------
+    - [MobileNets: Efficient Convolutional Neural Networks for Mobile Vision Applications](https://arxiv.org/abs/1704.04861)
 
-    Arguments:
-      input_shape: Optional shape tuple, only to be specified if `include_top`
-        is False (otherwise the input shape has to be `(224, 224, 3)` (with
-        `channels_last` data format) or (3, 224, 224) (with `channels_first`
-        data format). It should have exactly 3 inputs channels, and width and
-        height should be no smaller than 32. E.g. `(200, 200, 3)` would be one
-        valid value. Default to `None`.
-        `input_shape` will be ignored if the `input_tensor` is provided.
-      alpha: Controls the width of the network. This is known as the width
-        multiplier in the MobileNet paper. - If `alpha` < 1.0, proportionally
-        decreases the number of filters in each layer. - If `alpha` > 1.0,
-        proportionally increases the number of filters in each layer. - If
-        `alpha` = 1, default number of filters from the paper are used at each
-        layer. Default to 1.0.
-      depth_multiplier: Depth multiplier for depthwise convolution. This is
-        called the resolution multiplier in the MobileNet paper. Default to 1.0.
-      dropout: Dropout rate. Default to 0.001.
-      include_top: Boolean, whether to include the fully-connected layer at the
-        top of the network. Default to `True`.
-      weights: One of `None` (random initialization), 'imagenet' (pre-training
-        on ImageNet), or the path to the weights file to be loaded. Default to
-        `imagenet`.
-      input_tensor: Optional Keras tensor (i.e. output of `layers.Input()`) to
-        use as image input for the model. `input_tensor` is useful for sharing
-        inputs between multiple different networks. Default to None.
-      pooling: Optional pooling mode for feature extraction when `include_top`
-        is `False`.
-        - `None` (default) means that the output of the model will be
-            the 4D tensor output of the last convolutional block.
-        - `avg` means that global average pooling
-            will be applied to the output of the
-            last convolutional block, and thus
-            the output of the model will be a 2D tensor.
-        - `max` means that global max pooling will be applied.
-      classes: Optional number of classes to classify images into, only to be
-        specified if `include_top` is True, and if no `weights` argument is
-        specified. Defaults to 1000.
-      classifier_activation: A `str` or callable. The activation function to use
-        on the "top" layer. Ignored unless `include_top=True`. Set
-        `classifier_activation=None` to return the logits of the "top" layer.
-      **kwargs: For backwards compatibility only.
-    Returns:
-      A `keras.Model` instance.
+    Parameters
+    ----------
+    input_shape : [type], optional, default=None
+        선택적 shape 튜플, `include_top`이 `False`인 경우에만 지정됩니다.
+        (그렇지 않으면 입력 shape은 `(224, 224, 3)` (`'channels_last'` 데이터 형식을 사용하는 경우) 또는
+        `(3, 224, 224)` (`'channels_first'` 데이터 형식을 사용하는 경우)이어야 합니다.)
+        정확히 3개 입력 채널이 있어야 합니다. 그리고 너비와 높이는 32보다 커야합니다.
+        예) `(200, 200, 3)` 유효한 값입니다.
+        `input_tensor`가 제공되면, `input_shape`는 무시됩니다.
+    alpha : float, optional, default=1.0
+        네트워크의 너비를 제어합니다.
+        이것은 MobileNet 논문에서 너비 승수(width multiplier)라고 알려져 있습니다.
+        - `alpha` < 1.0이면, 각 레이어의 필터 수를 비례적으로 줄입니다.
+        - `alpha` > 1.0이면, 각 레이어의 필터 수를 비례적으로 늘립니다.
+        - `alpha` = 1이면, 논문으로부터의 기본 필터 수가 각 레이어에 사용됩니다.
+    depth_multiplier : int, optional, default=1.0
+        depthwise 컨볼루션을 위한 깊이 승수(Depth multiplier).
+        이를 MobileNet 논문에서는 해상도 승수(resolution multiplier)라고 합니다.
+    dropout : float, optional, default=0.001
+        Dropout 비율
+    include_top : bool, optional, default=True
+        네트워크 상단에 있는 완전 연결 레이어를 포함할지 여부
+    weights : str, optional, default="imagenet"
+        `None`(무작위 초기화), `'imagenet'`(ImageNet에 대해 사전 트레이닝된) 또는 로드할 가중치 파일의 경로 중 하나입니다.
+    input_tensor : [type], optional, default=None
+        모델의 이미지 입력으로 사용할 Optional Keras 텐서 (즉,`layers.Input()`의 출력)
+        `input_tensor`는 여러 다른 네트워크간에 입력을 공유하는 데 유용합니다.
+    pooling : str, optional, default=None
+        `include_top`이 `False`인 경우, 특성 추출을 위한 선택적 풀링 모드입니다.
+        - `None`은 모델의 출력이 마지막 컨볼루션 블록의 4D 텐서 출력이 될 것임을 의미합니다.
+        - `avg`는 글로벌 평균 풀링이 마지막 컨볼루션 블록의 출력에 적용되므로, 모델의 출력이 2D텐서가 될 것임을 의미합니다.
+        - 'max'는 글로벌 최대 풀링이 적용됨을 의미합니다.
+    classes : int, optional, default=1000
+        이미지를 분류할 클래스 수. `include_top`이 `True`이고, `weights` 인수가 지정되지 않은 경우에만, 지정합니다.
+    classifier_activation : str or callable, optional, default="softmax"
+        `str` 또는 callable. "top" 레이어에서 사용할 활성화 함수입니다. `include_top=True`가 아니면 무시됩니다.
+        "top" 레이어의 로짓을 반환하려면, `classifier_activation=None`을 설정하십시오.
+    **kwargs:
+        이전 버전과의 호환성 만을 위해.
 
-    Raises:
-      ValueError: in case of invalid argument for `weights`,
-        or invalid input shape.
-      ValueError: if `classifier_activation` is not `softmax` or `None` when
-        using a pretrained top layer.
+    Returns
+    -------
+    `keras.Model`
+        `keras.Model` 인스턴스.
+
+    Raises
+    ------
+    ValueError
+        `weights`에 대한 인수가 잘못되었거나, 입력 shape이 잘못된 경우
+    ValueError
+        사전 트레이닝된 top 레이어를 사용할 때, `classifier_activation`이 `softmax` 또는 `None`이 아닌 경우
     """
     global layers
     if "layers" in kwargs:
@@ -165,22 +156,21 @@ def MobileNet(
     else:
         layers = VersionAwareLayers()
     if kwargs:
-        raise ValueError("Unknown argument(s): %s" % (kwargs,))
+        raise ValueError("알 수 없는 인수(들): %s" % (kwargs,))
     if not (weights in {"imagenet", None} or file_io.file_exists_v2(weights)):
         raise ValueError(
-            "The `weights` argument should be either "
-            "`None` (random initialization), `imagenet` "
-            "(pre-training on ImageNet), "
-            "or the path to the weights file to be loaded."
+            "`weights` 인수는 `None` (무작위 초기화), "
+            "`imagenet` (ImageNet에 대해 사전 트레이닝된) 또는, "
+            "로드할 가중치 파일의 경로여야 합니다."
         )
 
     if weights == "imagenet" and include_top and classes != 1000:
         raise ValueError(
-            'If using `weights` as `"imagenet"` with `include_top` '
-            "as true, `classes` should be 1000"
+            '`include_top`이 true이고, `"imagenet"`으로 `weights`를 사용하는 경우,'
+            "`classes`는 1000이어야 합니다."
         )
 
-    # Determine proper input shape and default size.
+    # 적절한 입력 shape과 기본 크기를 결정합니다.
     if input_shape is None:
         default_size = 224
     else:
@@ -215,23 +205,20 @@ def MobileNet(
     if weights == "imagenet":
         if depth_multiplier != 1:
             raise ValueError(
-                "If imagenet weights are being loaded, " "depth multiplier must be 1"
+                "imagenet 가중치를 로드하는 경우, 깊이 승수(depth multiplier)는 1이어야 합니다."
             )
 
         if alpha not in [0.25, 0.50, 0.75, 1.0]:
             raise ValueError(
-                "If imagenet weights are being loaded, "
-                "alpha can be one of"
-                "`0.25`, `0.50`, `0.75` or `1.0` only."
+                "imagenet 가중치가 로드되는 경우, "
+                "alpha는 `0.25`, `0.50`, `0.75` 또는 `1.0`중 하나만 될 수 있습니다."
             )
 
         if rows != cols or rows not in [128, 160, 192, 224]:
             rows = 224
             logging.warning(
-                "`input_shape` is undefined or non-square, "
-                "or `rows` is not in [128, 160, 192, 224]. "
-                "Weights for input shape (224, 224) will be"
-                " loaded as the default."
+                "`input_shape`가 정의되지 않았거나, 정사각형이 아니거나, `rows`가 [128, 160, 192, 224] 중 하나가 아닙니다. "
+                "입력 shape (224, 224)에 대한 가중치가 기본값으로 로드됩니다."
             )
 
     if input_tensor is None:
@@ -288,17 +275,16 @@ def MobileNet(
         elif pooling == "max":
             x = layers.GlobalMaxPooling2D()(x)
 
-    # Ensure that the model takes into account
-    # any potential predecessors of `input_tensor`.
+    # 모델이 `input_tensor`의 잠재적 선행자(potential predecessors)를 고려하는지 확인합니다.
     if input_tensor is not None:
         inputs = layer_utils.get_source_inputs(input_tensor)
     else:
         inputs = img_input
 
-    # Create model.
+    # 모델 생성
     model = training.Model(inputs, x, name="mobilenet_%0.2f_%s" % (alpha, rows))
 
-    # Load weights.
+    # 가중치 불러오기
     if weights == "imagenet":
         if alpha == 1.0:
             alpha_text = "1_0"
@@ -329,40 +315,43 @@ def MobileNet(
 
 
 def _conv_block(inputs, filters, alpha, kernel=(3, 3), strides=(1, 1)):
-    """Adds an initial convolution layer (with batch normalization and relu6).
+    """
+    초기 컨볼루션 레이어를 추가합니다. (배치 정규화 및 relu6 사용)
 
-    Arguments:
-      inputs: Input tensor of shape `(rows, cols, 3)` (with `channels_last`
-        data format) or (3, rows, cols) (with `channels_first` data format).
-        It should have exactly 3 inputs channels, and width and height should
-        be no smaller than 32. E.g. `(224, 224, 3)` would be one valid value.
-      filters: Integer, the dimensionality of the output space (i.e. the
-        number of output filters in the convolution).
-      alpha: controls the width of the network. - If `alpha` < 1.0,
-        proportionally decreases the number of filters in each layer. - If
-        `alpha` > 1.0, proportionally increases the number of filters in each
-        layer. - If `alpha` = 1, default number of filters from the paper are
-        used at each layer.
-      kernel: An integer or tuple/list of 2 integers, specifying the width and
-        height of the 2D convolution window. Can be a single integer to
-        specify the same value for all spatial dimensions.
-      strides: An integer or tuple/list of 2 integers, specifying the strides
-        of the convolution along the width and height. Can be a single integer
-        to specify the same value for all spatial dimensions. Specifying any
-        stride value != 1 is incompatible with specifying any `dilation_rate`
-        value != 1. # Input shape
-      4D tensor with shape: `(samples, channels, rows, cols)` if
-        data_format='channels_first'
-      or 4D tensor with shape: `(samples, rows, cols, channels)` if
-        data_format='channels_last'. # Output shape
-      4D tensor with shape: `(samples, filters, new_rows, new_cols)` if
-        data_format='channels_first'
-      or 4D tensor with shape: `(samples, new_rows, new_cols, filters)` if
-        data_format='channels_last'. `rows` and `cols` values might have
-        changed due to stride.
+    Parameters
+    ----------
+    inputs : [type]
+        `(rows, cols, 3)` (`channels_last` 데이터 형식 사용) 또는
+        `(3, rows, cols)` (`channels_first` 데이터 형식 사용) shape의 입력 텐서
+        정확히 3개의 입력 채널이 있어야 하며, 너비와 높이는 32보다 작아서는 안됩니다. 예) `(224, 224, 3)`는 하나의 유효한 값입니다.
+    filters : int
+        출력 공간의 차원(즉, 컨볼루션의 출력 필터 수)
+    alpha : float
+        네트워크의 너비를 컨트롤합니다.
+        - `alpha` < 1.0이면, 각 레이어의 필터 수를 비례적으로 줄입니다.
+        - `alpha` > 1.0이면, 각 레이어의 필터 수를 비례적으로 늘립니다.
+        - `alpha` = 1이면, 논문으로부터의 기본 필터 수가 각 레이어에 사용됩니다.
+    kernel : tuple, optional, default=(3, 3)
+        2D 컨볼루션 윈도우의 너비와 높이를 지정하는, 정수 또는 2개 정수의 튜플/리스트입니다.
+        모든 공간 차원에 대해 동일한 값을 지정하는 단일 정수일 수 있습니다.
+    strides : tuple, optional, default=(1, 1)
+        너비와 높이를 따라 컨볼루션의 스트라이드를 지정하는, 정수 또는 2개 정수의 튜플/리스트입니다.
+        모든 공간 차원에 대해 동일한 값을 지정하는 단일 정수일 수 있습니다.
+        stride value != 1을 지정하는 것은 '`dilation_rate` value != 1을 지정하는 것과 호환되지 않습니다.
 
-    Returns:
-      Output tensor of block.
+        # Input shape
+        4D tensor with shape: data_format='channels_first'인 경우, `(samples, channels, rows, cols)`
+        또는 4D tensor with shape: data_format='channels_last'인 경우, `(samples, rows, cols, channels)`.
+
+        # Output shape
+        4D tensor with shape: data_format='channels_first'인 경우, `(samples, filters, new_rows, new_cols)`
+        또는 4D tensor with shape: data_format='channels_last'인 경우, `(samples, new_rows, new_cols, filters)`.
+        `rows` 및 `cols` 값은 stride로 인해 변경되었을 수 있습니다.
+
+    Returns
+    -------
+    [type]
+        블록의 출력 텐서
     """
     channel_axis = 1 if backend.image_data_format() == "channels_first" else -1
     filters = int(filters * alpha)
@@ -381,45 +370,46 @@ def _depthwise_conv_block(
     strides=(1, 1),
     block_id=1,
 ):
-    """Adds a depthwise convolution block.
+    """
+    Depthwise 컨볼루션 블록을 추가합니다.
 
-    A depthwise convolution block consists of a depthwise conv,
-    batch normalization, relu6, pointwise convolution,
-    batch normalization and relu6 activation.
+    Depthwise 컨볼루션 블록은 depthwise conv, 배치 정규화, relu6, pointwise 컨볼루션, 배치 정규화 및 relu6 활성화로 구성됩니다.
 
-    Arguments:
-      inputs: Input tensor of shape `(rows, cols, channels)` (with
-        `channels_last` data format) or (channels, rows, cols) (with
-        `channels_first` data format).
-      pointwise_conv_filters: Integer, the dimensionality of the output space
-        (i.e. the number of output filters in the pointwise convolution).
-      alpha: controls the width of the network. - If `alpha` < 1.0,
-        proportionally decreases the number of filters in each layer. - If
-        `alpha` > 1.0, proportionally increases the number of filters in each
-        layer. - If `alpha` = 1, default number of filters from the paper are
-        used at each layer.
-      depth_multiplier: The number of depthwise convolution output channels
-        for each input channel. The total number of depthwise convolution
-        output channels will be equal to `filters_in * depth_multiplier`.
-      strides: An integer or tuple/list of 2 integers, specifying the strides
-        of the convolution along the width and height. Can be a single integer
-        to specify the same value for all spatial dimensions. Specifying any
-        stride value != 1 is incompatible with specifying any `dilation_rate`
-        value != 1.
-      block_id: Integer, a unique identification designating the block number.
+    Parameters
+    ----------
+    inputs : [type]
+        `(rows, cols, channels)` (`channels_last` 데이터 형식 사용) 또는
+        `(channels, rows, cols)` (`channels_first` 데이터 형식 사용) shape의 입력 텐서
+    pointwise_conv_filters : int
+        출력 공간의 차원. (즉, pointwise 컨볼루션의 출력 필터 수)
+    alpha : [type]
+        네트워크의 너비를 컨트롤합니다.
+        - `alpha` < 1.0이면, 각 레이어의 필터 수를 비례적으로 줄입니다.
+        - `alpha` > 1.0이면, 각 레이어의 필터 수를 비례적으로 늘립니다.
+        - `alpha` = 1이면, 논문으로부터의 기본 필터 수가 각 레이어에 사용됩니다.
+    depth_multiplier : int, optional, default=1
+        각 입력 채널에 대한 depthwise 컨볼루션 출력 채널 수입니다.
+        depthwise 컨볼루션 출력 채널의 총 수는 `filters_in * depth_multiplier`와 같습니다.
+    strides : tuple, optional, default=(1, 1)
+        너비와 높이를 따라 컨볼루션의 스트라이드를 지정하는, 정수 또는 2개 정수의 튜플/리스트입니다.
+        모든 공간 차원에 대해 동일한 값을 지정하는 단일 정수일 수 있습니다.
+        stride value != 1을 지정하는 것은 '`dilation_rate` value != 1을 지정하는 것과 호환되지 않습니다.
+    block_id : int, optional, default=1
+        블록 숫자를 지정하는 고유 ID.
+
         # Input shape
-      4D tensor with shape: `(batch, channels, rows, cols)` if
-        data_format='channels_first'
-      or 4D tensor with shape: `(batch, rows, cols, channels)` if
-        data_format='channels_last'. # Output shape
-      4D tensor with shape: `(batch, filters, new_rows, new_cols)` if
-        data_format='channels_first'
-      or 4D tensor with shape: `(batch, new_rows, new_cols, filters)` if
-        data_format='channels_last'. `rows` and `cols` values might have
-        changed due to stride.
+        4D tensor with shape: data_format='channels_first'인 경우, `(batch, channels, rows, cols)`
+        또는 4D tensor with shape: data_format='channels_last'인 경우, `(batch, rows, cols, channels)`.
 
-    Returns:
-      Output tensor of block.
+        # Output shape
+        4D tensor with shape: data_format='channels_first'인 경우, `(batch, filters, new_rows, new_cols)`
+        또는 4D tensor with shape: data_format='channels_last'인 경우, `(batch, new_rows, new_cols, filters)`.
+        `rows` 및 `cols` 값은 stride로 인해 변경되었을 수 있습니다.
+
+    Returns
+    -------
+    [type]
+        블록의 출력 텐서
     """
     channel_axis = 1 if backend.image_data_format() == "channels_first" else -1
     pointwise_conv_filters = int(pointwise_conv_filters * alpha)
