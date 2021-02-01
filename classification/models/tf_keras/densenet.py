@@ -182,7 +182,7 @@ def DenseNet(
     input_tensor : [type], optional, default=None
         모델의 이미지 입력으로 사용할 선택적 Keras 텐서(즉, `layers.Input()`의 출력).
     input_shape : [type], optional, default=None
-        선택적 shape 튜플, `include_top`이 False인 경우에만 지정됩니다.
+        선택적 shape 튜플, `include_top`이 `False`인 경우에만 지정됩니다.
         (그렇지 않으면 입력 shape은 `(224, 224, 3)` (`'channels_last'` 데이터 형식을 사용하는 경우) 또는
         `(3, 224, 224)` (`'channels_first'` 데이터 형식을 사용하는 경우)이어야 합니다.)
         정확히 3개 입력 채널이 있어야 합니다. 그리고 너비와 높이는 32보다 커야합니다.
@@ -193,7 +193,7 @@ def DenseNet(
         - `avg` 글로벌 평균 풀링이 마지막 컨볼루션 레이어의 출력에 적용됨을 의미합니다. 따라서, 모델의 출력은 2D 텐서가 됩니다.
         - `max` 글로벌 최대 풀링이 적용됨을 의미합니다.
     classes : int, optional, default=1000
-        이미지를 분류할 클래스 수 (선택 사항). `include_top`이  True이고, `weights` 인수가 지정되지 않은 경우에만 지정됩니다.
+        이미지를 분류할 클래스 수 (선택 사항). `include_top`이  `True`이고, `weights` 인수가 지정되지 않은 경우에만 지정됩니다.
     classifier_activation : str or callable, optional, default="softmax"
         "top" 레이어에서 사용할 활성화 함수입니다.
         `include_top=True`가 아니면 무시됩니다.
