@@ -237,14 +237,14 @@ def EfficientNet(
     include_top : bool, optional, default=True
         네트워크 top에 완전 연결 레이어를 포함할지 여부.
     weights : str, optional, default="imagenet"
-        `None`(무작위 초기화), 'imagenet' (ImageNet 트레이닝) 중 하나 또는 로드할 가중치 파일의 경로입니다.
+        `None`(무작위 초기화), 'imagenet' (ImageNet에 대해 사전 트레이닝) 중 하나 또는 로드할 가중치 파일의 경로입니다.
     input_tensor : [type], optional, default=None
         모델의 이미지 입력으로 사용할 선택적 Keras 텐서(즉, `layers.Input()`의 출력).
     input_shape : [type], optional, default=None
         선택적 shape 튜플, `include_top`이 False인 경우에만 지정됩니다.
         정확히 3개 입력 채널이 있어야 합니다.
     pooling : [type], optional, default=None
-        `include_top`이`False` 인 경우, 특성 추출을 위한 선택적 풀링 모드
+        `include_top`이 `False` 인 경우, 특성 추출을 위한 선택적 풀링 모드
         - `None` 모델의 출력이 마지막 컨볼루션 레이어의 4D 텐서 출력이 됨을 의미합니다.
         - `avg` 글로벌 평균 풀링이 마지막 컨볼루션 레이어의 출력에 적용됨을 의미합니다. 따라서, 모델의 출력은 2D 텐서가 됩니다.
         - `max` 글로벌 최대 풀링이 적용됨을 의미합니다.

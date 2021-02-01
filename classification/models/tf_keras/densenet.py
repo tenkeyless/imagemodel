@@ -59,31 +59,45 @@ layers = VersionAwareLayers()
 
 
 def dense_block(x, blocks, name):
-    """A dense block.
+    """
+    dense 블록
 
-    Arguments:
-      x: input tensor.
-      blocks: integer, the number of building blocks.
-      name: string, block label.
+    Parameters
+    ----------
+    x : [type]
+        입력 텐서
+    blocks : int
+        빌딩 블록의 수.
+    name : str
+        블록 라벨
 
-    Returns:
-      Output tensor for the block.
+    Returns
+    -------
+    [type]
+        블록에 대한 출력 텐서
     """
     for i in range(blocks):
         x = conv_block(x, 32, name=name + "_block" + str(i + 1))
     return x
 
 
-def transition_block(x, reduction, name):
-    """A transition block.
+def transition_block(x, reduction: float, name: str):
+    """
+    transition 블록
 
-    Arguments:
-      x: input tensor.
-      reduction: float, compression rate at transition layers.
-      name: string, block label.
+    Parameters
+    ----------
+    x : [type]
+        입력 텐서
+    reduction : float
+        transition 레이어에서 compression 비율.
+    name : str
+        블록 라벨
 
-    Returns:
-      output tensor for the block.
+    Returns
+    -------
+    [type]
+        블록에 대한 출력 텐서
     """
     bn_axis = 3 if backend.image_data_format() == "channels_last" else 1
     x = layers.BatchNormalization(axis=bn_axis, epsilon=1.001e-5, name=name + "_bn")(x)
@@ -98,16 +112,23 @@ def transition_block(x, reduction, name):
     return x
 
 
-def conv_block(x, growth_rate, name):
-    """A building block for a dense block.
+def conv_block(x, growth_rate: float, name: str):
+    """
+    dense 블록에 대한 빌딩 블록
 
-    Arguments:
-      x: input tensor.
-      growth_rate: float, growth rate at dense layers.
-      name: string, block label.
+    Parameters
+    ----------
+    x : [type]
+        입력 텐서
+    growth_rate : float
+        dense 레이어에서 growth 비율
+    name : str
+        블록 라벨
 
-    Returns:
-      Output tensor for the block.
+    Returns
+    -------
+    [type]
+        블록에 대한 출력 텐서
     """
     bn_axis = 3 if backend.image_data_format() == "channels_last" else 1
     x1 = layers.BatchNormalization(axis=bn_axis, epsilon=1.001e-5, name=name + "_0_bn")(
@@ -136,79 +157,74 @@ def DenseNet(
     classes=1000,
     classifier_activation="softmax",
 ):
-    """Instantiates the DenseNet architecture.
+    """
+    DenseNet 아키텍처를 인스턴스화합니다.
 
-    Reference:
-    - [Densely Connected Convolutional Networks](
-        https://arxiv.org/abs/1608.06993) (CVPR 2017)
+    선택적으로 ImageNet에서 사전 트레이닝된 가중치를 로드합니다.
+    모델에서 사용하는 데이터 형식 규칙은 Keras 구성 `~/.keras/keras.json`에 지정된 규칙입니다.
 
-    Optionally loads weights pre-trained on ImageNet.
-    Note that the data format convention used by the model is
-    the one specified in your Keras config at `~/.keras/keras.json`.
+    참고 : 각 Keras 애플리케이션에는 특정 종류의 입력 전처리가 필요합니다.
+    DenseNet 경우, 입력을 모델에 전달하기 전에 입력에 대해,
+    `tf.keras.applications.densenet.preprocess_input`을 호출해야 합니다.
 
-    Note: each Keras Application expects a specific kind of input preprocessing.
-    For DenseNet, call `tf.keras.applications.densenet.preprocess_input` on your
-    inputs before passing them to the model.
+    Reference
+    ---------
+    - [Densely Connected Convolutional Networks](https://arxiv.org/abs/1608.06993) (CVPR 2017)
 
-    Arguments:
-      blocks: numbers of building blocks for the four dense layers.
-      include_top: whether to include the fully-connected
-        layer at the top of the network.
-      weights: one of `None` (random initialization),
-        'imagenet' (pre-training on ImageNet),
-        or the path to the weights file to be loaded.
-      input_tensor: optional Keras tensor
-        (i.e. output of `layers.Input()`)
-        to use as image input for the model.
-      input_shape: optional shape tuple, only to be specified
-        if `include_top` is False (otherwise the input shape
-        has to be `(224, 224, 3)` (with `'channels_last'` data format)
-        or `(3, 224, 224)` (with `'channels_first'` data format).
-        It should have exactly 3 inputs channels,
-        and width and height should be no smaller than 32.
-        E.g. `(200, 200, 3)` would be one valid value.
-      pooling: optional pooling mode for feature extraction
-        when `include_top` is `False`.
-        - `None` means that the output of the model will be
-            the 4D tensor output of the
-            last convolutional block.
-        - `avg` means that global average pooling
-            will be applied to the output of the
-            last convolutional block, and thus
-            the output of the model will be a 2D tensor.
-        - `max` means that global max pooling will
-            be applied.
-      classes: optional number of classes to classify images
-        into, only to be specified if `include_top` is True, and
-        if no `weights` argument is specified.
-      classifier_activation: A `str` or callable. The activation function to use
-        on the "top" layer. Ignored unless `include_top=True`. Set
-        `classifier_activation=None` to return the logits of the "top" layer.
+    Parameters
+    ----------
+    blocks : [type]
+        4개 Dense 레이어를 위한 빌딩 블록의 수.
+    include_top : bool, optional, default=True
+        네트워크 top에 완전 연결 레이어를 포함할지 여부.
+    weights : str, optional, default="imagenet"
+        `None`(무작위 초기화), 'imagenet' (ImageNet에 대해 사전 트레이닝) 중 하나 또는 로드할 가중치 파일의 경로입니다.
+    input_tensor : [type], optional, default=None
+        모델의 이미지 입력으로 사용할 선택적 Keras 텐서(즉, `layers.Input()`의 출력).
+    input_shape : [type], optional, default=None
+        선택적 shape 튜플, `include_top`이 False인 경우에만 지정됩니다.
+        (그렇지 않으면 입력 shape은 `(224, 224, 3)` (`'channels_last'` 데이터 형식을 사용하는 경우) 또는
+        `(3, 224, 224)` (`'channels_first'` 데이터 형식을 사용하는 경우)이어야 합니다.)
+        정확히 3개 입력 채널이 있어야 합니다. 그리고 너비와 높이는 32보다 커야합니다.
+        예) `(200, 200, 3)` 유효한 값입니다.
+    pooling : [type], optional, default=None
+        `include_top`이 `False` 인 경우, 특성 추출을 위한 선택적 풀링 모드
+        - `None` 모델의 출력이 마지막 컨볼루션 레이어의 4D 텐서 출력이 됨을 의미합니다.
+        - `avg` 글로벌 평균 풀링이 마지막 컨볼루션 레이어의 출력에 적용됨을 의미합니다. 따라서, 모델의 출력은 2D 텐서가 됩니다.
+        - `max` 글로벌 최대 풀링이 적용됨을 의미합니다.
+    classes : int, optional, default=1000
+        이미지를 분류할 클래스 수 (선택 사항). `include_top`이  True이고, `weights` 인수가 지정되지 않은 경우에만 지정됩니다.
+    classifier_activation : str or callable, optional, default="softmax"
+        "top" 레이어에서 사용할 활성화 함수입니다.
+        `include_top=True`가 아니면 무시됩니다.
+        "top" 레이어의 로짓을 반환하려면, `classifier_activation=None`을 설정하십시오.
 
-    Returns:
-      A `keras.Model` instance.
+    Returns
+    -------
+    `keras.Model`
+        `keras.Model` 인스턴스.
 
-    Raises:
-      ValueError: in case of invalid argument for `weights`,
-        or invalid input shape.
-      ValueError: if `classifier_activation` is not `softmax` or `None` when
-        using a pretrained top layer.
+    Raises
+    ------
+    ValueError
+        `weights`에 대한 인수가 잘못되었거나, 입력 shape이 잘못된 경우.
+    ValueError
+        사전 트레이닝된 top 레이어를 사용할 때, `classifier_activation`이 `softmax` 또는 `None`이 아닌 경우
     """
     if not (weights in {"imagenet", None} or file_io.file_exists_v2(weights)):
         raise ValueError(
-            "The `weights` argument should be either "
-            "`None` (random initialization), `imagenet` "
-            "(pre-training on ImageNet), "
-            "or the path to the weights file to be loaded."
+            "`weights` 인수는 `None` (무작위 초기화), "
+            "`imagenet` (ImageNet에 대해 사전 트레이닝된) 또는, "
+            "로드할 가중치 파일의 경로여야 합니다."
         )
 
     if weights == "imagenet" and include_top and classes != 1000:
         raise ValueError(
-            'If using `weights` as `"imagenet"` with `include_top`'
-            " as true, `classes` should be 1000"
+            '`include_top`이 true이고, `"imagenet"`으로 `weights`를 사용하는 경우,'
+            "`classes`는 1000이어야 합니다."
         )
 
-    # Determine proper input shape
+    # 적절한 입력 shape을 결정합니다.
     input_shape = imagenet_utils.obtain_input_shape(
         input_shape,
         default_size=224,
@@ -259,14 +275,13 @@ def DenseNet(
         elif pooling == "max":
             x = layers.GlobalMaxPooling2D(name="max_pool")(x)
 
-    # Ensure that the model takes into account
-    # any potential predecessors of `input_tensor`.
+    # 모델이 `input_tensor`의 잠재적 선행자(potential predecessors)를 고려하는지 확인합니다.
     if input_tensor is not None:
         inputs = layer_utils.get_source_inputs(input_tensor)
     else:
         inputs = img_input
 
-    # Create model.
+    # 모델 생성
     if blocks == [6, 12, 24, 16]:
         model = training.Model(inputs, x, name="densenet121")
     elif blocks == [6, 12, 32, 32]:
@@ -276,7 +291,7 @@ def DenseNet(
     else:
         model = training.Model(inputs, x, name="densenet")
 
-    # Load weights.
+    # 가중치 불러오기
     if weights == "imagenet":
         if include_top:
             if blocks == [6, 12, 24, 16]:
