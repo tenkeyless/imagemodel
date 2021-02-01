@@ -104,44 +104,36 @@ def MobileNetV2(
 
     Parameters
     ----------
-    input_shape : [type], optional
+    input_shape : [type], optional, default=None
         입력 이미지 해상도가 (224, 224, 3)이 아닌 모델을 사용하려는 경우, 지정할 Optional shape 튜플입니다.
         정확히 3개의 입력 채널 (224, 224, 3)이 있어야 합니다.
         `input_tensor`로부터 `input_shape`를 추론하려는 경우, 이 옵션을 생략할 수도 있습니다.
         `input_tensor`와 `input_shape`를 모두 포함하는 경우,
         일치한다면 `input_shape`가 사용되며, 모양이 일치하지 않으면 오류가 발생합니다.
         예 : `(160, 160, 3)`은 하나의 유효한 값입니다.
-        , by default `None`
-    alpha : float, optional
+    alpha : float, optional, default=1.0
         0과 1 사이의 Float. 네트워크의 너비를 제어합니다.
         이것은 MobileNetV2 논문에서 너비 승수(width multiplier)라고 알려져 있지만,
         Keras의 `applications.MobileNetV1` 모델과 일관성을 유지하기 위해 이 이름이 유지됩니다.
         - `alpha` < 1.0이면, 각 레이어의 필터 수를 비례적으로 줄입니다.
         - `alpha` > 1.0이면, 각 레이어의 필터 수를 비례적으로 늘립니다.
         - `alpha` = 1이면, 논문으로부터의 기본 필터 수가 각 레이어에 사용됩니다.
-        , by default `1.0`
-    include_top : bool, optional
+    include_top : bool, optional, default=True
         네트워크 상단에 완전 연결 레이어를 포함할지 여부
-        , by default `True`
-    weights : str, optional
+    weights : str, optional, default="imagenet"
         `None`(무작위 초기화), `'imagenet'`(ImageNet에 대해 사전 트레이닝된) 또는 로드할 가중치 파일의 경로 중 하나입니다.
-        , by default `"imagenet"`
-    input_tensor : [type], optional
+    input_tensor : [type], optional, default=None
         모델의 이미지 입력으로 사용할 Optional Keras 텐서 (즉,`layers.Input()`의 출력)
-        , by default `None`
-    pooling : str, optional
+    pooling : str, optional, default=None
         `include_top`이 `False`인 경우, 특성 추출을 위한 선택적 풀링 모드입니다.
         - `None`은 모델의 출력이 마지막 컨볼루션 블록의 4D 텐서 출력이 될 것임을 의미합니다.
         - `avg`는 글로벌 평균 풀링이 마지막 컨볼루션 블록의 출력에 적용되므로, 모델의 출력이 2D텐서가 될 것임을 의미합니다.
         - 'max'는 글로벌 최대 풀링이 적용됨을 의미합니다.
-        , by default `None`
-    classes : int, optional
+    classes : int, optional, default=1000
         이미지를 분류할 클래스 수. `include_top`이 `True`이고, `weights` 인수가 지정되지 않은 경우에만, 지정합니다.
-        , by default `1000`
-    classifier_activation : str, optional
+    classifier_activation : str, optional, default="softmax"
         `str` 또는 callable. "top" 레이어에서 사용할 활성화 함수입니다. `include_top=True`가 아니면 무시됩니다.
         "top" 레이어의 로짓을 반환하려면, `classifier_activation=None`을 설정하십시오.
-        , by default `"softmax"`
     **kwargs:
         이전 버전과의 호환성 만을 위해.
 

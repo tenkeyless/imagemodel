@@ -15,7 +15,6 @@
 # pylint: disable=invalid-name
 # pylint: disable=missing-docstring
 """
-EfficientNet models for Keras.
 Keras 용 EfficientNet 모델.
 
 참조:
@@ -136,51 +135,54 @@ DENSE_KERNEL_INITIALIZER = {
 
 layers = VersionAwareLayers()
 
-BASE_DOCSTRING = """Instantiates the {name} architecture.
+BASE_DOCSTRING = """
+{name} 아키텍처를 인스턴스화합니다.
 
-  Reference:
-  - [EfficientNet: Rethinking Model Scaling for Convolutional Neural Networks](
-      https://arxiv.org/abs/1905.11946) (ICML 2019)
+선택적으로 ImageNet에서 사전 트레이닝된 가중치를 로드합니다.
+모델에서 사용하는 데이터 형식 규칙은 Keras 구성 `~/.keras/keras.json`에 지정된 규칙입니다.
+구성하지 않은 경우, 기본값은 `"channels_last"`입니다.
 
-  Optionally loads weights pre-trained on ImageNet.
-  Note that the data format convention used by the model is
-  the one specified in your Keras config at `~/.keras/keras.json`.
-  If you have never configured it, it defaults to `"channels_last"`.
+References
+----------
+- [EfficientNet: Rethinking Model Scaling for Convolutional Neural Networks](https://arxiv.org/abs/1905.11946) (ICML 2019)
 
-  Arguments:
-    include_top: Whether to include the fully-connected
-        layer at the top of the network. Defaults to True.
-    weights: One of `None` (random initialization),
-          'imagenet' (pre-training on ImageNet),
-          or the path to the weights file to be loaded. Defaults to 'imagenet'.
-    input_tensor: Optional Keras tensor
-        (i.e. output of `layers.Input()`)
-        to use as image input for the model.
-    input_shape: Optional shape tuple, only to be specified
-        if `include_top` is False.
-        It should have exactly 3 inputs channels.
-    pooling: Optional pooling mode for feature extraction
-        when `include_top` is `False`. Defaults to None.
-        - `None` means that the output of the model will be
-            the 4D tensor output of the
-            last convolutional layer.
-        - `avg` means that global average pooling
-            will be applied to the output of the
-            last convolutional layer, and thus
-            the output of the model will be a 2D tensor.
-        - `max` means that global max pooling will
-            be applied.
-    classes: Optional number of classes to classify images
-        into, only to be specified if `include_top` is True, and
-        if no `weights` argument is specified. Defaults to 1000 (number of
-        ImageNet classes).
-    classifier_activation: A `str` or callable. The activation function to use
-        on the "top" layer. Ignored unless `include_top=True`. Set
-        `classifier_activation=None` to return the logits of the "top" layer.
-        Defaults to 'softmax'.
 
-  Returns:
-    A `keras.Model` instance.
+Arguments
+---------
+include_top: Whether to include the fully-connected
+    layer at the top of the network. Defaults to True.
+weights: One of `None` (random initialization),
+        'imagenet' (pre-training on ImageNet),
+        or the path to the weights file to be loaded. Defaults to 'imagenet'.
+input_tensor: Optional Keras tensor
+    (i.e. output of `layers.Input()`)
+    to use as image input for the model.
+input_shape: Optional shape tuple, only to be specified
+    if `include_top` is False.
+    It should have exactly 3 inputs channels.
+pooling: Optional pooling mode for feature extraction
+    when `include_top` is `False`. Defaults to None.
+    - `None` means that the output of the model will be
+        the 4D tensor output of the
+        last convolutional layer.
+    - `avg` means that global average pooling
+        will be applied to the output of the
+        last convolutional layer, and thus
+        the output of the model will be a 2D tensor.
+    - `max` means that global max pooling will
+        be applied.
+classes: Optional number of classes to classify images
+    into, only to be specified if `include_top` is True, and
+    if no `weights` argument is specified. Defaults to 1000 (number of
+    ImageNet classes).
+classifier_activation: A `str` or callable. The activation function to use
+    on the "top" layer. Ignored unless `include_top=True`. Set
+    `classifier_activation=None` to return the logits of the "top" layer.
+    Defaults to 'softmax'.
+
+Returns
+-------
+    `keras.Model` 인스턴스.
 """
 
 
@@ -202,82 +204,86 @@ def EfficientNet(
     classes=1000,
     classifier_activation="softmax",
 ):
-    """Instantiates the EfficientNet architecture using given scaling coefficients.
+    """
+    주어진 스케일링 계수를 사용하여, EfficientNet 아키텍처를 인스턴스화합니다.
 
-    Reference:
-    - [EfficientNet: Rethinking Model Scaling for Convolutional Neural Networks](
-        https://arxiv.org/abs/1905.11946) (ICML 2019)
+    선택적으로 ImageNet에서 사전 트레이닝된 가중치를 로드합니다.
+    모델에서 사용하는 데이터 형식 규칙은 Keras 구성 `~/.keras/keras.json`에 지정된 규칙입니다.
 
-    Optionally loads weights pre-trained on ImageNet.
-    Note that the data format convention used by the model is
-    the one specified in your Keras config at `~/.keras/keras.json`.
+    Reference
+    ---------
+    - [EfficientNet: Rethinking Model Scaling for Convolutional Neural Networks](https://arxiv.org/abs/1905.11946) (ICML 2019)
 
-    Arguments:
-      width_coefficient: float, scaling coefficient for network width.
-      depth_coefficient: float, scaling coefficient for network depth.
-      default_size: integer, default input image size.
-      dropout_rate: float, dropout rate before final classifier layer.
-      drop_connect_rate: float, dropout rate at skip connections.
-      depth_divisor: integer, a unit of network width.
-      activation: activation function.
-      blocks_args: list of dicts, parameters to construct block modules.
-      model_name: string, model name.
-      include_top: whether to include the fully-connected
-          layer at the top of the network.
-      weights: one of `None` (random initialization),
-            'imagenet' (pre-training on ImageNet),
-            or the path to the weights file to be loaded.
-      input_tensor: optional Keras tensor
-          (i.e. output of `layers.Input()`)
-          to use as image input for the model.
-      input_shape: optional shape tuple, only to be specified
-          if `include_top` is False.
-          It should have exactly 3 inputs channels.
-      pooling: optional pooling mode for feature extraction
-          when `include_top` is `False`.
-          - `None` means that the output of the model will be
-              the 4D tensor output of the
-              last convolutional layer.
-          - `avg` means that global average pooling
-              will be applied to the output of the
-              last convolutional layer, and thus
-              the output of the model will be a 2D tensor.
-          - `max` means that global max pooling will
-              be applied.
-      classes: optional number of classes to classify images
-          into, only to be specified if `include_top` is True, and
-          if no `weights` argument is specified.
-      classifier_activation: A `str` or callable. The activation function to use
-          on the "top" layer. Ignored unless `include_top=True`. Set
-          `classifier_activation=None` to return the logits of the "top" layer.
+    Parameters
+    ----------
+    width_coefficient : float
+        네트워크 width에 대한 스케일링 계수.
+    depth_coefficient : float
+        네트워크 depth에 대한 스케일링 계수.
+    default_size : int
+        기본 입력 이미지 크기.
+    dropout_rate : float, optional, default=0.2
+        최종 분류기 레이어 이전의 드롭아웃 비율.
+    drop_connect_rate : float, optional, default=0.2
+        스킵 연결에서 드롭아웃 비율.
+    depth_divisor : int, optional, default=8
+        네트워크 width의 유닛.
+    activation : str, optional, default="swish"
+        활성화 함수.
+    blocks_args : str, optional, default="default"
+        블록 모듈을 구성하기 위한 dicts, 매개변수 list.
+    model_name : str, optional, default="efficientnet"
+        모델 이름
+    include_top : bool, optional, default=True
+        네트워크 top에 완전 연결 레이어를 포함할지 여부.
+    weights : str, optional, default="imagenet"
+        `None`(무작위 초기화), 'imagenet' (ImageNet 트레이닝) 중 하나 또는 로드할 가중치 파일의 경로입니다.
+    input_tensor : [type], optional, default=None
+        모델의 이미지 입력으로 사용할 선택적 Keras 텐서(즉, `layers.Input()`의 출력).
+    input_shape : [type], optional, default=None
+        선택적 shape 튜플, `include_top`이 False인 경우에만 지정됩니다.
+        정확히 3개 입력 채널이 있어야 합니다.
+    pooling : [type], optional, default=None
+        `include_top`이`False` 인 경우, 특성 추출을 위한 선택적 풀링 모드
+        - `None` 모델의 출력이 마지막 컨볼루션 레이어의 4D 텐서 출력이 됨을 의미합니다.
+        - `avg` 글로벌 평균 풀링이 마지막 컨볼루션 레이어의 출력에 적용됨을 의미합니다. 따라서, 모델의 출력은 2D 텐서가 됩니다.
+        - `max` 글로벌 최대 풀링이 적용됨을 의미합니다.
+    classes : int, optional, default=1000
+        이미지를 분류할 클래스 수 (선택 사항). `include_top`이  True이고, `weights` 인수가 지정되지 않은 경우에만 지정됩니다.
+    classifier_activation : str, optional, default="softmax"
+        `str` 또는 callable. "top" 레이어에서 사용할 활성화 함수입니다.
+        `include_top=True`가 아니면 무시됩니다.
+        "top" 레이어의 로짓을 반환하려면, `classifier_activation=None`을 설정하십시오.
 
-    Returns:
-      A `keras.Model` instance.
+    Returns
+    -------
+    `keras.Model`
+        `keras.Model` 인스턴스.
 
-    Raises:
-      ValueError: in case of invalid argument for `weights`,
-        or invalid input shape.
-      ValueError: if `classifier_activation` is not `softmax` or `None` when
-        using a pretrained top layer.
+    Raises
+    ------
+    ValueError
+        `weights`에 대한 인수가 잘못되었거나, 입력 shape이 잘못된 경우.
+    ValueError
+        사전 트레이닝된 top 레이어를 사용할 때, `classifier_activation`이 `softmax` 또는 `None`이 아닌 경우
     """
     if blocks_args == "default":
         blocks_args = DEFAULT_BLOCKS_ARGS
 
     if not (weights in {"imagenet", None} or file_io.file_exists_v2(weights)):
         raise ValueError(
-            "The `weights` argument should be either "
-            "`None` (random initialization), `imagenet` "
-            "(pre-training on ImageNet), "
-            "or the path to the weights file to be loaded."
+            "`weights` 인수는 `None` (무작위 초기화), "
+            "`imagenet` (ImageNet에 대해 사전 트레이닝된) 또는, "
+            "로드할 가중치 파일의 경로여야 합니다."
         )
 
     if weights == "imagenet" and include_top and classes != 1000:
         raise ValueError(
-            'If using `weights` as `"imagenet"` with `include_top`'
-            " as true, `classes` should be 1000"
+            '`include_top`이 true이고, `"imagenet"`으로 `weights`를 사용하는 경우,'
+            "`classes`는 1000이어야 합니다."
         )
 
-    # Determine proper input shape
+    # 적절한 입력 shape을 결정합니다.
     input_shape = imagenet_utils.obtain_input_shape(
         input_shape,
         default_size=default_size,
@@ -298,16 +304,16 @@ def EfficientNet(
     bn_axis = 3 if backend.image_data_format() == "channels_last" else 1
 
     def round_filters(filters, divisor=depth_divisor):
-        """Round number of filters based on depth multiplier."""
+        """깊이 승수(depth multiplier)를 기반으로 한 필터 수를 반올림하는 메서드입니다."""
         filters *= width_coefficient
         new_filters = max(divisor, int(filters + divisor / 2) // divisor * divisor)
-        # Make sure that round down does not go down by more than 10%.
+        # 반올림의 내림으로 인해 10% 이상 내려가지 않도록 하십시오.
         if new_filters < 0.9 * filters:
             new_filters += divisor
         return int(new_filters)
 
     def round_repeats(repeats):
-        """Round number of repeats based on depth multiplier."""
+        """깊이 승수(depth multiplier)를 기반으로 한 반올림 반복 횟수입니다."""
         return int(math.ceil(depth_coefficient * repeats))
 
     # Build stem
@@ -383,17 +389,16 @@ def EfficientNet(
         elif pooling == "max":
             x = layers.GlobalMaxPooling2D(name="max_pool")(x)
 
-    # Ensure that the model takes into account
-    # any potential predecessors of `input_tensor`.
+    # 모델이 `input_tensor`의 잠재적 선행자(potential predecessors)를 고려하는지 확인합니다.
     if input_tensor is not None:
         inputs = layer_utils.get_source_inputs(input_tensor)
     else:
         inputs = img_input
 
-    # Create model.
+    # 모델 생성
     model = training.Model(inputs, x, name=model_name)
 
-    # Load weights.
+    # 가중치 불러오기
     if weights == "imagenet":
         if include_top:
             file_suffix = ".h5"
@@ -427,23 +432,38 @@ def block(
     se_ratio=0.0,
     id_skip=True,
 ):
-    """An inverted residual block.
+    """
+    Inverted ResNet 블록.
 
-    Arguments:
-        inputs: input tensor.
-        activation: activation function.
-        drop_rate: float between 0 and 1, fraction of the input units to drop.
-        name: string, block label.
-        filters_in: integer, the number of input filters.
-        filters_out: integer, the number of output filters.
-        kernel_size: integer, the dimension of the convolution window.
-        strides: integer, the stride of the convolution.
-        expand_ratio: integer, scaling coefficient for the input filters.
-        se_ratio: float between 0 and 1, fraction to squeeze the input filters.
-        id_skip: boolean.
+    Parameters
+    ----------
+    inputs : [type]
+        입력 텐서.
+    activation : str, optional, default="swish"
+        활성화 함수.
+    drop_rate : float, optional, default=0.0
+        0과 1 사이의 float, 드롭할 입력 유닛의 비율입니다.
+    name : str, optional, default=""
+        블록 라벨.
+    filters_in : int, optional, default=32
+        입력 필터의 수.
+    filters_out : int, optional, default=16
+        출력 필터의 수.
+    kernel_size : int, optional, default=3
+        컨볼루션 윈도우의 차원.
+    strides : int, optional, default=1
+        컨볼루션의 스트라이드.
+    expand_ratio : int, optional, default=1
+        입력 필터에 대한 스케일링 계수.
+    se_ratio : float, optional, default=0.0
+        0과 1 사이의 float, 입력 필터를 squeeze 하는 비율.
+    id_skip : bool, optional, default=True
+        [description], by
 
-    Returns:
-        output tensor for the block.
+    Returns
+    -------
+    [type]
+        블록에 대한 출력 텐서.
     """
     bn_axis = 3 if backend.image_data_format() == "channels_last" else 1
 
@@ -463,7 +483,7 @@ def block(
     else:
         x = inputs
 
-    # Depthwise Convolution
+    # Depthwise 컨볼루션
     if strides == 2:
         x = layers.ZeroPadding2D(
             padding=imagenet_utils.correct_pad(x, kernel_size), name=name + "dwconv_pad"
