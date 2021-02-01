@@ -93,7 +93,7 @@ def InceptionV3(
         - `avg` 글로벌 평균 풀링이 마지막 컨볼루션 블록의 출력에 적용됨을 의미합니다. 따라서, 모델의 출력은 2D 텐서가 됩니다.
         - `max` 글로벌 최대 풀링이 적용됨을 의미합니다.
     classes : int, optional, default=1000
-        이미지를 분류할 클래스 수 (선택 사항). `include_top`이  `True`이고, `weights` 인수가 지정되지 않은 경우에만 지정됩니다.
+        이미지를 분류할 클래스 수 (선택 사항). `include_top`이 `True`이고, `weights` 인수가 지정되지 않은 경우에만 지정됩니다.
     classifier_activation : str or callable, optional, default="softmax"
         "top" 레이어에서 사용할 활성화 함수입니다.
         `include_top=True`가 아니면 무시됩니다.
