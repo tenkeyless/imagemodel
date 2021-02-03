@@ -3,18 +3,18 @@ from enum import Enum
 from tensorflow.keras.losses import BinaryCrossentropy, CategoricalCrossentropy
 
 
-class RefLoss(Enum):
+class Losses(Enum):
     cce = "categorical_crossentropy"
     bce = "binary_crossentropy"
 
     def get_loss(self):
-        if self == RefLoss.cce:
+        if self == Losses.cce:
             return CategoricalCrossentropy()
-        elif self == RefLoss.bce:
+        elif self == Losses.bce:
             return BinaryCrossentropy()
         else:
             return CategoricalCrossentropy()
 
     @staticmethod
     def get_default() -> str:
-        return RefLoss.cce.value
+        return Losses.cce.value
