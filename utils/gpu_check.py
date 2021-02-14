@@ -1,5 +1,6 @@
 import tensorflow as tf
 
+
 def check_first_gpu():
     # GPU Setting
     gpus = tf.config.experimental.list_physical_devices("GPU")
