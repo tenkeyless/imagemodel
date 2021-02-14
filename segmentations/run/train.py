@@ -187,50 +187,50 @@ if __name__ == "__main__":
     # 2. Setup --------
     # 2-1) Setup folders for Result and TensorBoard Log.
     # data folder
-#     base_data_folder: str = os.path.join(result_base_folder, "data")
-#     training_result_folder: str = os.path.join(base_data_folder, training_id)
-#     create_folder_if_not_exist(training_result_folder)
+    base_data_folder: str = os.path.join(result_base_folder, "data")
+    training_result_folder: str = os.path.join(base_data_folder, training_id)
+    create_folder_if_not_exist(training_result_folder)
 
-#     # save folder
-#     base_save_folder: str = os.path.join(result_base_folder, "save")
-#     save_models_folder: str = os.path.join(base_save_folder, "models")
-#     save_weights_folder: str = os.path.join(base_save_folder, "weights")
-#     save_tf_log_folder: str = os.path.join(base_save_folder, "tf_logs")
-#     tf_run_log_dir: str = os.path.join(save_tf_log_folder, training_id)
-#     for folder in [save_models_folder, save_weights_folder, tf_run_log_dir]:
-#         create_folder_if_not_exist(folder)
+    # save folder
+    base_save_folder: str = os.path.join(result_base_folder, "save")
+    save_models_folder: str = os.path.join(base_save_folder, "models")
+    save_weights_folder: str = os.path.join(base_save_folder, "weights")
+    save_tf_log_folder: str = os.path.join(base_save_folder, "tf_logs")
+    tf_run_log_dir: str = os.path.join(save_tf_log_folder, training_id)
+    for folder in [save_models_folder, save_weights_folder, tf_run_log_dir]:
+        create_folder_if_not_exist(folder)
 
-#     # 2-2) Setup for dataset.
-#     datasets = Datasets(dataset).get_dataset()
-#     training_dataset = datasets.get_training_dataset(
-#         batch_size_optional=training_batch_size
-#     )
-#     val_dataset = datasets.get_validation_dataset(batch_size_optional=val_batch_size)
+    # 2-2) Setup for dataset.
+    datasets = Datasets(dataset).get_dataset()
+    training_dataset = datasets.get_training_dataset(
+        batch_size_optional=training_batch_size
+    )
+    val_dataset = datasets.get_validation_dataset(batch_size_optional=val_batch_size)
 
-#     # 2-3) Report setup results
-#     info: str = """
-# # Information ---------------------------
-# Training ID: {}
-# Training Dataset: {}
-# Validation Dataset: {}
-# Tensorboard Log Folder: {}
-# Training Data Folder: {}/{}
-# -----------------------------------------
-# """.format(
-#         training_id,
-#         training_dataset.value,
-#         val_dataset.value,
-#         tf_run_log_dir,
-#         base_data_folder,
-#         training_id,
-#     )
-#     print(info)
-#     tmp_info = os.path.join(training_result_folder, "info_{}.txt".format(run_id))
-#     f = open(tmp_info, "w")
-#     f.write(info)
-#     f.close()
+    # 2-3) Report setup results
+    info: str = """
+# Information ---------------------------
+Training ID: {}
+Training Dataset: {}
+Validation Dataset: {}
+Tensorboard Log Folder: {}
+Training Data Folder: {}/{}
+-----------------------------------------
+""".format(
+        training_id,
+        training_dataset.value,
+        val_dataset.value,
+        tf_run_log_dir,
+        base_data_folder,
+        training_id,
+    )
+    print(info)
+    tmp_info = os.path.join(training_result_folder, "info_{}.txt".format(run_id))
+    f = open(tmp_info, "w")
+    f.write(info)
+    f.close()
 
-#     # 3. Model compile --------
+    # 3. Model compile --------
 
 #     ref_tracking_model_module = load_module(
 #         module_name=model_name,
