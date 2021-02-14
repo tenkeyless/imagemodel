@@ -3,6 +3,7 @@ import sys
 
 sys.path.append(os.getcwd())
 
+import platform
 from argparse import ArgumentParser, RawTextHelpFormatter
 from typing import List, Optional, Tuple
 
@@ -133,6 +134,15 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
+    command_str = list(map(lambda el: str(el), sys.argv[:]))
+    list_to_command_str = " ".join(map(str, command_str))
+    parsed_args_str = ""
+    for arg in list(vars(args))[:-1]:
+        parsed_args_str += "- {}: {}\n".format(arg, getattr(args, arg))
+    parsed_args_str += "- {}: {}".format(
+        list(vars(args))[-1], getattr(args, list(vars(args))[-1])
+    )
+
     # 1-2) Set variables
     # required
     model_name: str = args.model_name
@@ -212,19 +222,31 @@ if __name__ == "__main__":
     # 2-3) Report setup results
     info: str = """
 # Information ---------------------------
+Hostname: {}
 Training ID: {}
 Training Dataset: {}
 Validation Dataset: {}
 Tensorboard Log Folder: {}
 Training Data Folder: {}/{}
 -----------------------------------------
+
+# Command -------------------------------
+{}
+-----------------------------------------
+
+# Parsed Arguments ----------------------
+{}
+-----------------------------------------
 """.format(
+        platform.node(),
         training_id,
         datasets.value,
         datasets.value,
         tf_run_log_dir,
         base_data_folder,
         training_id,
+        list_to_command_str,
+        parsed_args_str,
     )
     print(info)
     tmp_info = os.path.join(training_result_folder, "info_{}.txt".format(run_id))
