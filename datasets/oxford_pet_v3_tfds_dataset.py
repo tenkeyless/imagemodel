@@ -54,8 +54,14 @@ class OxfordPetV3TfdsDataset(TfdsDatasetInterface):
         )
         return train_dataset
 
+    def get_training_dataset_length(self) -> int:
+        return self._info.splits["train"].num_examples
+
     def get_validation_dataset(self, batch_size_optional: Optional[int] = None):
         return None
+
+    def get_validation_dataset_length(self) -> int:
+        return 0
 
     def get_test_dataset(self, batch_size_optional: Optional[int] = None):
         batch_size = batch_size_optional or self.batch_size
@@ -63,3 +69,6 @@ class OxfordPetV3TfdsDataset(TfdsDatasetInterface):
         test_dataset = self._dataset["test"].map(self.load_image_test)
         test_dataset = test_dataset.batch(batch_size)
         return test_dataset
+
+    def get_test_dataset_length(self) -> int:
+        return self._info.splits["test"].num_examples

@@ -1,8 +1,8 @@
-import abc
+from abc import ABCMeta, abstractmethod
 from typing import Optional
 
 
-class TfdsDatasetInterface(metaclass=abc.ABCMeta):
+class TfdsDatasetInterface(metaclass=ABCMeta):
     @classmethod
     def __subclasshook__(cls, subclass):
         return (
@@ -15,14 +15,26 @@ class TfdsDatasetInterface(metaclass=abc.ABCMeta):
             or NotImplemented
         )
 
-    @abc.abstractmethod
+    @abstractmethod
     def get_training_dataset(self, batch_size_optional: Optional[int] = None):
         raise NotImplementedError
 
-    @abc.abstractmethod
+    @abstractmethod
+    def get_training_dataset_length(self) -> int:
+        raise NotImplementedError
+
+    @abstractmethod
     def get_validation_dataset(self, batch_size_optional: Optional[int] = None):
         raise NotImplementedError
 
-    @abc.abstractmethod
+    @abstractmethod
+    def get_validation_dataset_length(self) -> int:
+        raise NotImplementedError
+
+    @abstractmethod
     def get_test_dataset(self, batch_size_optional: Optional[int] = None):
+        raise NotImplementedError
+
+    @abstractmethod
+    def get_test_dataset_length(self) -> int:
         raise NotImplementedError
