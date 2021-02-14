@@ -201,11 +201,14 @@ if __name__ == "__main__":
         create_folder_if_not_exist(folder)
 
     # 2-2) Setup for dataset.
-    datasets = Datasets(dataset).get_dataset()
-    training_dataset = datasets.get_training_dataset(
+    datasets = Datasets(dataset)
+    dataset_interface = datasets.get_dataset()
+    training_dataset = dataset_interface.get_training_dataset(
         batch_size_optional=training_batch_size
     )
-    val_dataset = datasets.get_validation_dataset(batch_size_optional=val_batch_size)
+    val_dataset = dataset_interface.get_validation_dataset(
+        batch_size_optional=val_batch_size
+    )
 
     # 2-3) Report setup results
     info: str = """
@@ -218,8 +221,8 @@ Training Data Folder: {}/{}
 -----------------------------------------
 """.format(
         training_id,
-        training_dataset.value,
-        val_dataset.value,
+        datasets.value,
+        datasets.value,
         tf_run_log_dir,
         base_data_folder,
         training_id,
@@ -231,7 +234,6 @@ Training Data Folder: {}/{}
     f.close()
 
     # 3. Model compile --------
-
 #     ref_tracking_model_module = load_module(
 #         module_name=model_name,
 #         file_path="segmentations/models/{}.py".format(model_name),
