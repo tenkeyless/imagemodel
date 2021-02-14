@@ -38,6 +38,34 @@ Image segmentations with Keras, TensorFlow for CPU, GPU and TPU.
 
 ### Run docker image as container
 
+* Need to make a [tensorflow dataset folder] before use tensorflow dataset.
+
+    ```shell
+    mkdir ~/tensorflow_datasets
+    ```
+  
+  * Check your permission of [tensorflow dataset folder].
+
+    ```shell
+    ls -al
+
+    ...
+    drwxr-xr-x  2 tklee tklee  4096 10월  7 14:49 Templates
+    drwxrwxr-x  2 root  root  4096  2월 14 19:09 tensorflow_datasets
+    drwxr-xr-x  2 tklee tklee  4096 10월  7 14:49 Videos
+    ...
+    ```
+
+    If owner of [tensorflow dataset folder] is root, then you need to change it.
+
+    ```shell
+    sudo chown -R [user]:[user] tensorflow_datasets/
+    ```
+
+    ```shell
+    sudo chown -R tklee:tklee tensorflow_datasets/
+    ```
+
 * Run docker image as bash
 
     At [This project] folder. (`$(pwd)`)
@@ -50,9 +78,39 @@ Image segmentations with Keras, TensorFlow for CPU, GPU and TPU.
         -u $(id -u):$(id -g) \
         -v /etc/localtime:/etc/localtime:ro \
         -v $(pwd):/segmentations \
+        -v [result folder]:/segmentations_results \
+        -v [tensorflow dataset folder]:/tensorflow_datasets \
         -p 6006:6006 \
         --workdir="/segmentations" \
         segmentations/tkl:1.0
+    ```
+
+    ```shell
+    docker run \
+        --gpus all \
+        -it \
+        --rm \
+        -u $(id -u):$(id -g) \
+        -v /etc/localtime:/etc/localtime:ro \
+        -v $(pwd):/segmentations \
+        -v ~/segmentations_results:/segmentations_results \
+        -v ~/tensorflow_datasets:/tensorflow_datasets \
+        -p 6006:6006 \
+        --workdir="/segmentations" \
+        segmentations/tkl:1.0
+    ```
+
+* Run training on docker container
+
+    ```shell
+    python segmentations/run/train.py \
+        --model_name unet_based_mobilenetv2 \
+        --result_base_folder /segmentations_results \
+        --model_option 'output_channels@3' \
+        --dataset oxford_iiit_pet_v3 \
+        --losses 'sparse_categorical_crossentropy_from_logits',1.0 \
+        --metrics accuracy \
+        --optimizer adam2
     ```
 
 * (Optional) Or run docker using on shell.

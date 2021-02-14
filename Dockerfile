@@ -23,3 +23,12 @@ RUN apt-get install 'ffmpeg'\
     'libsm6'\ 
     'libxext6' -y
 RUN pip install opencv-python
+RUN pip install image-keras paramiko Pillow
+
+RUN pip install tensorflow_datasets
+RUN pip install tensorflow-metadata
+RUN apt-get -y install git
+RUN pip install -q git+https://github.com/tensorflow/examples.git
+
+RUN apt -y install graphviz
+RUN pip install pydot
