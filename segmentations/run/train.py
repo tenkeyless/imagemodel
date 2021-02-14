@@ -4,7 +4,7 @@ import sys
 sys.path.append(os.getcwd())
 
 from argparse import ArgumentParser, RawTextHelpFormatter
-from typing import List, Optional, Tuple, TypeVar
+from typing import List, Optional, Tuple
 
 import tensorflow as tf
 from image_keras.supports.folder import create_folder_if_not_exist
@@ -22,9 +22,7 @@ from segmentations.run.common import (
 )
 from tensorflow.keras.callbacks import Callback, History, TensorBoard
 from tensorflow.python.keras.callbacks import EarlyStopping, ModelCheckpoint
-from utils.list import check_all_exists_or_not, check_exists_or_not, sublist
-from utils.modules import load_module
-from utils.optional import optional_map
+from utils.list import check_all_exists_or_not
 
 if __name__ == "__main__":
     # 1. Variables --------
@@ -174,6 +172,7 @@ if __name__ == "__main__":
         raise RuntimeError(
             "`continuous_model_name` and `continuous_epoch` should both exists or not."
         )
+
     training_id = (
         setup_continuous_training(continuous_model_name, continuous_epoch)
         or training_id
@@ -234,144 +233,127 @@ Training Data Folder: {}/{}
     f.close()
 
     # 3. Model compile --------
-#     ref_tracking_model_module = load_module(
-#         module_name=model_name,
-#         file_path="segmentations/models/{}.py".format(model_name),
-#     )
-#     if pretrained_unet_path is None:
-#         unet_model = unet_l4(input_name="unet_input", output_name="unet_output")
-#     else:
-#         unet_model = tf.keras.models.load_model(
-#             pretrained_unet_path,
-#             custom_objects={"binary_class_mean_iou": binary_class_mean_iou},
-#         )
+    # continue setting (weights)
+    if continuous_model_name is not None:
+        model = tf.keras.models.load_model(continuous_model_name)
 
-#     if not with_shared_unet:
-#         unet_model2 = tf.keras.models.clone_model(unet_model)
-#         unet_model2.set_weights(unet_model.get_weights())
+    model_optimizer = Optimizers(optimizer).get_optimizer()
+    model_loss_list = list(
+        map(lambda el: Losses(el[0]).get_loss(), loss_weight_tuple_list)
+    )
+    model_loss_weight_list = list(map(lambda el: el[1], loss_weight_tuple_list))
+    model_metrics_list = [
+        list(filter(lambda v: v, [Metrics(metric).get_metric() for metric in metrics]))
+        for metrics in metrics_list
+    ]
+    output_keys = model.output_names
+    if len(loss_weight_tuple_list) != len(output_keys):
+        raise ValueError(
+            "Number of `--losses` option(s) should be {}.".format(len(output_keys))
+        )
+    if len(metrics_list) != len(output_keys):
+        raise ValueError(
+            "Number of `--metrics` option(s) should be {}.".format(len(output_keys))
+        )
+    model_loss_dict = dict(zip(output_keys, model_loss_list))
+    model_loss_weight_dict = dict(zip(output_keys, model_loss_weight_list))
+    model_metrics_dict = dict(zip(output_keys, model_metrics_list))
+    model.compile(
+        optimizer=model_optimizer,
+        loss=model_loss_dict,
+        loss_weights=model_loss_weight_dict,
+        metrics=model_metrics_dict,
+    )
 
-#         model = getattr(ref_tracking_model_module, model_name)(
-#             unet_l4_model_main=unet_model,
-#             unet_l4_model_ref=unet_model2,
-#             bin_num=bin_size,
-#         )
-#     else:
-#         model = getattr(ref_tracking_model_module, model_name)(
-#             pre_trained_unet_l4_model=unet_model, bin_num=bin_size
-#         )
+    # model plot
+    tmp_plot_model_img_path = os.path.join(training_result_folder, "model.png")
+    plot_model(
+        model,
+        show_shapes=True,
+        to_file=tmp_plot_model_img_path,
+        dpi=144,
+    )
 
-#     # continue setting (weights)
-#     if continuous_model_name is not None:
-#         model = tf.keras.models.load_model(continuous_model_name)
+    # model plot
+    tmp_plot_model_img_path = os.path.join(training_result_folder, "model_nested.png")
+    plot_model(
+        model,
+        show_shapes=True,
+        to_file=tmp_plot_model_img_path,
+        expand_nested=True,
+        dpi=144,
+    )
 
-#     model_optimizer = Optimizers(optimizer).get_optimizer()
-#     model_loss_list = list(
-#         map(lambda el: Losses(el[0]).get_loss(), loss_weight_tuple_list)
-#     )
-#     model_loss_weight_list = list(map(lambda el: el[1], loss_weight_tuple_list))
-#     model_metrics_list = [
-#         list(filter(lambda v: v, [Metrics(metric).get_metric() for metric in metrics]))
-#         for metrics in metrics_list
-#     ]
-#     output_keys = model.output_names
-#     if len(loss_weight_tuple_list) != len(output_keys):
-#         raise ValueError(
-#             "Number of `--losses` option(s) should be {}.".format(len(output_keys))
-#         )
-#     if len(metrics_list) != len(output_keys):
-#         raise ValueError(
-#             "Number of `--metrics` option(s) should be {}.".format(len(output_keys))
-#         )
-#     model_loss_dict = dict(zip(output_keys, model_loss_list))
-#     model_loss_weight_dict = dict(zip(output_keys, model_loss_weight_list))
-#     model_metrics_dict = dict(zip(output_keys, model_metrics_list))
-#     model.compile(
-#         optimizer=model_optimizer,
-#         loss=model_loss_dict,
-#         loss_weights=model_loss_weight_dict,
-#         metrics=model_metrics_dict,
-#     )
-#     tmp_plot_model_img_path = "/tmp/model.png"
-#     plot_model(
-#         model,
-#         show_shapes=True,
-#         to_file=tmp_plot_model_img_path,
-#         expand_nested=True,
-#         dpi=144,
-#     )
-#     upload_blob(
-#         bucket_name,
-#         tmp_plot_model_img_path,
-#         os.path.join(
-#             training_result_folder_without_gs,
-#             os.path.basename(tmp_plot_model_img_path),
-#         ),
-#     )
-#     model.summary()
+    # model summary
+    tmp_plot_model_txt_path = os.path.join(training_result_folder, "model.txt")
+    with open(tmp_plot_model_txt_path, "w") as fh:
+        model.summary(print_fn=lambda x: fh.write(x + "\n"))
 
-#     # 4. Dataset --------
-#     # 4-1) Training dataset
-#     training_dataset = make_preprocessed_tf_dataset(
-#         batch_size=training_batch_size,
-#         inout_folder_tuple=training_inout_datasets,
-#         bin_size=bin_size,
-#     )
-#     training_samples = len(training_dataset) * training_batch_size
-#     if plot_sample:
-#         plot_and_upload_dataset(
-#             dataset=training_dataset,
-#             batch_size=training_batch_size,
-#             bin_size=bin_size,
-#             bucket_name=bucket_name,
-#             upload_gs_folder=training_result_folder_without_gs,
-#         )
+    # 4. Dataset --------
+    # 4-1) Training dataset
+    # training_dataset = make_preprocessed_tf_dataset(
+    #     batch_size=training_batch_size,
+    #     inout_folder_tuple=training_inout_datasets,
+    #     bin_size=bin_size,
+    # )
+    # training_samples = len(training_dataset) * training_batch_size
+    # if plot_sample:
+    #     plot_and_upload_dataset(
+    #         dataset=training_dataset,
+    #         batch_size=training_batch_size,
+    #         bin_size=bin_size,
+    #         bucket_name=bucket_name,
+    #         upload_gs_folder=training_result_folder_without_gs,
+    #     )
 
-#     # 4-2) Validation dataset
-#     val_dataset = make_preprocessed_tf_dataset(
-#         batch_size=val_batch_size,
-#         inout_folder_tuple=val_inout_datasets,
-#         bin_size=bin_size,
-#     )
-#     val_samples = len(val_dataset) * val_batch_size
+    # 4-2) Validation dataset
+    # val_dataset = make_preprocessed_tf_dataset(
+    #     batch_size=val_batch_size,
+    #     inout_folder_tuple=val_inout_datasets,
+    #     bin_size=bin_size,
+    # )
+    # val_samples = len(val_dataset) * val_batch_size
 
-#     # 5. Training --------
-#     # 5-1) Parameters
-#     training_steps_per_epoch: int = training_samples // training_batch_size
-#     val_steps: int = val_samples // val_batch_size
+    # 5. Training --------
+    # 5-1) Parameters
+    training_steps_per_epoch: int = (
+        dataset_interface.get_training_dataset_length() // training_batch_size
+    )
+    val_steps: int = dataset_interface.get_validation_dataset_length() // val_batch_size
 
-#     # callbacks
-#     model_checkpoint: Callback = ModelCheckpoint(
-#         os.path.join(save_weights_folder, training_id + ".epoch_{epoch:02d}"),
-#         verbose=1,
-#     )
-#     early_stopping_patience: int = training_epochs // (10 * val_freq)
-#     early_stopping: Callback = EarlyStopping(
-#         patience=early_stopping_patience, verbose=1
-#     )
-#     tensorboard_cb: Callback = TensorBoard(log_dir=tf_run_log_dir)
-#     callback_list: List[Callback] = [tensorboard_cb, model_checkpoint]
-#     if not without_early_stopping:
-#         callback_list.append(early_stopping)
+    # callbacks
+    model_checkpoint: Callback = ModelCheckpoint(
+        os.path.join(save_weights_folder, training_id + ".epoch_{epoch:02d}"),
+        verbose=1,
+    )
+    early_stopping_patience: int = training_epochs // (10 * val_freq)
+    early_stopping: Callback = EarlyStopping(
+        patience=early_stopping_patience, verbose=1
+    )
+    tensorboard_cb: Callback = TensorBoard(log_dir=tf_run_log_dir)
+    callback_list: List[Callback] = [tensorboard_cb, model_checkpoint]
+    if not without_early_stopping:
+        callback_list.append(early_stopping)
 
-#     # continue setting (initial epoch)
-#     initial_epoch = 0
-#     if check_exists_or_not(continuous_model_name, continuous_epoch):
-#         assert isinstance(continuous_epoch, int)
-#         initial_epoch = continuous_epoch
+    # continue setting (initial epoch)
+    initial_epoch = 0
+    if continuous_epoch is not None:
+        assert isinstance(continuous_epoch, int)
+        initial_epoch = continuous_epoch
 
-#     # 5-2) Training
-#     history: History = model.fit(
-#         training_dataset,
-#         epochs=training_epochs,
-#         verbose=1,
-#         callbacks=callback_list,
-#         validation_data=val_dataset,
-#         shuffle=True,
-#         initial_epoch=initial_epoch,
-#         steps_per_epoch=training_steps_per_epoch,
-#         validation_steps=val_steps,
-#         validation_freq=val_freq,
-#         max_queue_size=10,
-#         workers=8,
-#         use_multiprocessing=True,
-#     )
+    # 5-2) Training
+    history: History = model.fit(
+        training_dataset,
+        epochs=training_epochs,
+        verbose=1,
+        callbacks=callback_list,
+        validation_data=val_dataset,
+        shuffle=True,
+        initial_epoch=initial_epoch,
+        steps_per_epoch=training_steps_per_epoch,
+        validation_steps=val_steps,
+        validation_freq=val_freq,
+        max_queue_size=10,
+        workers=8,
+        use_multiprocessing=True,
+    )
