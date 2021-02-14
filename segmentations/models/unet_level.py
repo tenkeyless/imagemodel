@@ -1,6 +1,7 @@
 import warnings
-from typing import List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple
 
+from segmentations.models.model_interface import ModelInterface
 from tensorflow.keras.layers import (
     Conv2D,
     Dropout,
@@ -11,7 +12,10 @@ from tensorflow.keras.layers import (
     concatenate,
 )
 from tensorflow.keras.models import Model
+from typing_extensions import TypedDict
+from utils.function import get_default_args
 from utils.functional import compose_left
+from utils.optional import optional_map
 
 
 def unet_base_conv_2d(
@@ -108,3 +112,73 @@ def unet_level(
     )(output)
 
     return Model(inputs=[input], outputs=[output])
+
+
+class UNetLevelArgumentsDict(TypedDict):
+    level: Optional[int]
+    input_shape: Optional[Tuple[int, int, int]]
+    input_name: Optional[str]
+    output_name: Optional[str]
+    base_filters: Optional[int]
+
+
+class UNetLevelModel(ModelInterface[UNetLevelArgumentsDict]):
+    __default_args = get_default_args(unet_level)
+
+    def func(self):
+        return unet_level
+
+    def get_model(self, option_dict: UNetLevelArgumentsDict) -> Model:
+        return unet_level(
+            level=option_dict.get("level") or self.__default_args["level"],
+            input_shape=option_dict.get("input_shape")
+            or self.__default_args["input_shape"],
+            input_name=option_dict.get("input_name")
+            or self.__default_args["input_name"],
+            output_name=option_dict.get("output_name")
+            or self.__default_args["output_name"],
+            base_filters=option_dict.get("base_filters")
+            or self.__default_args["base_filters"],
+        )
+
+    def convert_str_model_option_dict(
+        self, option_dict: Dict[str, str]
+    ) -> UNetLevelArgumentsDict:
+        # level
+        level_optional_str: Optional[str] = option_dict.get("level")
+        level_optional: Optional[int] = optional_map(level_optional_str, eval)
+
+        # input shape
+        input_shape_optional_str: Optional[str] = option_dict.get("input_shape")
+        input_shape_optional: Optional[Tuple[int, int, int]] = optional_map(
+            input_shape_optional_str, eval
+        )
+        if input_shape_optional is not None:
+            if type(input_shape_optional) is not tuple:
+                raise ValueError(
+                    "'input_shape' should be tuple of 3 ints. `Tuple[int, int, int]`."
+                )
+            if len(input_shape_optional) != 3:
+                raise ValueError(
+                    "'input_shape' should be tuple of 3 ints. `Tuple[int, int, int]`."
+                )
+
+        # input name
+        input_name_optional_str: Optional[str] = option_dict.get("input_name")
+
+        # output name
+        output_name_optional_str: Optional[str] = option_dict.get("output_name")
+
+        # base filters
+        base_filters_optional_str: Optional[str] = option_dict.get("base_filters")
+        base_filters_optional: Optional[int] = optional_map(
+            base_filters_optional_str, eval
+        )
+
+        return UNetLevelArgumentsDict(
+            level=level_optional,
+            input_shape=input_shape_optional,
+            input_name=input_name_optional_str,
+            output_name=output_name_optional_str,
+            base_filters=base_filters_optional,
+        )

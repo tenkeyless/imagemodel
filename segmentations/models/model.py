@@ -2,6 +2,7 @@ from enum import Enum
 
 from segmentations.models.model_interface import ModelInterface
 from segmentations.models.unet import UNetModel
+from segmentations.models.unet_level import UNetLevelModel
 
 
 class Models(Enum):
@@ -12,6 +13,8 @@ class Models(Enum):
     def get_model(self) -> ModelInterface:
         if self == Models.unet:
             return UNetModel()
+        elif self == Models.unet_level:
+            return UNetLevelModel()
         else:
             return UNetModel()
 
