@@ -100,6 +100,8 @@ Image segmentations with Keras, TensorFlow for CPU, GPU and TPU.
         segmentations/tkl:1.0
     ```
 
+### Training, test, prediction on docker container
+
 * Run training on docker container
 
     ```shell
@@ -140,21 +142,7 @@ Image segmentations with Keras, TensorFlow for CPU, GPU and TPU.
         --run_id "20210216_140754"
     ```
 
-* (Optional) Or run docker using on shell.
-
-    ```shell
-    docker run \
-        --gpus all \
-        -it \
-        --rm \
-        -u $(id -u):$(id -g) \
-        -v /etc/localtime:/etc/localtime:ro \
-        -v $(pwd):/segmentations \
-        -p 6006:6006 \
-        --workdir="/segmentations" \
-        segmentations/tkl:1.0 \
-        python _run/sample/color_tracking/training_with_generator.py
-    ```
+## Tips for Docker
 
 * Detach from docker container
 
