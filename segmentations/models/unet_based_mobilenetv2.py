@@ -1,12 +1,55 @@
 # Based on https://www.tensorflow.org/tutorials/images/segmentation
 
-# Setup
+# 1. Setup
 # -----
 # $ pip install tensorflow-metadata
 # $ pip install -q git+https://github.com/tensorflow/examples.git
 
+# 2. Code example displaying prediction results
+# ------------------------------------------
+
+# import numpy as np
+# import matplotlib.pyplot as plt
+# import os
+# import cv2
+
+
+# def display(display_list):
+#     plt.figure(figsize=(15, 15))
+
+#     title = ["Input Image", "True Mask", "Predicted Mask"]
+
+#     for i in range(len(display_list)):
+#         plt.subplot(1, len(display_list), i + 1)
+#         plt.title(title[i])
+#         plt.imshow(display_list[i])
+#         plt.axis("off")
+#     plt.show()
+
+
+# img_name = "american_bulldog_91.npy"
+# img_name = img_name[: img_name.rfind(".")]
+
+# image_folder = "/Users/tklee/tensorflow_datasets/downloads/extracted/TAR_GZ.robots.ox.ac.uk_vgg_pets_imagesZxlcXhwB8atfm2pdIrjCelgNiW7ORYkX5h1Fkzf6MY0.tar.gz/images"
+# true_label_folder = "/Users/tklee/tensorflow_datasets/downloads/extracted/TAR_GZ.robots.ox.ac.uk_vgg_pets_annotationsUkJftt5cQklCt2JrQoZW_L15jblwqTffYXUMDx01jpE.tar.gz/annotations/trimaps"
+# predicted_result_folder = "x"
+
+# img = cv2.imread(os.path.join(image_folder, img_name + ".jpg"))
+# resized_img = cv2.resize(img, (128, 128))
+# true_label = cv2.imread(
+#     os.path.join(true_label_folder, img_name + ".png"),
+#     cv2.IMREAD_GRAYSCALE,
+# )
+# resized_result_img = cv2.resize(true_label, (128, 128))
+# predicted_img = np.load(os.path.join(predicted_result_folder, img_name + ".npy"))
+
+# display([resized_img, resized_result_img, predicted_img])
+
+
+import os
 from typing import Dict, Optional
 
+import numpy as np
 import tensorflow as tf
 from segmentations.models.model_interface import ModelInterface
 from tensorflow.keras.models import Model
@@ -19,7 +62,7 @@ base_model = tf.keras.applications.MobileNetV2(
     input_shape=[128, 128, 3], include_top=False
 )
 
-# 이 층들의 활성화를 이용합시다
+# Use the activations of these layers
 layer_names = [
     "block_1_expand_relu",  # 64x64
     "block_3_expand_relu",  # 32x32
@@ -29,7 +72,7 @@ layer_names = [
 ]
 layers = [base_model.get_layer(name).output for name in layer_names]
 
-# 특징추출 모델을 만듭시다
+# Create the feature extraction model
 down_stack = tf.keras.Model(inputs=base_model.input, outputs=layers)
 
 down_stack.trainable = False
@@ -46,18 +89,18 @@ def unet_based_mobilenetv2(output_channels):
     inputs = tf.keras.layers.Input(shape=[128, 128, 3])
     x = inputs
 
-    # 모델을 통해 다운샘플링합시다
+    # Downsampling through the model
     skips = down_stack(x)
     x = skips[-1]
     skips = reversed(skips[:-1])
 
-    # 건너뛰기 연결을 업샘플링하고 설정하세요
+    # Upsampling and establishing the skip connections
     for up, skip in zip(up_stack, skips):
         x = up(x)
         concat = tf.keras.layers.Concatenate()
         x = concat([x, skip])
 
-    # 이 모델의 마지막 층입니다
+    # This is the last layer of the model
     last = tf.keras.layers.Conv2DTranspose(
         output_channels, 3, strides=2, padding="same"
     )  # 64x64 -> 128x128
@@ -95,3 +138,20 @@ class UNetBasedMobilenetv2Model(ModelInterface[UNetBasedMobilenetv2ArgumentsDict
         return UNetBasedMobilenetv2ArgumentsDict(
             output_channels=output_channel_optional
         )
+
+    def post_processing(self, predicted_result):
+        def create_mask(pred_mask):
+            pred_mask = tf.argmax(pred_mask, axis=-1)
+            pred_mask = pred_mask[..., tf.newaxis]
+            return pred_mask
+
+        return create_mask(predicted_result)
+
+    def saved_post_processed_result(self, filename: str, result):
+        foldername_only: str = os.path.dirname(filename)
+        filename_only: str = os.path.basename(filename)
+        filename_without_extension: str = filename_only[: filename_only.rfind(".")]
+        new_filename: str = os.path.join(
+            foldername_only, "{}.npy".format(filename_without_extension)
+        )
+        np.save(new_filename, result)

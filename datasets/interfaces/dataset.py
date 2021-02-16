@@ -38,3 +38,7 @@ class TfdsDatasetInterface(metaclass=ABCMeta):
     @abstractmethod
     def get_test_dataset_length(self) -> int:
         raise NotImplementedError
+
+    @abstractmethod
+    def get_test_dataset_filenames(self):
+        raise NotImplementedError

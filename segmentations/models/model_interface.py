@@ -32,6 +32,14 @@ class ModelInterface(Generic[T], metaclass=ABCMeta):
     def convert_str_model_option_dict(self, option_dict: Dict[str, str]) -> T:
         raise NotImplementedError
 
+    @abstractmethod
+    def post_processing(self, predicted_result):
+        raise NotImplementedError
+
+    @abstractmethod
+    def saved_post_processed_result(self, filename: str, result):
+        raise NotImplementedError
+
     def check_dict_option(self, option_dict: Dict[str, str]) -> bool:
         args: List[str] = self.get_model_option_keys()
         return sublist(list(option_dict), args)

@@ -72,3 +72,7 @@ class OxfordPetV3TfdsDataset(TfdsDatasetInterface):
 
     def get_test_dataset_length(self) -> int:
         return self._info.splits["test"].num_examples
+
+    def get_test_dataset_filenames(self):
+        test_dataset_filenames = self._dataset["test"].map(lambda el: el["file_name"])
+        return test_dataset_filenames
