@@ -104,10 +104,25 @@ Image segmentations with Keras, TensorFlow for CPU, GPU and TPU.
 
     ```shell
     python segmentations/run/train.py \
+        --dataset oxford_iiit_pet_v3 \
         --model_name unet_based_mobilenetv2 \
         --result_base_folder /segmentations_results \
         --model_option 'output_channels@3' \
+        --losses 'sparse_categorical_crossentropy_from_logits',1.0 \
+        --metrics accuracy \
+        --optimizer adam2
+    ```
+
+* Run test on docker container
+
+    ```shell
+    python segmentations/run/test.py \
         --dataset oxford_iiit_pet_v3 \
+        --model_name unet_based_mobilenetv2 \
+        --result_base_folder /segmentations_results \
+        --batch_size 8 \
+        --model_weight_path ~/segmentations_results/save/weights/training__model_unet_based_mobilenetv2__run_20210214_103920.epoch_06 \
+        --run_id "20210216_110359" \
         --losses 'sparse_categorical_crossentropy_from_logits',1.0 \
         --metrics accuracy \
         --optimizer adam2
