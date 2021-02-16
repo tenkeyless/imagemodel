@@ -147,7 +147,7 @@ class UNetBasedMobilenetv2Model(ModelInterface[UNetBasedMobilenetv2ArgumentsDict
 
         return create_mask(predicted_result)
 
-    def saved_post_processed_result(self, filename: str, result):
+    def save_post_processed_result(self, filename: str, result):
         foldername_only: str = os.path.dirname(filename)
         filename_only: str = os.path.basename(filename)
         filename_without_extension: str = filename_only[: filename_only.rfind(".")]

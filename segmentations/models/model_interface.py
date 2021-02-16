@@ -37,7 +37,7 @@ class ModelInterface(Generic[T], metaclass=ABCMeta):
         raise NotImplementedError
 
     @abstractmethod
-    def saved_post_processed_result(self, filename: str, result):
+    def save_post_processed_result(self, filename: str, result):
         raise NotImplementedError
 
     def check_dict_option(self, option_dict: Dict[str, str]) -> bool:

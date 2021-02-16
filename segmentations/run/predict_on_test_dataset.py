@@ -88,7 +88,7 @@ if __name__ == "__main__":
     # 1-3) Variable Check
     models = Models(model_name).get_model()
     post_processing = models.post_processing
-    saved_post_processed_result = models.saved_post_processed_result
+    save_post_processed_result = models.save_post_processed_result
 
     # 2. Setup --------
     # 2-1) Setup folders for Result.
@@ -193,7 +193,7 @@ Test Data Folder: {}/{}
         )
 
         post_processed_result = post_processing(predicted)
-        saved_post_processed_result(
+        save_post_processed_result(
             os.path.join(predict_testset_result_image_folder, filename),
             post_processed_result,
         )
