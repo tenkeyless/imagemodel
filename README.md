@@ -38,6 +38,34 @@ Image segmentations with Keras, TensorFlow for CPU, GPU and TPU.
 
 ### Run docker image as container
 
+* Need to make a [tensorflow dataset folder] before use tensorflow dataset.
+
+    ```shell
+    mkdir ~/tensorflow_datasets
+    ```
+  
+  * Check your permission of [tensorflow dataset folder].
+
+    ```shell
+    ls -al
+
+    ...
+    drwxr-xr-x  2 tklee tklee  4096 10월  7 14:49 Templates
+    drwxrwxr-x  2 root  root  4096  2월 14 19:09 tensorflow_datasets
+    drwxr-xr-x  2 tklee tklee  4096 10월  7 14:49 Videos
+    ...
+    ```
+
+    If owner of [tensorflow dataset folder] is root, then you need to change it.
+
+    ```shell
+    sudo chown -R [user]:[user] tensorflow_datasets/
+    ```
+
+    ```shell
+    sudo chown -R tklee:tklee tensorflow_datasets/
+    ```
+
 * Run docker image as bash
 
     At [This project] folder. (`$(pwd)`)
@@ -50,12 +78,12 @@ Image segmentations with Keras, TensorFlow for CPU, GPU and TPU.
         -u $(id -u):$(id -g) \
         -v /etc/localtime:/etc/localtime:ro \
         -v $(pwd):/segmentations \
+        -v [result folder]:/segmentations_results \
+        -v [tensorflow dataset folder]:/tensorflow_datasets \
         -p 6006:6006 \
         --workdir="/segmentations" \
         segmentations/tkl:1.0
     ```
-
-* (Optional) Or run docker using on shell.
 
     ```shell
     docker run \
@@ -65,11 +93,56 @@ Image segmentations with Keras, TensorFlow for CPU, GPU and TPU.
         -u $(id -u):$(id -g) \
         -v /etc/localtime:/etc/localtime:ro \
         -v $(pwd):/segmentations \
+        -v ~/segmentations_results:/segmentations_results \
+        -v ~/tensorflow_datasets:/tensorflow_datasets \
         -p 6006:6006 \
         --workdir="/segmentations" \
-        segmentations/tkl:1.0 \
-        python _run/sample/color_tracking/training_with_generator.py
+        segmentations/tkl:1.0
     ```
+
+### Training, test, prediction on docker container
+
+* Run training on docker container
+
+    ```shell
+    python segmentations/run/train.py \
+        --dataset oxford_iiit_pet_v3 \
+        --model_name unet_based_mobilenetv2 \
+        --result_base_folder /segmentations_results \
+        --model_option 'output_channels@3' \
+        --losses 'sparse_categorical_crossentropy_from_logits',1.0 \
+        --metrics accuracy \
+        --optimizer adam2
+    ```
+
+* Run test on docker container
+
+    ```shell
+    python segmentations/run/test.py \
+        --dataset oxford_iiit_pet_v3 \
+        --model_name unet_based_mobilenetv2 \
+        --result_base_folder /segmentations_results \
+        --batch_size 8 \
+        --model_weight_path /segmentations_results/save/weights/training__model_unet_based_mobilenetv2__run_20210214_103920.epoch_06 \
+        --run_id "20210216_110359" \
+        --losses 'sparse_categorical_crossentropy_from_logits',1.0 \
+        --metrics accuracy \
+        --optimizer adam2
+    ```
+
+* Run prediction for test dataset on docker container
+
+    ```shell
+    python segmentations/run/predict_on_test_dataset.py \
+        --dataset oxford_iiit_pet_v3 \
+        --model_name unet_based_mobilenetv2 \
+        --result_base_folder /segmentations_results \
+        --batch_size 2 \
+        --model_weight_path /segmentations_results/save/weights/training__model_unet_based_mobilenetv2__run_20210214_103920.epoch_06 \
+        --run_id "20210216_140754"
+    ```
+
+## Tips for Docker
 
 * Detach from docker container
 

@@ -1,3 +1,10 @@
 Keras==2.4.0
 tensorflow==2.4.0
 tensorflow-datasets
+tensorflow-metadata
+
+image-keras==0.3.5
+paramiko
+Pillow
+opencv-python
+pydot
