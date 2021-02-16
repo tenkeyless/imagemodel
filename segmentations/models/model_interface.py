@@ -12,10 +12,15 @@ class ModelInterface(Generic[T], metaclass=ABCMeta):
     @classmethod
     def __subclasshook__(cls, subclass):
         return (
-            hasattr(subclass, "get_model")
+            hasattr(subclass, "func")
+            and hasattr(subclass, "get_model")
             and callable(subclass.get_model)
             and hasattr(subclass, "convert_str_model_option_dict")
             and callable(subclass.convert_str_model_option_dict)
+            and hasattr(subclass, "post_processing")
+            and callable(subclass.post_processing)
+            and hasattr(subclass, "save_post_processed_result")
+            and callable(subclass.save_post_processed_result)
             or NotImplemented
         )
 
