@@ -311,33 +311,8 @@ Training Data Folder: {}/{}
     with open(tmp_plot_model_txt_path, "w") as fh:
         model.summary(print_fn=lambda x: fh.write(x + "\n"))
 
-    # 4. Dataset --------
-    # 4-1) Training dataset
-    # training_dataset = make_preprocessed_tf_dataset(
-    #     batch_size=training_batch_size,
-    #     inout_folder_tuple=training_inout_datasets,
-    #     bin_size=bin_size,
-    # )
-    # training_samples = len(training_dataset) * training_batch_size
-    # if plot_sample:
-    #     plot_and_upload_dataset(
-    #         dataset=training_dataset,
-    #         batch_size=training_batch_size,
-    #         bin_size=bin_size,
-    #         bucket_name=bucket_name,
-    #         upload_gs_folder=training_result_folder_without_gs,
-    #     )
-
-    # 4-2) Validation dataset
-    # val_dataset = make_preprocessed_tf_dataset(
-    #     batch_size=val_batch_size,
-    #     inout_folder_tuple=val_inout_datasets,
-    #     bin_size=bin_size,
-    # )
-    # val_samples = len(val_dataset) * val_batch_size
-
-    # 5. Training --------
-    # 5-1) Parameters
+    # 4. Training --------
+    # 4-1) Parameters
     training_steps_per_epoch: int = (
         dataset_interface.get_training_dataset_length() // training_batch_size
     )
@@ -363,7 +338,7 @@ Training Data Folder: {}/{}
         assert isinstance(continuous_epoch, int)
         initial_epoch = continuous_epoch
 
-    # 5-2) Training
+    # 4-2) Training
     history: History = model.fit(
         training_dataset,
         epochs=training_epochs,

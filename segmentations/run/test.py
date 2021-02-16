@@ -221,16 +221,7 @@ Test Data Folder: {}/{}
     with open(tmp_plot_model_txt_path, "w") as fh:
         model.summary(print_fn=lambda x: fh.write(x + "\n"))
 
-    # 4. Dataset --------
-    # 4-1) Test dataset
-    # test_dataset = make_preprocessed_tf_dataset(
-    #     batch_size=test_batch_size,
-    #     inout_folder_tuple=test_inout_datasets,
-    #     bin_size=bin_size,
-    # )
-    # test_samples = len(test_dataset) * test_batch_size
-
-    # 5. Test --------
+    # 4. Test --------
     # ValueError: too many values to unpack (expected 2)
     test_loss, test_acc = model.evaluate(
         test_dataset, workers=8, use_multiprocessing=True

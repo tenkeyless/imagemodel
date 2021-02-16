@@ -170,7 +170,7 @@ Test Data Folder: {}/{}
     with open(tmp_plot_model_txt_path, "w") as fh:
         model.summary(print_fn=lambda x: fh.write(x + "\n"))
 
-    # 5. Predict --------
+    # 4. Predict --------
     predicted = model.predict(
         test_dataset,
         batch_size=predict_testset_batch_size,
