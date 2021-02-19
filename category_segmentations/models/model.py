@@ -1,9 +1,11 @@
 from enum import Enum
 
-from segmentations.models.model_interface import ModelInterface
-from segmentations.models.unet import UNetModel
-from segmentations.models.unet_based_mobilenetv2 import UNetBasedMobilenetv2Model
-from segmentations.models.unet_level import UNetLevelModel
+from category_segmentations.models.model_interface import ModelInterface
+from category_segmentations.models.unet import UNetModel
+from category_segmentations.models.unet_based_mobilenetv2 import (
+    UNetBasedMobilenetv2Model,
+)
+from category_segmentations.models.unet_level import UNetLevelModel
 
 
 class Models(Enum):

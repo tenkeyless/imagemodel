@@ -1,9 +1,9 @@
-import inspect
 from abc import ABCMeta, abstractmethod
 from typing import Dict, Generic, List, TypeVar
 
+from common.utils.function import get_function_parameters_list
+from common.utils.list import sublist
 from tensorflow.keras.models import Model
-from utils.list import sublist
 
 T = TypeVar("T")
 
@@ -62,7 +62,7 @@ class ModelInterface(Generic[T], metaclass=ABCMeta):
             )
 
     def get_model_option_keys(self) -> List[str]:
-        return inspect.getfullargspec(self.func()).args
+        return get_function_parameters_list(self.func())
 
     def get_model_from_str_model_option(self, option_dict: Dict[str, str]) -> Model:
         converted_dict = self.convert_str_model_option_dict(option_dict)

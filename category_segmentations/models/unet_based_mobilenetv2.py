@@ -51,12 +51,12 @@ from typing import Dict, Optional
 
 import numpy as np
 import tensorflow as tf
-from segmentations.models.model_interface import ModelInterface
+from category_segmentations.models.model_interface import ModelInterface
 from tensorflow.keras.models import Model
 from tensorflow_examples.models.pix2pix import pix2pix
 from typing_extensions import TypedDict
-from utils.function import get_default_args
-from utils.optional import optional_map
+from common.utils.function import get_default_args
+from common.utils.optional import optional_map
 
 base_model = tf.keras.applications.MobileNetV2(
     input_shape=[128, 128, 3], include_top=False

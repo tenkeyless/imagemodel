@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from utils.functional import compose, compose_left
+from common.utils.functional import compose, compose_left
 
 
 class FunctionalTest(TestCase):

@@ -1,4 +1,5 @@
 import inspect
+from typing import List
 
 
 def get_default_args(func):
@@ -64,3 +65,27 @@ def get_annotations(func):
     """
     signature = inspect.signature(func)
     return {k: v.annotation for k, v in signature.parameters.items()}
+
+
+def get_function_parameters_list(func) -> List[str]:
+    """
+    Get parameter list of function `func`.
+
+    Parameters
+    ----------
+    func : Callable
+        A function to get parameter list.
+
+    Returns
+    -------
+    List[str]
+        Parameter list
+
+    Examples
+    --------
+    >>> def test_func(a, b) -> int:
+    ...     return a+1
+    >>> get_function_parameters_list(test_func)
+    ['a', 'b']
+    """
+    return inspect.getfullargspec(func).args

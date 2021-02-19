@@ -76,22 +76,30 @@ def get_bg_weights(
     # BG(t) to BG(p)
     # 1.0 means bg, 0.0 means fg
     cal_bg_to_bg = K.all(
-        K.equal(yp_yt_bg, K.ones_like(yp_yt_bg) * [1.0, 1.0]), axis=-1, keepdims=True,
+        K.equal(yp_yt_bg, K.ones_like(yp_yt_bg) * [1.0, 1.0]),
+        axis=-1,
+        keepdims=True,
     )
     cal_bg_to_bg = K.cast(cal_bg_to_bg, K.floatx())
     # BG(t) to FG(p)
     cal_bg_to_fg = K.all(
-        K.equal(yp_yt_bg, K.ones_like(yp_yt_bg) * [1.0, 0.0]), axis=-1, keepdims=True,
+        K.equal(yp_yt_bg, K.ones_like(yp_yt_bg) * [1.0, 0.0]),
+        axis=-1,
+        keepdims=True,
     )
     cal_bg_to_fg = K.cast(cal_bg_to_fg, K.floatx())
     # FG(t) to BG(p)
     cal_fg_to_bg = K.all(
-        K.equal(yp_yt_bg, K.ones_like(yp_yt_bg) * [0.0, 1.0]), axis=-1, keepdims=True,
+        K.equal(yp_yt_bg, K.ones_like(yp_yt_bg) * [0.0, 1.0]),
+        axis=-1,
+        keepdims=True,
     )
     cal_fg_to_bg = K.cast(cal_fg_to_bg, K.floatx())
     # FG(t) to FG(p)
     cal_fg_to_fg = K.all(
-        K.equal(yp_yt_bg, K.ones_like(yp_yt_bg) * [0.0, 0.0]), axis=-1, keepdims=True,
+        K.equal(yp_yt_bg, K.ones_like(yp_yt_bg) * [0.0, 0.0]),
+        axis=-1,
+        keepdims=True,
     )
     cal_fg_to_fg = K.cast(cal_fg_to_fg, K.floatx())
 

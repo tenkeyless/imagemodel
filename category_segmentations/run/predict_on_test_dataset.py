@@ -5,13 +5,16 @@ sys.path.append(os.getcwd())
 
 import platform
 from argparse import ArgumentParser, RawTextHelpFormatter
+from typing import Optional
 
 import tensorflow as tf
+from category_segmentations.configs.datasets import Datasets
+from category_segmentations.models.model import Models
+from category_segmentations.run.common import get_run_id
 from image_keras.supports.folder import create_folder_if_not_exist
 from keras.utils import plot_model
-from segmentations.configs.datasets import Datasets
-from segmentations.models.model import Models
-from segmentations.run.common import get_run_id
+
+from common.datasets.interfaces.dataset import TfdsDatasetInterface
 
 if __name__ == "__main__":
     # 1. Variables --------
@@ -104,7 +107,9 @@ if __name__ == "__main__":
 
     # 2-2) Setup for dataset.
     datasets = Datasets(dataset)
-    dataset_interface = datasets.get_dataset()
+    dataset_interface: Optional[TfdsDatasetInterface] = datasets.get_dataset()
+    if dataset_interface is None:
+        raise ValueError("`dataset` should be exist.")
     test_dataset = dataset_interface.get_test_dataset(
         batch_size_optional=predict_testset_batch_size
     )

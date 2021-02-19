@@ -1,7 +1,6 @@
-import warnings
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, Optional, Tuple
 
-from segmentations.models.model_interface import ModelInterface
+from category_segmentations.models.model_interface import ModelInterface
 from tensorflow.keras.layers import (
     Conv2D,
     Dropout,
@@ -13,9 +12,9 @@ from tensorflow.keras.layers import (
 )
 from tensorflow.keras.models import Model
 from typing_extensions import TypedDict
-from utils.function import get_default_args
-from utils.functional import compose_left
-from utils.optional import optional_map
+from common.utils.function import get_default_args
+from common.utils.functional import compose_left
+from common.utils.optional import optional_map
 
 
 def unet_base_conv_2d(
@@ -59,78 +58,85 @@ def unet_base_up_sampling(
     return compose_left(up_sample_func, conv_func)
 
 
-def unet_level(
-    level: int = 4,
+def unet(
     input_shape: Tuple[int, int, int] = (256, 256, 1),
     input_name: str = "unet_input",
     output_name: str = "unet_output",
     base_filters: int = 16,
 ) -> Model:
-    # Parameter Check
-    if level <= 0:
-        raise ValueError("`level` should be greater than 0.")
-    if level >= 6:
-        warnings.warn("`level` recommended to be smaller than 6.", RuntimeWarning)
-
-    # Prepare
-    filter_nums: List[int] = []
-    for l in range(level):
-        filter_nums.append(base_filters * 4 * (2 ** l))
-
     # Input
     input: Layer = Input(shape=input_shape, name=input_name)
 
-    # Skip connections
-    skip_connections: List[Layer] = []
-
     # Encoder
-    encoder: Layer = input
-    for filter_num in filter_nums[:-1]:
-        encoder = unet_base_conv_2d(filter_num)(encoder)
-        encoder = unet_base_conv_2d(filter_num)(encoder)
-        skip_connections.append(encoder)
-        encoder = unet_base_sub_sampling()(encoder)
+    conv1: Layer = unet_base_conv_2d(base_filters * 4)(input)
+    conv1 = unet_base_conv_2d(base_filters * 4)(conv1)
+    pool1: Layer = unet_base_sub_sampling()(conv1)
+
+    conv2: Layer = unet_base_conv_2d(base_filters * 8)(pool1)
+    conv2 = unet_base_conv_2d(base_filters * 8)(conv2)
+    pool2: Layer = unet_base_sub_sampling()(conv2)
+
+    conv3: Layer = unet_base_conv_2d(base_filters * 16)(pool2)
+    conv3 = unet_base_conv_2d(base_filters * 16)(conv3)
+    pool3: Layer = unet_base_sub_sampling()(conv3)
+
+    conv4: Layer = unet_base_conv_2d(base_filters * 32)(pool3)
+    conv4 = unet_base_conv_2d(base_filters * 32)(conv4)
+    pool4: Layer = unet_base_sub_sampling()(conv4)
 
     # Intermediate
-    intermedate: Layer = unet_base_conv_2d(filter_nums[-1])(encoder)
-    intermedate = unet_base_conv_2d(filter_nums[-1])(intermedate)
-    intermedate = Dropout(0.5)(intermedate)
+    conv5: Layer = unet_base_conv_2d(base_filters * 64)(pool4)
+    conv5 = unet_base_conv_2d(base_filters * 64)(conv5)
+    drop1: Layer = Dropout(0.5)(conv5)
 
     # Decoder
-    decoder: Layer = intermedate
-    for filter_num_index, filter_num in enumerate(filter_nums[:-1][::-1]):
-        decoder = unet_base_up_sampling(filter_num)(decoder)
-        skip_layer: Layer = skip_connections[::-1][filter_num_index]
-        decoder = concatenate([skip_layer, decoder])
-        decoder = unet_base_conv_2d(filter_num)(decoder)
-        decoder = unet_base_conv_2d(filter_num)(decoder)
+    up1: Layer = unet_base_up_sampling(base_filters * 32)(drop1)
+    merge1: Layer = concatenate([conv4, up1])
+    conv6: Layer = unet_base_conv_2d(base_filters * 32)(merge1)
+    conv6 = unet_base_conv_2d(base_filters * 32)(conv6)
+
+    up2: Layer = unet_base_up_sampling(base_filters * 16)(conv6)
+    merge2: Layer = concatenate([conv3, up2])
+    conv7: Layer = unet_base_conv_2d(base_filters * 16)(merge2)
+    conv7 = unet_base_conv_2d(base_filters * 16)(conv7)
+
+    up3: Layer = unet_base_up_sampling(base_filters * 8)(conv7)
+    merge3: Layer = concatenate([conv2, up3])
+    conv8: Layer = unet_base_conv_2d(base_filters * 8)(merge3)
+    conv8 = unet_base_conv_2d(base_filters * 8)(conv8)
+
+    up4: Layer = unet_base_up_sampling(base_filters * 4)(conv8)
+    merge4: Layer = concatenate([conv1, up4])
+    conv9: Layer = unet_base_conv_2d(base_filters * 4)(merge4)
+    conv9 = unet_base_conv_2d(base_filters * 4)(conv9)
 
     # Output
-    output: Layer = unet_base_conv_2d(2)(decoder)
-    output = unet_base_conv_2d(
+    conv10: Layer = unet_base_conv_2d(2)(conv9)
+    output: Layer = unet_base_conv_2d(
         1, kernel_size=1, activation="sigmoid", name_optional=output_name
-    )(output)
+    )(conv10)
 
     return Model(inputs=[input], outputs=[output])
 
 
-class UNetLevelArgumentsDict(TypedDict):
-    level: Optional[int]
+class UNetArgumentsDict(TypedDict):
     input_shape: Optional[Tuple[int, int, int]]
     input_name: Optional[str]
     output_name: Optional[str]
     base_filters: Optional[int]
 
 
-class UNetLevelModel(ModelInterface[UNetLevelArgumentsDict]):
-    __default_args = get_default_args(unet_level)
+# UNetArgumentsDict = TypedDict("UNetArgumentsDict", get_annotations(unet))
+
+
+class UNetModel(ModelInterface[UNetArgumentsDict]):
+    __default_args = get_default_args(unet)
 
     def func(self):
-        return unet_level
+        return unet
 
-    def get_model(self, option_dict: UNetLevelArgumentsDict) -> Model:
-        return unet_level(
-            level=option_dict.get("level") or self.__default_args["level"],
+    def get_model(self, option_dict: UNetArgumentsDict) -> Model:
+        return unet(
             input_shape=option_dict.get("input_shape")
             or self.__default_args["input_shape"],
             input_name=option_dict.get("input_name")
@@ -143,11 +149,7 @@ class UNetLevelModel(ModelInterface[UNetLevelArgumentsDict]):
 
     def convert_str_model_option_dict(
         self, option_dict: Dict[str, str]
-    ) -> UNetLevelArgumentsDict:
-        # level
-        level_optional_str: Optional[str] = option_dict.get("level")
-        level_optional: Optional[int] = optional_map(level_optional_str, eval)
-
+    ) -> UNetArgumentsDict:
         # input shape
         input_shape_optional_str: Optional[str] = option_dict.get("input_shape")
         input_shape_optional: Optional[Tuple[int, int, int]] = optional_map(
@@ -175,8 +177,7 @@ class UNetLevelModel(ModelInterface[UNetLevelArgumentsDict]):
             base_filters_optional_str, eval
         )
 
-        return UNetLevelArgumentsDict(
-            level=level_optional,
+        return UNetArgumentsDict(
             input_shape=input_shape_optional,
             input_name=input_name_optional_str,
             output_name=output_name_optional_str,

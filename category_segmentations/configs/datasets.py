@@ -1,8 +1,8 @@
 from enum import Enum
 from typing import Optional
 
-from datasets.oxford_pet_v3_tfds_dataset import OxfordPetV3TfdsDataset
-from datasets.interfaces.dataset import TfdsDatasetInterface
+from common.datasets.oxford_pet_v3_tfds_dataset import OxfordPetV3TfdsDataset
+from common.datasets.interfaces.dataset import TfdsDatasetInterface
 
 
 class Datasets(Enum):

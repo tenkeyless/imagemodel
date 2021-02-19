@@ -1,7 +1,7 @@
 from unittest import TestCase
 
 import tensorflow as tf
-from segmentations.losses.losses_bg_weighted_bce import (
+from common.losses.losses_bg_weighted_bce import (
     bce_loss,
     bg_weighted_binary_crossentropy,
     get_bg_weights,

@@ -2,7 +2,7 @@ from unittest import TestCase
 
 import tensorflow as tf
 from keras import backend as K
-from losses.losses_weighted_cce import weighted_crossentropy
+from common.losses.losses_weighted_cce import weighted_crossentropy
 
 
 class TestWeightedCCE(TestCase):
