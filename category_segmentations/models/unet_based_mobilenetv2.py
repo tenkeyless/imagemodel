@@ -85,7 +85,7 @@ up_stack = [
 ]
 
 
-def unet_based_mobilenetv2(output_channels):
+def unet_based_mobilenetv2(output_channels: int):
     inputs = tf.keras.layers.Input(shape=[128, 128, 3])
     x = inputs
 

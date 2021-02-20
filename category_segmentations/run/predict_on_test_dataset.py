@@ -9,7 +9,7 @@ from typing import Optional
 
 import tensorflow as tf
 from category_segmentations.configs.datasets import Datasets
-from category_segmentations.models.model import Models
+from category_segmentations.configs.models import Models
 from category_segmentations.run.common import get_run_id
 from image_keras.supports.folder import create_folder_if_not_exist
 from keras.utils import plot_model

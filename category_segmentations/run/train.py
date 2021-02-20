@@ -14,7 +14,7 @@ from category_segmentations.configs.datasets import Datasets
 from category_segmentations.configs.losses import Losses
 from category_segmentations.configs.metrics import Metrics
 from category_segmentations.configs.optimizers import Optimizers
-from category_segmentations.models.model import Models
+from category_segmentations.configs.models import Models
 from category_segmentations.run.common import (
     get_run_id,
     loss_coords,

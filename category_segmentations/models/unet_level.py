@@ -1,7 +1,13 @@
-from typing import Dict, List, Optional, Tuple
+import os
 import warnings
+from typing import Dict, List, Optional, Tuple
 
+import numpy as np
+import tensorflow as tf
 from category_segmentations.models.model_interface import ModelInterface
+from common.utils.function import get_default_args
+from common.utils.functional import compose_left
+from common.utils.optional import optional_map
 from tensorflow.keras.layers import (
     Conv2D,
     Dropout,
@@ -13,9 +19,6 @@ from tensorflow.keras.layers import (
 )
 from tensorflow.keras.models import Model
 from typing_extensions import TypedDict
-from common.utils.function import get_default_args
-from common.utils.functional import compose_left
-from common.utils.optional import optional_map
 
 
 def unet_base_conv_2d(
@@ -62,6 +65,7 @@ def unet_base_up_sampling(
 def unet_level(
     level: int = 4,
     input_shape: Tuple[int, int, int] = (256, 256, 1),
+    output_channels: int = 2,
     input_name: str = "unet_input",
     output_name: str = "unet_output",
     base_filters: int = 16,
@@ -106,16 +110,16 @@ def unet_level(
         decoder = unet_base_conv_2d(filter_num)(decoder)
 
     # Output
-    output: Layer = unet_base_conv_2d(2)(decoder)
     output = unet_base_conv_2d(
-        1, kernel_size=1, activation="sigmoid", name_optional=output_name
-    )(output)
+        output_channels, kernel_size=1, activation="sigmoid", name_optional=output_name
+    )(decoder)
 
     return Model(inputs=[input], outputs=[output])
 
 
 class UNetLevelArgumentsDict(TypedDict):
     level: Optional[int]
+    output_channels: Optional[int]
     input_shape: Optional[Tuple[int, int, int]]
     input_name: Optional[str]
     output_name: Optional[str]
@@ -135,6 +139,8 @@ class UNetLevelModel(ModelInterface[UNetLevelArgumentsDict]):
             or self.__default_args["input_shape"],
             input_name=option_dict.get("input_name")
             or self.__default_args["input_name"],
+            output_channels=option_dict.get("output_channels")
+            or self.__default_args["output_channels"],
             output_name=option_dict.get("output_name")
             or self.__default_args["output_name"],
             base_filters=option_dict.get("base_filters")
@@ -163,6 +169,12 @@ class UNetLevelModel(ModelInterface[UNetLevelArgumentsDict]):
                     "'input_shape' should be tuple of 3 ints. `Tuple[int, int, int]`."
                 )
 
+        # output channels
+        output_channels_optional_str: Optional[str] = option_dict.get("output_channels")
+        output_channels_optional: Optional[int] = optional_map(
+            output_channels_optional_str, eval
+        )
+
         # input name
         input_name_optional_str: Optional[str] = option_dict.get("input_name")
 
@@ -177,8 +189,26 @@ class UNetLevelModel(ModelInterface[UNetLevelArgumentsDict]):
 
         return UNetLevelArgumentsDict(
             level=level_optional,
+            output_channels=output_channels_optional,
             input_shape=input_shape_optional,
             input_name=input_name_optional_str,
             output_name=output_name_optional_str,
             base_filters=base_filters_optional,
         )
+
+    def post_processing(self, predicted_result):
+        def create_mask(pred_mask):
+            pred_mask = tf.argmax(pred_mask, axis=-1)
+            pred_mask = pred_mask[..., tf.newaxis]
+            return pred_mask
+
+        return create_mask(predicted_result)
+
+    def save_post_processed_result(self, filename: str, result):
+        foldername_only: str = os.path.dirname(filename)
+        filename_only: str = os.path.basename(filename)
+        filename_without_extension: str = filename_only[: filename_only.rfind(".")]
+        new_filename: str = os.path.join(
+            foldername_only, "{}.npy".format(filename_without_extension)
+        )
+        np.save(new_filename, result)
