@@ -10,11 +10,11 @@ from typing import List, Tuple
 import tensorflow as tf
 from image_keras.supports.folder import create_folder_if_not_exist
 from keras.utils import plot_model
-from binary_segmentations.configs.datasets import Datasets
-from binary_segmentations.configs.losses import Losses
-from binary_segmentations.configs.metrics import Metrics
-from binary_segmentations.configs.optimizers import Optimizers
-from binary_segmentations.run.common import get_run_id, loss_coords
+from imagemodel.binary_segmentations.configs.datasets import Datasets
+from imagemodel.binary_segmentations.configs.losses import Losses
+from imagemodel.binary_segmentations.configs.metrics import Metrics
+from imagemodel.binary_segmentations.configs.optimizers import Optimizers
+from imagemodel.binary_segmentations.run.common import get_run_id, loss_coords
 
 if __name__ == "__main__":
     # 1. Variables --------

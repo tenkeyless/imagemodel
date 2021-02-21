@@ -8,13 +8,13 @@ from argparse import ArgumentParser, RawTextHelpFormatter
 from typing import Optional
 
 import tensorflow as tf
-from binary_segmentations.configs.datasets import Datasets
-from binary_segmentations.configs.models import Models
-from binary_segmentations.run.common import get_run_id
+from imagemodel.binary_segmentations.configs.datasets import Datasets
+from imagemodel.binary_segmentations.configs.models import Models
+from imagemodel.binary_segmentations.run.common import get_run_id
 from image_keras.supports.folder import create_folder_if_not_exist
 from keras.utils import plot_model
 
-from common.datasets.interfaces.dataset import TfdsDatasetInterface
+from imagemodel.common.datasets.interfaces.dataset import TfdsDatasetInterface
 
 if __name__ == "__main__":
     # 1. Variables --------
