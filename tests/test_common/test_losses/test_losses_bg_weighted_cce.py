@@ -1,7 +1,7 @@
 from unittest import TestCase
 
 import tensorflow as tf
-from common.losses.losses_bg_weighted_cce import (
+from imagemodel.common.losses.losses_bg_weighted_cce import (
     bg_weighted_categorical_crossentropy,
     cce_loss,
     get_bg_weights,

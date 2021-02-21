@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from common.utils.functional import compose, compose_left
+from imagemodel.common.utils.functional import compose, compose_left
 
 
 class FunctionalTest(TestCase):

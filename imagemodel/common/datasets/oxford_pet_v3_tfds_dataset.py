@@ -3,7 +3,7 @@ from typing import Optional
 import tensorflow as tf
 import tensorflow_datasets as tfds
 
-from datasets.interfaces.dataset import TfdsDatasetInterface
+from imagemodel.common.datasets.interfaces.dataset import TfdsDatasetInterface
 
 
 class OxfordPetV3TfdsDataset(TfdsDatasetInterface):

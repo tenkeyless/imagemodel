@@ -1,6 +1,6 @@
 import tensorflow as tf
-from category_segmentations.models.unet import unet
-from category_segmentations.models.unet_level import unet_level
+from imagemodel.category_segmentations.models.unet import unet
+from imagemodel.category_segmentations.models.unet_level import unet_level
 
 
 class UnetLevelTest(tf.test.TestCase):
