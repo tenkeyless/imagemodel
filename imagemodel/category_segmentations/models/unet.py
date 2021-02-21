@@ -3,10 +3,10 @@ from typing import Dict, Optional, Tuple
 
 import numpy as np
 import tensorflow as tf
-from category_segmentations.models.model_interface import ModelInterface
-from common.utils.function import get_default_args
-from common.utils.functional import compose_left
-from common.utils.optional import optional_map
+from imagemodel.category_segmentations.models.model_interface import ModelInterface
+from imagemodel.common.utils.function import get_default_args
+from imagemodel.common.utils.functional import compose_left
+from imagemodel.common.utils.optional import optional_map
 from tensorflow.keras.layers import (
     Conv2D,
     Dropout,

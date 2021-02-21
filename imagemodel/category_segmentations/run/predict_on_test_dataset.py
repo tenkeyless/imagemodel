@@ -4,17 +4,17 @@ import sys
 sys.path.append(os.getcwd())
 
 import platform
+import signal
 from argparse import ArgumentParser, RawTextHelpFormatter
 from typing import Optional
 
 import tensorflow as tf
-from category_segmentations.configs.datasets import Datasets
-from category_segmentations.configs.models import Models
-from category_segmentations.run.common import get_run_id
 from image_keras.supports.folder import create_folder_if_not_exist
+from imagemodel.category_segmentations.configs.datasets import Datasets
+from imagemodel.category_segmentations.configs.models import Models
+from imagemodel.category_segmentations.run.common import get_run_id
+from imagemodel.common.datasets.interfaces.dataset import TfdsDatasetInterface
 from keras.utils import plot_model
-
-from common.datasets.interfaces.dataset import TfdsDatasetInterface
 
 if __name__ == "__main__":
     # 1. Variables --------
@@ -122,6 +122,7 @@ Hostname: {}
 Predict testset ID: {}
 Test Dataset: {}
 Test Data Folder: {}/{}
+Predict result folder: {}
 -----------------------------------------
 
 # Command -------------------------------
@@ -137,6 +138,7 @@ Test Data Folder: {}/{}
         datasets.value,
         base_data_folder,
         predict_testset_id,
+        predict_testset_result_folder,
         list_to_command_str,
         parsed_args_str,
     )
@@ -176,6 +178,21 @@ Test Data Folder: {}/{}
         model.summary(print_fn=lambda x: fh.write(x + "\n"))
 
     # 4. Predict --------
+    # 4-1) After predict
+    def on_predict_end(predict_testset_result_folder: str):
+        print(
+            "\n\n\nCheck predict result folder: {} \n\n".format(
+                predict_testset_result_folder
+            )
+        )
+
+    def signal_handler(sig, frame):
+        on_predict_end(predict_testset_result_folder)
+        sys.exit(0)
+
+    signal.signal(signal.SIGINT, signal_handler)
+
+    # 4-2) Predict
     predicted = model.predict(
         test_dataset,
         batch_size=predict_testset_batch_size,
@@ -203,3 +220,5 @@ Test Data Folder: {}/{}
             post_processed_result,
         )
     print("\n")
+
+    on_predict_end(predict_testset_result_folder)

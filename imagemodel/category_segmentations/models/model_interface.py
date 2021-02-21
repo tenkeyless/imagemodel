@@ -1,8 +1,8 @@
 from abc import ABCMeta, abstractmethod
 from typing import Dict, Generic, List, TypeVar
 
-from common.utils.function import get_function_parameters_list
-from common.utils.list import sublist
+from imagemodel.common.utils.function import get_function_parameters_list
+from imagemodel.common.utils.list import sublist
 from tensorflow.keras.models import Model
 
 T = TypeVar("T")

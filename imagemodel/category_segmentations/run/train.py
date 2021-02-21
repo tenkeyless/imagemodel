@@ -4,28 +4,30 @@ import sys
 sys.path.append(os.getcwd())
 
 import platform
+import signal
 from argparse import ArgumentParser, RawTextHelpFormatter
 from typing import List, Optional, Tuple
 
 import tensorflow as tf
 from image_keras.supports.folder import create_folder_if_not_exist
-from keras.utils import plot_model
-from category_segmentations.configs.datasets import Datasets
-from category_segmentations.configs.losses import Losses
-from category_segmentations.configs.metrics import Metrics
-from category_segmentations.configs.optimizers import Optimizers
-from category_segmentations.configs.models import Models
-from category_segmentations.run.common import (
+from imagemodel.category_segmentations.configs.datasets import Datasets
+from imagemodel.category_segmentations.configs.losses import Losses
+from imagemodel.category_segmentations.configs.metrics import Metrics
+from imagemodel.category_segmentations.configs.models import Models
+from imagemodel.category_segmentations.configs.optimizers import Optimizers
+from imagemodel.category_segmentations.run.common import (
     get_run_id,
     loss_coords,
     model_option_coords,
     setup_continuous_training,
 )
+from imagemodel.common.utils.list import check_all_exists_or_not
+from keras.utils import plot_model
 from tensorflow.keras.callbacks import Callback, History, TensorBoard
 from tensorflow.python.keras.callbacks import EarlyStopping, ModelCheckpoint
-from common.utils.list import check_all_exists_or_not
 
 if __name__ == "__main__":
+
     # 1. Variables --------
     # 1-1) Variables with Parser
     parser: ArgumentParser = ArgumentParser(
@@ -314,7 +316,19 @@ Training Data Folder: {}/{}
         model.summary(print_fn=lambda x: fh.write(x + "\n"))
 
     # 4. Training --------
-    # 4-1) Parameters
+    # 4-1) After training
+    def on_training_end(training_result_folder: str):
+        print(
+            "\n\n\nCheck training result folder: {} \n\n".format(training_result_folder)
+        )
+
+    def signal_handler(sig, frame):
+        on_training_end(training_result_folder)
+        sys.exit(0)
+
+    signal.signal(signal.SIGINT, signal_handler)
+
+    # 4-2) Parameters
     training_steps_per_epoch: int = (
         dataset_interface.get_training_dataset_length() // training_batch_size
     )
@@ -340,7 +354,7 @@ Training Data Folder: {}/{}
         assert isinstance(continuous_epoch, int)
         initial_epoch = continuous_epoch
 
-    # 4-2) Training
+    # 4-3) Training
     history: History = model.fit(
         training_dataset,
         epochs=training_epochs,
@@ -356,3 +370,5 @@ Training Data Folder: {}/{}
         workers=8,
         use_multiprocessing=True,
     )
+
+    on_training_end(training_result_folder)

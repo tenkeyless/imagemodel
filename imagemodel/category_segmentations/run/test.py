@@ -4,17 +4,18 @@ import sys
 sys.path.append(os.getcwd())
 
 import platform
+import signal
 from argparse import ArgumentParser, RawTextHelpFormatter
 from typing import List, Tuple
 
 import tensorflow as tf
 from image_keras.supports.folder import create_folder_if_not_exist
+from imagemodel.category_segmentations.configs.datasets import Datasets
+from imagemodel.category_segmentations.configs.losses import Losses
+from imagemodel.category_segmentations.configs.metrics import Metrics
+from imagemodel.category_segmentations.configs.optimizers import Optimizers
+from imagemodel.category_segmentations.run.common import get_run_id, loss_coords
 from keras.utils import plot_model
-from category_segmentations.configs.datasets import Datasets
-from category_segmentations.configs.losses import Losses
-from category_segmentations.configs.metrics import Metrics
-from category_segmentations.configs.optimizers import Optimizers
-from category_segmentations.run.common import get_run_id, loss_coords
 
 if __name__ == "__main__":
     # 1. Variables --------
@@ -224,6 +225,17 @@ Test Data Folder: {}/{}
         model.summary(print_fn=lambda x: fh.write(x + "\n"))
 
     # 4. Test --------
+    # 4-1) After test
+    def on_test_end(test_result_folder: str):
+        print("\n\n\nCheck test result folder: {} \n\n".format(test_result_folder))
+
+    def signal_handler(sig, frame):
+        on_test_end(test_result_folder)
+        sys.exit(0)
+
+    signal.signal(signal.SIGINT, signal_handler)
+
+    # 4-2) Test
     # ValueError: too many values to unpack (expected 2)
     test_loss, test_acc = model.evaluate(
         test_dataset, workers=8, use_multiprocessing=True
@@ -242,3 +254,5 @@ Test Accuracy: {}
     f = open(tmp_info, "w")
     f.write(result)
     f.close()
+
+    on_test_end(test_result_folder)
