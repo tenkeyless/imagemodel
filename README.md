@@ -26,15 +26,20 @@ This project runs based on Docker.
 1. Build `Dockerfile`.
 
     ```shell
-    cd code/segmentations
-    docker build . -t segmentations/tkl:1.0
+    cd [This project]
+    docker build . -t [This project]/tkl:1.0
+    ```
+
+    ```shell
+    cd code/imagemodel
+    docker build . -t imagemodel/tkl:1.0
     ```
 
     * [Result] Check docker image
 
         ```shell
         $ docker images
-        segmentations/tkl       1.0                               f1a65192f6b7        5 days ago          8.3GB
+        imagemodel/tkl          1.0                               f1a65192f6b7        5 days ago          8.3GB
         nvidia/cuda             11.0-cudnn8-runtime-ubuntu18.04   848be2582b0a        12 days ago         3.6GB
         nvidia/cuda             10.2-base                         038eb67e1704        2 weeks ago         107MB
         nvidia/cuda             latest                            752312fac010        3 weeks ago         4.69GB
@@ -56,12 +61,12 @@ This project runs based on Docker.
         --rm \
         -u $(id -u):$(id -g) \
         -v /etc/localtime:/etc/localtime:ro \
-        -v $(pwd):/segmentations \
+        -v $(pwd):/imagemodel \
         -v [result folder]:/category_segmentations_results \
         -v [tensorflow dataset folder]:/tensorflow_datasets \
         -p 6006:6006 \
-        --workdir="/segmentations" \
-        segmentations/tkl:1.0
+        --workdir="/imagemodel" \
+        imagemodel/tkl:1.0
     ```
 
     Real example.
@@ -69,19 +74,19 @@ This project runs based on Docker.
     ```shell
     mkdir ~/category_segmentations_results
     mkdir ~/tensorflow_datasets
-    cd code/segmentations
+    cd code/imagemodel
     docker run \
         --gpus all \
         -it \
         --rm \
         -u $(id -u):$(id -g) \
         -v /etc/localtime:/etc/localtime:ro \
-        -v $(pwd):/segmentations \
+        -v $(pwd):/imagemodel \
         -v ~/category_segmentations_results:/category_segmentations_results \
         -v ~/tensorflow_datasets:/tensorflow_datasets \
         -p 6006:6006 \
-        --workdir="/segmentations" \
-        segmentations/tkl:1.0
+        --workdir="/imagemodel" \
+        imagemodel/tkl:1.0
     ```
 
 ### Tips for docker

@@ -26,21 +26,21 @@ if __name__ == "__main__":
     parser.add_argument(
         "--dataset",
         type=str,
-        help="Should be one of models in `Datasets` of `segmentations/configs/datasets.py`. \n"
+        help="Should be one of models in `Datasets` of `imagemodel/category_segmentations/configs/datasets.py`. \n"
         "ex) 'oxford_iiit_pet_v3'",
     )
     parser.add_argument(
         "--model_name",
         type=str,
         required=True,
-        help="Should be one of models in `Models` of `segmentations/models/model.py`. \n"
+        help="Should be one of models in `Models` of `imagemodel/category_segmentations/configs/models.py`. \n"
         "ex) 'unet'",
     )
     parser.add_argument(
         "--result_base_folder",
         type=str,
         required=True,
-        help="Name of base folder. 'segmentations/training', '/user/name/path/folder'.",
+        help="Name of base folder. 'category_segmentations/training', '/user/name/path/folder'.",
     )
     parser.add_argument(
         "--batch_size",
