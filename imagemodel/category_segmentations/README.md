@@ -142,7 +142,7 @@ Segmentation indicating which category each pixel in the image belongs to.
       --batch_size 8 \
       --training_epochs 20 \
       --val_freq 1 \
-      --run_id tkl_20210220_174938 \
+      --run_id tkl_20210222_102839 \
       --optimizer adam2 \
       --losses 'sparse_categorical_crossentropy',1.0 \
       --metrics accuracy
@@ -156,8 +156,8 @@ Segmentation indicating which category each pixel in the image belongs to.
       --model_name unet \
       --result_base_folder /category_segmentations_results \
       --batch_size 8 \
-      --model_weight_path /category_segmentations_results/save/weights/training__model_unet__run_tkl_20210220_174938.epoch_08 \
-      --run_id tkl_20210220_175156 \
+      --model_weight_path /category_segmentations_results/save/weights/training__model_unet__run_tkl_20210222_102839.epoch_03 \
+      --run_id tkl_20210222_102851 \
       --optimizer adam2 \
       --losses 'sparse_categorical_crossentropy',1.0 \
       --metrics accuracy
@@ -171,8 +171,8 @@ Segmentation indicating which category each pixel in the image belongs to.
       --model_name unet \
       --result_base_folder /category_segmentations_results \
       --batch_size 8 \
-      --model_weight_path /category_segmentations_results/save/weights/training__model_unet__run_tkl_20210220_174938.epoch_08 \
-      --run_id tkl_20210220_175256
+      --model_weight_path /category_segmentations_results/save/weights/training__model_unet__run_tkl_20210222_102839.epoch_03 \
+      --run_id tkl_20210222_102902
     ```
 
 ### U-Net Level
@@ -190,7 +190,7 @@ Segmentation indicating which category each pixel in the image belongs to.
       --batch_size 8 \
       --training_epochs 20 \
       --val_freq 1 \
-      --run_id tkl_20210221_210326 \
+      --run_id tkl_20210222_103208 \
       --optimizer adam2 \
       --losses 'sparse_categorical_crossentropy',1.0 \
       --metrics accuracy
@@ -204,8 +204,8 @@ Segmentation indicating which category each pixel in the image belongs to.
       --model_name unet_level \
       --result_base_folder /category_segmentations_results \
       --batch_size 8 \
-      --model_weight_path /category_segmentations_results/save/weights/training__model_unet_level__run_tkl_20210221_210326.epoch_07 \
-      --run_id tkl_20210220_175156 \
+      --model_weight_path /category_segmentations_results/save/weights/training__model_unet_level__run_tkl_20210222_103208.epoch_03 \
+      --run_id tkl_20210222_103225 \
       --optimizer adam2 \
       --losses 'sparse_categorical_crossentropy',1.0 \
       --metrics accuracy
@@ -219,8 +219,8 @@ Segmentation indicating which category each pixel in the image belongs to.
       --model_name unet_level \
       --result_base_folder /category_segmentations_results \
       --batch_size 8 \
-      --model_weight_path /category_segmentations_results/save/weights/training__model_unet_level__run_tkl_20210221_210326.epoch_07 \
-      --run_id tkl_20210220_175256
+      --model_weight_path /category_segmentations_results/save/weights/training__model_unet_level__run_tkl_20210222_103208.epoch_03 \
+      --run_id tkl_20210222_103233
     ```
 
 ### U-Net based on MobileNet V2
@@ -236,7 +236,7 @@ Segmentation indicating which category each pixel in the image belongs to.
       --batch_size 8 \
       --training_epochs 20 \
       --val_freq 1 \
-      --run_id tkl_20210221_205637 \
+      --run_id tkl_20210222_103422 \
       --optimizer adam2 \
       --losses 'sparse_categorical_crossentropy_from_logits',1.0 \
       --metrics accuracy
@@ -250,8 +250,8 @@ Segmentation indicating which category each pixel in the image belongs to.
         --model_name unet_based_mobilenetv2 \
         --result_base_folder /category_segmentations_results \
         --batch_size 8 \
-        --model_weight_path /category_segmentations_results/save/weights/training__model_unet_based_mobilenetv2__run_tkl_20210221_205637.epoch_06 \
-        --run_id tkl_20210221_205609 \
+        --model_weight_path /category_segmentations_results/save/weights/training__model_unet_based_mobilenetv2__run_tkl_20210222_103422.epoch_03 \
+        --run_id tkl_20210222_103437 \
         --optimizer adam2 \
         --losses 'sparse_categorical_crossentropy_from_logits',1.0 \
         --metrics accuracy
@@ -265,6 +265,6 @@ Segmentation indicating which category each pixel in the image belongs to.
         --model_name unet_based_mobilenetv2 \
         --result_base_folder /category_segmentations_results \
         --batch_size 8 \
-        --model_weight_path /category_segmentations_results/save/weights/training__model_unet_based_mobilenetv2__run_tkl_20210221_205637.epoch_06 \
-        --run_id tkl_20210221_205753
+        --model_weight_path /category_segmentations_results/save/weights/training__model_unet_based_mobilenetv2__run_tkl_20210222_103422.epoch_03 \
+        --run_id tkl_20210222_103443
     ```
