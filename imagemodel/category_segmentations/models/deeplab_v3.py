@@ -394,11 +394,15 @@ def deeplab_v3(
 
     # upsample. align_corners 옵션 때문에 compat를 사용해야 합니다.
     size_before = tf.keras.backend.int_shape(x)
-    b4 = Lambda(
-        lambda x: tf.compat.v1.image.resize(
-            x, size_before[1:3], method="bilinear", align_corners=True
+
+    def b4_lambda(xx):
+        import tensorflow as tf
+
+        return tf.compat.v1.image.resize(
+            xx, size_before[1:3], method="bilinear", align_corners=True
         )
-    )(b4)
+
+    b4 = Lambda(b4_lambda)(b4)
 
     # simple 1x1 Conv
     b0 = Conv2D(256, (1, 1), padding="same", use_bias=False, name="aspp0")(x)
@@ -454,11 +458,15 @@ def deeplab_v3(
         # 특성 projection
         # x4 (x2) 블록
         skip_size = tf.keras.backend.int_shape(skip1)
-        x = Lambda(
-            lambda xx: tf.compat.v1.image.resize(
+
+        def x_lambda_1(xx):
+            import tensorflow as tf
+
+            return tf.compat.v1.image.resize(
                 xx, skip_size[1:3], method="bilinear", align_corners=True
             )
-        )(x)
+
+        x = Lambda(x_lambda_1)(x)
         dec_skip1 = Conv2D(
             48, (1, 1), padding="same", use_bias=False, name="feature_projection0"
         )(skip1)
@@ -481,12 +489,15 @@ def deeplab_v3(
     # 이 소스코드에서는 그림의 3x3 Conv와 달리, 1x1 Conv를 사용합니다.
     x = Conv2D(classes, (1, 1), padding="same", name=last_layer_name)(x)
     size_before3 = tf.keras.backend.int_shape(img_input)
-    x = Lambda(
-        lambda xx: tf.compat.v1.image.resize(
+
+    def x_lambda_2(xx):
+        import tensorflow as tf
+
+        return tf.compat.v1.image.resize(
             xx, size_before3[1:3], method="bilinear", align_corners=True
         )
-    )(x)
 
+    x = Lambda(x_lambda_2)(x)
     # 모델이 `input_tensor`의 잠재적 predecessors를 고려하는지 확인합니다.
     if input_tensor is not None:
         inputs = get_source_inputs(input_tensor)
@@ -776,8 +787,7 @@ class DeeplabV3Model(ModelInterface[DeeplabV3ArgumentsDict]):
             weights=option_dict.get("weights") or self.__default_args["weights"],
             input_shape=option_dict.get("input_shape")
             or self.__default_args["input_shape"],
-            classes=option_dict.get("classes")
-            or self.__default_args["classes"],
+            classes=option_dict.get("classes") or self.__default_args["classes"],
             backbone=option_dict.get("backbone") or self.__default_args["backbone"],
             OS=option_dict.get("OS") or self.__default_args["OS"],
             alpha=option_dict.get("alpha") or self.__default_args["alpha"],
@@ -806,9 +816,7 @@ class DeeplabV3Model(ModelInterface[DeeplabV3ArgumentsDict]):
 
         # classes
         classes_optional_str: Optional[str] = option_dict.get("classes")
-        classes_optional: Optional[int] = optional_map(
-            classes_optional_str, eval
-        )
+        classes_optional: Optional[int] = optional_map(classes_optional_str, eval)
 
         # backbone
         backbone_optional_str: Optional[str] = option_dict.get("backbone")
