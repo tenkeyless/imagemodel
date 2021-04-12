@@ -1,12 +1,13 @@
+from typing import Optional
+
 import tensorflow as tf
 import tensorflow_datasets as tfds
-from imagemodel.common.datasets.interfaces.data_feeder import BaseTFDSDataFeeder
+from imagemodel.common.datasets.interfaces.data_descriptor import BaseTFDataDescriptor
+from imagemodel.common.utils.tfds import append_tfds_str_range
 
 
-class BaseOxfordPetDataFeeder(BaseTFDSDataFeeder):
-    def __init__(
-        self, original_dataset: tf.data.Dataset, original_info: tfds.core.DatasetInfo
-    ):
+class OxfordIIITPetDataDescriptor(BaseTFDataDescriptor):
+    def __init__(self, original_dataset: tf.data.Dataset):
         """
         Description for tfds "oxford_iiit_pet:3.*.*".
         https://www.tensorflow.org/datasets/catalog/oxford_iiit_pet
@@ -26,16 +27,38 @@ class BaseOxfordPetDataFeeder(BaseTFDSDataFeeder):
 
         Examples
         --------
-        >>> di = tfds.load("oxford_iiit_pet:3.*.*", split="train[80%:]", with_info=True)
-        >>> data_feeder = BaseOxfordPetDataFeeder(original_dataset=di[0], original_info=di[1])
-        >>> for d in data_feeder.get_label_dataset().take(1)
+        >>> data_descriptor = OxfordPetDataDescriptor.init_with_train_dataset(
+        ...     begin_optional=None, end_optional=80
+        ... )
+        >>> for d in data_descriptor.get_label_dataset().take(1)
         ...     print(d)
         ...
         tf.Tensor(1, shape=(), dtype=int64)
         """
-        super(BaseOxfordPetDataFeeder, self).__init__(
-            original_dataset=original_dataset, original_info=original_info
+        super(OxfordIIITPetDataDescriptor, self).__init__(
+            original_dataset=original_dataset
         )
+
+    def __from_tfds_oxford_iiit_pet_3(split_option: str):
+        return tfds.load("oxford_iiit_pet:3.*.*", split=split_option, with_info=False)
+
+    @classmethod
+    def init_with_split_option(cls, split_option: str = "train"):
+        return cls(original_dataset=cls.__from_tfds_oxford_iiit_pet_3(split_option))
+
+    @classmethod
+    def init_with_train_dataset(
+        cls, begin_optional: Optional[int] = None, end_optional: Optional[int] = None
+    ):
+        option_string = append_tfds_str_range("train", begin_optional, end_optional)
+        return cls.init_with_split_option(option_string)
+
+    @classmethod
+    def init_with_test_dataset(
+        cls, begin_optional: Optional[int] = None, end_optional: Optional[int] = None
+    ):
+        option_string = append_tfds_str_range("test", begin_optional, end_optional)
+        return cls.init_with_split_option(option_string)
 
     def get_img_dataset(self) -> tf.data.Dataset:
         """

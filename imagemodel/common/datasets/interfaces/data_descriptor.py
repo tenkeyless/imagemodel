@@ -1,10 +1,9 @@
 from abc import ABCMeta, abstractmethod
 
 import tensorflow as tf
-import tensorflow_datasets as tfds
 
 
-class TFDSDataFeeder(metaclass=ABCMeta):
+class TFDataDescriptor(metaclass=ABCMeta):
     """
     <Interface>
 
@@ -14,8 +13,6 @@ class TFDSDataFeeder(metaclass=ABCMeta):
     ----------
     original_dataset : tf.data.Dataset
         A dataset of `tf.data.Dataset`.
-    original_info : tfds.core.DatasetInfo
-        Dataset info.
     """
 
     @classmethod
@@ -23,23 +20,19 @@ class TFDSDataFeeder(metaclass=ABCMeta):
         return (
             hasattr(subclass, "original_dataset")
             and callable(subclass.original_dataset)
-            and hasattr(subclass, "original_info")
-            and callable(subclass.original_info)
             or NotImplemented
         )
 
     @property
     @abstractmethod
     def original_dataset(self) -> tf.data.Dataset:
+        """
+        tf.data.Dataset: Original dataset.
+        """
         raise NotImplementedError
 
-    @property
-    @abstractmethod
-    def original_info(self) -> tfds.core.DatasetInfo:
-        raise NotImplementedError
 
-
-class BaseTFDSDataFeeder(TFDSDataFeeder):
+class BaseTFDataDescriptor(TFDataDescriptor):
     """
     Base implementation of `TFDSDataFeeder`.
 
@@ -51,16 +44,10 @@ class BaseTFDSDataFeeder(TFDSDataFeeder):
         Dataset info.
     """
 
-    def __init__(
-        self, original_dataset: tf.data.Dataset, original_info: tfds.core.DatasetInfo
-    ):
+    @abstractmethod
+    def __init__(self, original_dataset: tf.data.Dataset):
         self._original_dataset = original_dataset
-        self._original_info = original_info
 
     @property
     def original_dataset(self) -> tf.data.Dataset:
         return self._original_dataset
-
-    @property
-    def original_info(self) -> tfds.core.DatasetInfo:
-        return self._original_info

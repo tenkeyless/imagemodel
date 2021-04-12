@@ -4,18 +4,45 @@ from typing import List
 import tensorflow as tf
 
 
-class TFSupervisionFeeder(metaclass=ABCMeta):
+class TFSupervisionPurposeInputHelper(metaclass=ABCMeta):
     """
-    <Interface>
-
-    Methods for supervised learning.
+    <Interface> Methods input data for supervised learning.
 
     Methods
     -------
     get_inputs() -> List[tf.data.Dataset]
-        Dataset for input.
+    """
+
+    def get_inputs(self) -> List[tf.data.Dataset]:
+        pass
+
+
+class TFSupervisionPurposeOutputHelper(metaclass=ABCMeta):
+    """
+    <Interface> Methods output data for supervised learning.
+
+    Methods
+    -------
     get_outputs() -> List[tf.data.Dataset]
-        Dataset for output.
+    """
+
+    def get_outputs(self) -> List[tf.data.Dataset]:
+        pass
+
+
+class TFSupervisionFeeder(metaclass=ABCMeta):
+    """
+    <Interface> Methods for supervised learning.
+
+    Properties
+    ----------
+    input_helper: TFSupervisionPurposeInputHelper
+        Input helper.
+    output_helper: TFSupervisionPurposeOutputHelper
+        Output helper.
+
+    Methods
+    -------
     get_supervised_dataset() -> tf.data.Dataset
         With default implementation.
         Input, Output dataset for supervised training.
@@ -26,34 +53,26 @@ class TFSupervisionFeeder(metaclass=ABCMeta):
         return (
             hasattr(subclass, "get_supervised_dataset")
             and callable(subclass.get_supervised_dataset)
-            and hasattr(subclass, "get_inputs")
-            and callable(subclass.get_inputs)
-            and hasattr(subclass, "get_outputs")
-            and callable(subclass.get_outputs)
+            and hasattr(subclass, "input_helper")
+            and callable(subclass.input_helper)
+            and hasattr(subclass, "output_helper")
+            and callable(subclass.output_helper)
             or NotImplemented
         )
 
+    @property
     @abstractmethod
-    def get_inputs(self) -> List[tf.data.Dataset]:
+    def input_helper(self) -> TFSupervisionPurposeInputHelper:
         """
-        It returns input dataset.
-
-        Returns
-        -------
-        List[tf.data.Dataset]
-            Input dataset list.
+        TFSupervisionPurposeInputHelper: It returns input helper.
         """
         raise NotImplementedError
 
+    @property
     @abstractmethod
-    def get_outputs(self) -> List[tf.data.Dataset]:
+    def output_helper(self) -> TFSupervisionPurposeOutputHelper:
         """
-        It returns output dataset.
-
-        Returns
-        -------
-        List[tf.data.Dataset]
-            Output dataset list.
+        TFSupervisionPurposeOutputHelper: It returns output helper.
         """
         raise NotImplementedError
 
@@ -66,6 +85,7 @@ class TFSupervisionFeeder(metaclass=ABCMeta):
         tf.data.Dataset
             It returns tuple of `(Tuple of inputs, Tuple of outputs)`.
         """
-        input_dataset = tf.data.Dataset.zip(tuple(self.get_inputs()))
-        output_dataset = tf.data.Dataset.zip(tuple(self.get_outputs()))
+
+        input_dataset = tf.data.Dataset.zip(tuple(self.input_helper.get_inputs()))
+        output_dataset = tf.data.Dataset.zip(tuple(self.output_helper.get_outputs()))
         return tf.data.Dataset.zip((input_dataset, output_dataset))
