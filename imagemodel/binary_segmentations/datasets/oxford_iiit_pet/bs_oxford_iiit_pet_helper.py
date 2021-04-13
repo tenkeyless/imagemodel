@@ -11,20 +11,20 @@ from imagemodel.binary_segmentations.datasets.oxford_iiit_pet.oxford_iiit_pet_da
 @tf.autograph.experimental.do_not_convert
 def oxford_pet_mask_to_binary(label: tf.Tensor) -> tf.Tensor:
     """
-    Change 1=Background, 2=Border, 0=Object to 1=Object,Border 0=Background.
+    Change 2=Background, 3=Border, 1=Object to 1=Object,Border 0=Background.
 
     Parameters
     ----------
     label : `tf.Tensor`
-        1=Background, 2=Border, 0=Object image
+        1=Object, 2=Background, 3=Border image
 
     Returns
     -------
     `tf.Tensor`
         1=Object,Border 0=Background image
     """
-    casted_label = tf.cast(label, tf.int8)
-    casted_label = casted_label - 1
+    casted_label = tf.cast(label, tf.int16)
+    casted_label = casted_label - 2
     result = tf.math.abs(casted_label)
     return tf.cast(result, tf.uint8)
 
@@ -32,19 +32,20 @@ def oxford_pet_mask_to_binary(label: tf.Tensor) -> tf.Tensor:
 @tf.autograph.experimental.do_not_convert
 def oxford_pet_mask_to_binary2(label: tf.Tensor) -> tf.Tensor:
     """
-    Change 1=Background, 2=Border, 0=Object to 1=Object 0=Background,Border.
+    Change 2=Background, 3=Border, 1=Object to 1=Object 0=Background,Border.
 
     Parameters
     ----------
     label : `tf.Tensor`
-        1=Background, 2=Border, 0=Object image
+        1=Object, 2=Background, 3=Border image
 
     Returns
     -------
     `tf.Tensor`
         1=Object 0=Background,Border image
     """
-    casted_label = tf.cast(label, tf.int8)
+    casted_label = tf.cast(label, tf.int16)
+    casted_label = -casted_label + 2
     casted_label = tf.clip_by_value(casted_label, 0, 1)
     result = 1 - casted_label
     return tf.cast(result, tf.uint8)
