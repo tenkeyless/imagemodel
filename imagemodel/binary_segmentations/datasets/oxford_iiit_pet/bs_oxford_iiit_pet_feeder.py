@@ -1,33 +1,33 @@
 from abc import abstractmethod
 
 from imagemodel.binary_segmentations.datasets.bs_helper import (
-    BSPurposeInputHelper,
-    BSPurposeOutputHelper,
+    BSFeederInputHelper,
+    BSFeederOutputHelper,
 )
 from imagemodel.binary_segmentations.datasets.oxford_iiit_pet.bs_oxford_iiit_pet_helper import (
-    BSOxfordIIITPetPurposeInputHelper,
-    BSOxfordIIITPetPurposeOutputHelper,
+    BSOxfordIIITPetFeederInputHelper,
+    BSOxfordIIITPetFeederOutputHelper,
 )
 from imagemodel.binary_segmentations.datasets.oxford_iiit_pet.oxford_iiit_pet_data_descriptor import (
     OxfordIIITPetDataDescriptor,
 )
-from imagemodel.common.datasets.interfaces.feeder import TFSupervisionFeeder
+from imagemodel.common.datasets.manipulator.manipulator import SupervisedManipulator
 
 
-class BSOxfordIIITPetFeeder(TFSupervisionFeeder):
+class BSOxfordIIITPetFeeder(SupervisedManipulator):
     @abstractmethod
     def __init__(self, oxford_iiit_pet_3_data_descriptor: OxfordIIITPetDataDescriptor):
         self._oxford_iiit_pet_3_data_descriptor = oxford_iiit_pet_3_data_descriptor
 
     @property
-    def input_helper(self) -> BSPurposeInputHelper:
-        return BSOxfordIIITPetPurposeInputHelper(
+    def input_helper(self) -> BSFeederInputHelper:
+        return BSOxfordIIITPetFeederInputHelper(
             data_descriptor=self._oxford_iiit_pet_3_data_descriptor
         )
 
     @property
-    def output_helper(self) -> BSPurposeOutputHelper:
-        return BSOxfordIIITPetPurposeOutputHelper(
+    def output_helper(self) -> BSFeederOutputHelper:
+        return BSOxfordIIITPetFeederOutputHelper(
             data_descriptor=self._oxford_iiit_pet_3_data_descriptor
         )
 

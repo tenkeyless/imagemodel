@@ -1,13 +1,13 @@
 from typing import List
 
 import tensorflow as tf
-from imagemodel.common.datasets.interfaces.feeder import (
-    TFSupervisionPurposeInputHelper,
-    TFSupervisionPurposeOutputHelper,
+from imagemodel.common.datasets.manipulator.helper import (
+    ManipulatorInputHelper,
+    ManipulatorOutputHelper,
 )
 
 
-class BSPurposeInputHelper(TFSupervisionPurposeInputHelper):
+class BSFeederInputHelper(ManipulatorInputHelper):
     """
     <Interface>
 
@@ -37,7 +37,7 @@ class BSPurposeInputHelper(TFSupervisionPurposeInputHelper):
         return [self.get_image()]
 
 
-class BSPurposeOutputHelper(TFSupervisionPurposeOutputHelper):
+class BSFeederOutputHelper(ManipulatorOutputHelper):
     """
     <Interface>
 

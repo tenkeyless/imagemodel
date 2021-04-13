@@ -1,7 +1,7 @@
 import tensorflow as tf
 from imagemodel.binary_segmentations.datasets.bs_helper import (
-    BSPurposeInputHelper,
-    BSPurposeOutputHelper,
+    BSFeederInputHelper,
+    BSFeederOutputHelper,
 )
 from imagemodel.binary_segmentations.datasets.oxford_iiit_pet.oxford_iiit_pet_data_descriptor import (
     OxfordIIITPetDataDescriptor,
@@ -51,7 +51,7 @@ def oxford_pet_mask_to_binary2(label: tf.Tensor) -> tf.Tensor:
     return tf.cast(result, tf.uint8)
 
 
-class BSOxfordIIITPetPurposeInputHelper(BSPurposeInputHelper):
+class BSOxfordIIITPetFeederInputHelper(BSFeederInputHelper):
     def __init__(self, data_descriptor: OxfordIIITPetDataDescriptor):
         self._data_descriptor = data_descriptor
 
@@ -59,7 +59,7 @@ class BSOxfordIIITPetPurposeInputHelper(BSPurposeInputHelper):
         return self._data_descriptor.get_img_dataset()
 
 
-class BSOxfordIIITPetPurposeOutputHelper(BSPurposeOutputHelper):
+class BSOxfordIIITPetFeederOutputHelper(BSFeederOutputHelper):
     def __init__(self, data_descriptor: OxfordIIITPetDataDescriptor):
         self._data_descriptor = data_descriptor
 
@@ -67,7 +67,7 @@ class BSOxfordIIITPetPurposeOutputHelper(BSPurposeOutputHelper):
         return self._data_descriptor.get_mask_dataset().map(oxford_pet_mask_to_binary)
 
 
-class BSOxfordIIITPetPurposeOutputHelper2(BSPurposeOutputHelper):
+class BSOxfordIIITPetFeederOutputHelper2(BSFeederOutputHelper):
     def __init__(self, data_descriptor: OxfordIIITPetDataDescriptor):
         self._data_descriptor = data_descriptor
 
