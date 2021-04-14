@@ -61,12 +61,12 @@ class Manipulator(metaclass=ABCMeta):
 
 
 class PassManipulator(Manipulator):
-    def __init__(self, datasets: List[tf.data.Dataset]):
-        self._datasets = datasets
+    def __init__(self, manipulator: Manipulator):
+        self._manipulator: Manipulator = manipulator
 
     @property
     def input_helper(self) -> ManipulatorInputHelper:
-        return PassManipulatorInputHelper(self._datasets)
+        return PassManipulatorInputHelper(self._manipulator.get_input_dataset())
 
 
 class SupervisedManipulator(Manipulator, metaclass=ABCMeta):
@@ -136,27 +136,19 @@ class PassSupervisedManipulator(SupervisedManipulator):
 
     Examples
     --------
-    >>> from imagemodel.binary_segmentations.datasets.oxford_iiit_pet.bs_oxford_iiit_pet_feeder import BSOxfordIIITPetTrainingFeeder
+    >>> from imagemodel.binary_segmentations.datasets.oxford_iiit_pet.feeder import BSOxfordIIITPetTrainingFeeder
     >>> training_feeder = BSOxfordIIITPetTrainingFeeder()
     >>> from imagemodel.common.datasets.manipulator.manipulator import PassSupervisedManipulator
-    >>> supervised_training_manipulator = PassSupervisedManipulator(
-    ...     training_feeder.input_helper.get_inputs(),
-    ...     training_feeder.output_helper.get_outputs()
-    ... )
+    >>> supervised_training_manipulator = PassSupervisedManipulator(training_feeder)
     """
 
-    def __init__(
-        self,
-        input_datasets: List[tf.data.Dataset],
-        output_datasets: List[tf.data.Dataset],
-    ):
-        self._input_datasets = input_datasets
-        self._output_datasets = output_datasets
+    def __init__(self, manipulator: SupervisedManipulator):
+        self._manipulator: SupervisedManipulator = manipulator
 
     @property
     def input_helper(self) -> ManipulatorInputHelper:
-        return PassManipulatorInputHelper(self._input_datasets)
+        return PassManipulatorInputHelper(self._manipulator.get_input_dataset())
 
     @property
     def output_helper(self) -> ManipulatorOutputHelper:
-        return PassManipulatorOutputHelper(self._output_datasets)
+        return PassManipulatorOutputHelper(self._manipulator.get_output_dataset())
