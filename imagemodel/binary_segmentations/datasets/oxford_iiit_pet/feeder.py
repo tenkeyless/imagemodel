@@ -1,6 +1,6 @@
 from abc import abstractmethod
 
-from imagemodel.binary_segmentations.datasets.bs_helper import (
+from imagemodel.binary_segmentations.datasets.bs_feeder_helper import (
     BSFeederInputHelper,
     BSFeederOutputHelper,
 )
