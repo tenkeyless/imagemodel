@@ -2,7 +2,7 @@ from typing import Optional
 
 import tensorflow as tf
 import tensorflow_datasets as tfds
-from imagemodel.common.datasets.interfaces.data_descriptor import BaseTFDataDescriptor
+from imagemodel.common.datasets.descriptor.data_descriptor import BaseTFDataDescriptor
 from imagemodel.common.utils.tfds import append_tfds_str_range
 
 
