@@ -1,4 +1,4 @@
-from typing import Callable, List
+from typing import Callable, List, Tuple
 
 import tensorflow as tf
 from imagemodel.common.datasets.manipulator.helper import (
@@ -7,7 +7,7 @@ from imagemodel.common.datasets.manipulator.helper import (
 )
 
 
-class BSAugmenterInputHelper(ManipulatorInputHelper):
+class BSRegularizerInputHelper(ManipulatorInputHelper):
     """
     <Interface>
 
@@ -33,17 +33,17 @@ class BSAugmenterInputHelper(ManipulatorInputHelper):
         """
         pass
 
-    def image_augment_func(self) -> List[Callable[[tf.Tensor], tf.Tensor]]:
+    def image_regularizer_func(self) -> List[Callable[[tf.Tensor], tf.Tensor]]:
         pass
 
     def get_inputs(self) -> List[tf.data.Dataset]:
         image_dataset = self.get_image_dataset()
-        for f in self.image_augment_func():
+        for f in self.image_regularizer_func():
             image_dataset = image_dataset.map(f)
         return [image_dataset]
 
 
-class BSAugmenterOutputHelper(ManipulatorOutputHelper):
+class BSRegularizerOutputHelper(ManipulatorOutputHelper):
     """
     <Interface>
 
@@ -69,37 +69,37 @@ class BSAugmenterOutputHelper(ManipulatorOutputHelper):
         """
         pass
 
-    def mask_augment_func(self) -> List[Callable[[tf.Tensor], tf.Tensor]]:
+    def mask_regularizer_func(self) -> List[Callable[[tf.Tensor], tf.Tensor]]:
         pass
 
     def get_outputs(self) -> List[tf.data.Dataset]:
         mask_dataset = self.get_mask_dataset()
-        for f in self.mask_augment_func():
+        for f in self.mask_regularizer_func():
             mask_dataset = mask_dataset.map(f)
         return [mask_dataset]
 
 
-class BaseBSAugmenterInOutHelper(BSAugmenterInputHelper, BSAugmenterOutputHelper):
+class BaseBSRegularizerInOutHelper(BSRegularizerInputHelper, BSRegularizerOutputHelper):
     def __init__(
         self,
         input_datasets: List[tf.data.Dataset],
         output_datasets: List[tf.data.Dataset],
+        height_width_tuple: Tuple[int, int],
     ):
         self._input_datasets: List[tf.data.Dataset] = input_datasets
         self._output_datasets: List[tf.data.Dataset] = output_datasets
+        self._height_width_tuple: Tuple[int, int] = height_width_tuple
 
     def get_image_dataset(self) -> tf.data.Dataset:
         return self._input_datasets[0]
 
-    def image_augment_func(self) -> List[Callable[[tf.Tensor], tf.Tensor]]:
-        f1 = lambda img: tf.image.random_flip_left_right(img, 42)
-        f2 = lambda img: tf.image.random_flip_up_down(img, 42)
-        return [f1, f2]
+    def image_regularizer_func(self) -> List[Callable[[tf.Tensor], tf.Tensor]]:
+        f1 = lambda img: tf.image.resize(img, self._height_width_tuple)
+        return [f1]
 
     def get_mask_dataset(self) -> tf.data.Dataset:
         return self._output_datasets[0]
 
-    def mask_augment_func(self) -> List[Callable[[tf.Tensor], tf.Tensor]]:
-        f1 = lambda img: tf.image.random_flip_left_right(img, 42)
-        f2 = lambda img: tf.image.random_flip_up_down(img, 42)
-        return [f1, f2]
+    def mask_regularizer_func(self) -> List[Callable[[tf.Tensor], tf.Tensor]]:
+        f1 = lambda img: tf.image.resize(img, self._height_width_tuple)
+        return [f1]
