@@ -3,7 +3,7 @@ from imagemodel.binary_segmentations.datasets.bs_helper import (
     BSFeederInputHelper,
     BSFeederOutputHelper,
 )
-from imagemodel.binary_segmentations.datasets.oxford_iiit_pet.oxford_iiit_pet_data_descriptor import (
+from imagemodel.common.datasets.descriptor.oxford_iiit_pet_data_descriptor import (
     OxfordIIITPetDataDescriptor,
 )
 
