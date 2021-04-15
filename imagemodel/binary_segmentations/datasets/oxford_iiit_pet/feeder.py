@@ -1,5 +1,6 @@
 from abc import abstractmethod
 
+from imagemodel.binary_segmentations.datasets.bs_feeder import BSFeeder
 from imagemodel.binary_segmentations.datasets.bs_feeder_helper import (
     BSFeederInputHelper,
     BSFeederOutputHelper,
@@ -11,10 +12,9 @@ from imagemodel.binary_segmentations.datasets.oxford_iiit_pet.feeder_helper impo
 from imagemodel.common.datasets.descriptor.oxford_iiit_pet_data_descriptor import (
     OxfordIIITPetDataDescriptor,
 )
-from imagemodel.common.datasets.manipulator.manipulator import SupervisedManipulator
 
 
-class BSOxfordIIITPetFeeder(SupervisedManipulator):
+class BSOxfordIIITPetFeeder(BSFeeder):
     @abstractmethod
     def __init__(self, oxford_iiit_pet_3_data_descriptor: OxfordIIITPetDataDescriptor):
         self._oxford_iiit_pet_3_data_descriptor = oxford_iiit_pet_3_data_descriptor
