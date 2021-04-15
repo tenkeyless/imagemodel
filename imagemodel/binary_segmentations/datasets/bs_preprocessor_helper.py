@@ -79,6 +79,31 @@ class BSPreprocessorOutputHelper(ManipulatorOutputHelper):
         return [mask_dataset]
 
 
+class BaseBSPreprocessorInputHelper(BSPreprocessorInputHelper):
+    def __init__(self, datasets: List[tf.data.Dataset]):
+        self._datasets: List[tf.data.Dataset] = datasets
+
+    def get_image_dataset(self) -> tf.data.Dataset:
+        return self._datasets[0]
+
+    def image_preprocess_func(self) -> List[Callable[[tf.Tensor], tf.Tensor]]:
+        f1 = lambda img: tf.cast(img, tf.float32) / 255.0
+        return [f1]
+
+
+class BaseBSPreprocessorOutputHelper(BSPreprocessorOutputHelper):
+    def __init__(self, datasets: List[tf.data.Dataset]):
+        self._datasets: List[tf.data.Dataset] = datasets
+
+    def get_mask_dataset(self) -> tf.data.Dataset:
+        return self._datasets[0]
+
+    def mask_preprocess_func(self) -> List[Callable[[tf.Tensor], tf.Tensor]]:
+        f1 = lambda img: tf.cast(img, tf.float32)
+        f2 = lambda img: tf.cast(tf.greater(img, 0.5), tf.float32)
+        return [f1, f2]
+
+
 class BaseBSPreprocessorInOutHelper(
     BSPreprocessorInputHelper, BSPreprocessorOutputHelper
 ):
