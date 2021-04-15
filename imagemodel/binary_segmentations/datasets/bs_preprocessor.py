@@ -49,15 +49,10 @@ class BaseBSPreprocessor(BSPreprocessor):
     ...     cv2.imwrite("augmented_mask_{:02d}.png".format(index), output_mask.numpy()*255)
     """
 
-    def __init__(
-        self,
-        manipulator: SupervisedManipulator,
-        height_width_tuple: Tuple[int, int] = (256, 256),
-    ):
-        self._manipulator: SupervisedManipulator = manipulator
+    def __init__(self, manipulator: SupervisedManipulator):
         self._inout_helper = BaseBSPreprocessorInOutHelper(
-            input_datasets=self._manipulator.get_input_dataset(),
-            output_datasets=self._manipulator.get_output_dataset(),
+            input_datasets=manipulator.get_input_dataset(),
+            output_datasets=manipulator.get_output_dataset(),
         )
 
     @property

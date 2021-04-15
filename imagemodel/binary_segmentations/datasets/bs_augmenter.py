@@ -49,10 +49,9 @@ class BaseBSAugmenter(BSAugmenter):
     """
 
     def __init__(self, manipulator: SupervisedManipulator):
-        self._manipulator: SupervisedManipulator = manipulator
         self._inout_helper = BaseBSAugmenterInOutHelper(
-            input_datasets=self._manipulator.get_input_dataset(),
-            output_datasets=self._manipulator.get_output_dataset(),
+            input_datasets=manipulator.get_input_dataset(),
+            output_datasets=manipulator.get_output_dataset(),
         )
 
     @property

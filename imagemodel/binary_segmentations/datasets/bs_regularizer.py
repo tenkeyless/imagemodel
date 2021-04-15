@@ -54,10 +54,9 @@ class BaseBSRegularizer(BSRegularizer):
         manipulator: SupervisedManipulator,
         height_width_tuple: Tuple[int, int] = (256, 256),
     ):
-        self._manipulator: SupervisedManipulator = manipulator
         self._inout_helper = BaseBSRegularizerInOutHelper(
-            input_datasets=self._manipulator.get_input_dataset(),
-            output_datasets=self._manipulator.get_output_dataset(),
+            input_datasets=manipulator.get_input_dataset(),
+            output_datasets=manipulator.get_output_dataset(),
             height_width_tuple=height_width_tuple,
         )
 
