@@ -1,7 +1,8 @@
 from abc import ABCMeta, abstractmethod
-from typing import List
+from typing import List, TypeVar, Generic
 
 import tensorflow as tf
+
 from imagemodel.common.datasets.manipulator.helper import (
     ManipulatorInputHelper,
     ManipulatorOutputHelper,
@@ -9,8 +10,10 @@ from imagemodel.common.datasets.manipulator.helper import (
     PassManipulatorOutputHelper,
 )
 
+HI = TypeVar('HI', bound=ManipulatorInputHelper)
 
-class Manipulator(metaclass=ABCMeta):
+
+class Manipulator(Generic[HI], metaclass=ABCMeta):
     """
     <Interface>
 
@@ -28,16 +31,16 @@ class Manipulator(metaclass=ABCMeta):
     @classmethod
     def __subclasshook__(cls, subclass):
         return (
-            hasattr(subclass, "get_zipped_dataset")
-            and callable(subclass.get_zipped_dataset)
-            and hasattr(subclass, "input_helper")
-            and callable(subclass.input_helper)
-            or NotImplemented
+                hasattr(subclass, "get_zipped_dataset")
+                and callable(subclass.get_zipped_dataset)
+                and hasattr(subclass, "input_helper")
+                and callable(subclass.input_helper)
+                or NotImplemented
         )
 
     @property
     @abstractmethod
-    def input_helper(self) -> ManipulatorInputHelper:
+    def input_helper(self) -> HI:
         """
         ManipulatorInputHelper: It returns input helper.
         """
@@ -69,7 +72,10 @@ class PassManipulator(Manipulator):
         return PassManipulatorInputHelper(self._manipulator.get_input_dataset())
 
 
-class SupervisedManipulator(Manipulator, metaclass=ABCMeta):
+HO = TypeVar('HO', bound=PassManipulatorOutputHelper)
+
+
+class SupervisedManipulator(Manipulator[HI], Generic[HI, HO], metaclass=ABCMeta):
     """
     <Interface>
 
@@ -90,18 +96,18 @@ class SupervisedManipulator(Manipulator, metaclass=ABCMeta):
     @classmethod
     def __subclasshook__(cls, subclass):
         return (
-            hasattr(subclass, "get_zipped_dataset")
-            and callable(subclass.get_zipped_dataset)
-            and hasattr(subclass, "input_helper")
-            and callable(subclass.input_helper)
-            and hasattr(subclass, "output_helper")
-            and callable(subclass.output_helper)
-            or NotImplemented
+                hasattr(subclass, "get_zipped_dataset")
+                and callable(subclass.get_zipped_dataset)
+                and hasattr(subclass, "input_helper")
+                and callable(subclass.input_helper)
+                and hasattr(subclass, "output_helper")
+                and callable(subclass.output_helper)
+                or NotImplemented
         )
 
     @property
     @abstractmethod
-    def output_helper(self) -> ManipulatorOutputHelper:
+    def output_helper(self) -> HO:
         """
         ManipulatorOutputHelper: It returns output helper.
         """
@@ -129,15 +135,10 @@ class PassSupervisedManipulator(SupervisedManipulator):
     """
     [summary]
 
-    Parameters
-    ----------
-    SupervisedManipulator : [type]
-        [description]
-
     Examples
     --------
-    >>> from imagemodel.binary_segmentations.datasets.oxford_iiit_pet.feeder import BSOxfordIIITPetTrainingFeeder
-    >>> training_feeder = BSOxfordIIITPetTrainingFeeder()
+    >>> from imagemodel.binary_segmentations.datasets.oxford_iiit_pet import feeder
+    >>> training_feeder = feeder.BSOxfordIIITPetTrainingFeeder()
     >>> from imagemodel.common.datasets.manipulator.manipulator import PassSupervisedManipulator
     >>> supervised_training_manipulator = PassSupervisedManipulator(training_feeder)
     """
