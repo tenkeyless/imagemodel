@@ -47,8 +47,7 @@ def oxford_pet_mask_to_binary2(label: tf.Tensor) -> tf.Tensor:
     """
     casted_label = tf.cast(label, tf.int16)
     casted_label = -casted_label + 2
-    casted_label = tf.clip_by_value(casted_label, 0, 1)
-    result = 1 - casted_label
+    result = tf.clip_by_value(casted_label, 0, 1)
     return tf.cast(result, tf.uint8)
 
 

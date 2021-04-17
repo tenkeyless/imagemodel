@@ -27,10 +27,10 @@ class BaseBSAugmenter(BSAugmenter):
     >>> for index, inout in enumerate(augmenter.get_zipped_dataset().take(10)):
     ...     input_dataset = inout[0]
     ...     input_img = input_dataset[0]
-    ...     cv2.imwrite("augmented_img_{:02d}.png".format(index), input_img.numpy())
+    ...     cv2.imwrite("augmented_{:02d}_img.png".format(index), input_img.numpy())
     ...     output_dataset = inout[1]
     ...     output_mask = output_dataset[0]
-    ...     cv2.imwrite("augmented_mask_{:02d}.png".format(index), output_mask.numpy()*255)
+    ...     cv2.imwrite("augmented_{:02d}_mask.png".format(index), output_mask.numpy()*255)
     """
 
     def __init__(self, manipulator: SupervisedManipulator):
