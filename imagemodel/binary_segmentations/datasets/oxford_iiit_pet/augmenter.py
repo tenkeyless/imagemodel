@@ -12,7 +12,7 @@ from imagemodel.binary_segmentations.datasets.oxford_iiit_pet.augmenter_helper i
 from imagemodel.common.datasets.manipulator.manipulator import SupervisedManipulator
 
 
-class BSOxfordIIITPetAugmenter(BSAugmenter[BSAugmenterInputHelper, BSAugmenterOutputHelper]):
+class BSOxfordIIITPetAugmenter(BSAugmenter):
     @abstractmethod
     def __init__(self, manipulator: SupervisedManipulator):
         self._manipulator: SupervisedManipulator = manipulator
