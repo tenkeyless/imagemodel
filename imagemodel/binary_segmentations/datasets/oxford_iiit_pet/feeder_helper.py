@@ -1,4 +1,5 @@
 import tensorflow as tf
+
 from imagemodel.binary_segmentations.datasets.bs_feeder_helper import (
     BSFeederInputHelper,
     BSFeederOutputHelper,

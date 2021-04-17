@@ -1,6 +1,7 @@
 from typing import Callable
 
 import tensorflow as tf
+
 from imagemodel.binary_segmentations.datasets.bs_augmenter import (
     BaseBSAugmenter,
     BSAugmenter,
@@ -18,32 +19,28 @@ from imagemodel.binary_segmentations.datasets.bs_regularizer import (
 
 class BSPipeline:
     def __init__(
-        self,
-        feeder: BSFeeder,
-        augmenter_func: Callable[[BSFeeder], BSAugmenter] = BaseBSAugmenter,
-        regularizer_func: Callable[[BSAugmenter], BSRegularizer] = BaseBSRegularizer,
-        preprocessor_func: Callable[
-            [BSRegularizer], BSPreprocessor
-        ] = BaseBSPreprocessor,
+            self,
+            feeder: BSFeeder,
+            augmenter_func: Callable[[BSFeeder], BSAugmenter] = BaseBSAugmenter,
+            regularizer_func: Callable[[BSAugmenter], BSRegularizer] = BaseBSRegularizer,
+            preprocessor_func: Callable[
+                [BSRegularizer], BSPreprocessor
+            ] = BaseBSPreprocessor,
     ):
         """
-        [summary]
+        Pipeline for Binary Segmentation.
 
         Parameters
         ----------
-        feeder : BSFeeder
-            [description]
-        augmenter_func : Callable[[BSFeeder], BSAugmenter], optional, default=BaseBSAugmenter
-            [description]
-        regularizer_func : Callable[[BSAugmenter], BSRegularizer], optional, default=BaseBSRegularizer
-            [description]
-        preprocessor_func : Callable[[BSRegularizer], BSPreprocessor], optional, default=BaseBSPreprocessor
-            [description]
-
+        feeder: BSFeeder
+        augmenter_func: Callable[[BSFeeder], BSAugmenter], default=BaseBSAugmenter
+        regularizer_func: Callable[[BSAugmenter], BSRegularizer], default=BaseBSRegularizer
+        preprocessor_func: Callable[[BSRegularizer], BSPreprocessor], default=BaseBSPreprocessor
+        
         Examples
         --------
-        >>> from imagemodel.binary_segmentations.datasets.oxford_iiit_pet.feeder import BSOxfordIIITPetTrainingFeeder
-        >>> training_feeder = BSOxfordIIITPetTrainingFeeder()
+        >>> from imagemodel.binary_segmentations.datasets.oxford_iiit_pet import feeder
+        >>> training_feeder = feeder.BSOxfordIIITPetTrainingFeeder()
         >>> from imagemodel.binary_segmentations.datasets.pipeline import BSPipeline
         >>> bs_pipeline = BSPipeline(training_feeder)
         >>> for d in bs_pipeline.get_zipped_dataset().take(1):

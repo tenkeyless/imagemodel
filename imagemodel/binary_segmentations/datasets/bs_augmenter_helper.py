@@ -1,6 +1,7 @@
 from typing import Callable, List
 
 import tensorflow as tf
+
 from imagemodel.common.datasets.manipulator.helper import (
     ManipulatorInputHelper,
     ManipulatorOutputHelper,
@@ -87,8 +88,7 @@ class BaseBSAugmenterInputHelper(BSAugmenterInputHelper):
         return self._datasets[0]
 
     def image_augment_func(self) -> List[Callable[[tf.Tensor], tf.Tensor]]:
-        f1 = lambda img: tf.image.random_flip_left_right(img, 42)
-        return [f1]
+        return [lambda img: tf.image.random_flip_left_right(img, 42)]
 
 
 class BaseBSAugmenterOutputHelper(BSAugmenterOutputHelper):
@@ -99,15 +99,14 @@ class BaseBSAugmenterOutputHelper(BSAugmenterOutputHelper):
         return self._datasets[0]
 
     def mask_augment_func(self) -> List[Callable[[tf.Tensor], tf.Tensor]]:
-        f1 = lambda img: tf.image.random_flip_left_right(img, 42)
-        return [f1]
+        return [lambda img: tf.image.random_flip_left_right(img, 42)]
 
 
 class BaseBSAugmenterInOutHelper(BSAugmenterInputHelper, BSAugmenterOutputHelper):
     def __init__(
-        self,
-        input_datasets: List[tf.data.Dataset],
-        output_datasets: List[tf.data.Dataset],
+            self,
+            input_datasets: List[tf.data.Dataset],
+            output_datasets: List[tf.data.Dataset],
     ):
         self._input_datasets: List[tf.data.Dataset] = input_datasets
         self._output_datasets: List[tf.data.Dataset] = output_datasets
@@ -116,14 +115,12 @@ class BaseBSAugmenterInOutHelper(BSAugmenterInputHelper, BSAugmenterOutputHelper
         return self._input_datasets[0]
 
     def image_augment_func(self) -> List[Callable[[tf.Tensor], tf.Tensor]]:
-        f1 = lambda img: tf.image.random_flip_left_right(img, 42)
-        f2 = lambda img: tf.image.random_flip_up_down(img, 42)
-        return [f1, f2]
+        return [lambda img: tf.image.random_flip_left_right(img, 42),
+                lambda img: tf.image.random_flip_up_down(img, 42)]
 
     def get_mask_dataset(self) -> tf.data.Dataset:
         return self._output_datasets[0]
 
     def mask_augment_func(self) -> List[Callable[[tf.Tensor], tf.Tensor]]:
-        f1 = lambda img: tf.image.random_flip_left_right(img, 42)
-        f2 = lambda img: tf.image.random_flip_up_down(img, 42)
-        return [f1, f2]
+        return [lambda img: tf.image.random_flip_left_right(img, 42),
+                lambda img: tf.image.random_flip_up_down(img, 42)]

@@ -1,6 +1,7 @@
 from typing import Callable, List, Tuple
 
 import tensorflow as tf
+
 from imagemodel.common.datasets.manipulator.helper import (
     ManipulatorInputHelper,
     ManipulatorOutputHelper,
@@ -81,9 +82,9 @@ class BSRegularizerOutputHelper(ManipulatorOutputHelper):
 
 class BaseBSRegularizerInputHelper(BSRegularizerInputHelper):
     def __init__(
-        self,
-        datasets: List[tf.data.Dataset],
-        height_width_tuple: Tuple[int, int],
+            self,
+            datasets: List[tf.data.Dataset],
+            height_width_tuple: Tuple[int, int],
     ):
         self._datasets: List[tf.data.Dataset] = datasets
         self._height_width_tuple: Tuple[int, int] = height_width_tuple
@@ -92,15 +93,14 @@ class BaseBSRegularizerInputHelper(BSRegularizerInputHelper):
         return self._datasets[0]
 
     def image_regularizer_func(self) -> List[Callable[[tf.Tensor], tf.Tensor]]:
-        f1 = lambda img: tf.image.resize(img, self._height_width_tuple)
-        return [f1]
+        return [lambda img: tf.image.resize(img, self._height_width_tuple)]
 
 
 class BaseBSRegularizerOutputHelper(BSRegularizerOutputHelper):
     def __init__(
-        self,
-        datasets: List[tf.data.Dataset],
-        height_width_tuple: Tuple[int, int],
+            self,
+            datasets: List[tf.data.Dataset],
+            height_width_tuple: Tuple[int, int],
     ):
         self._datasets: List[tf.data.Dataset] = datasets
         self._height_width_tuple: Tuple[int, int] = height_width_tuple
@@ -109,16 +109,15 @@ class BaseBSRegularizerOutputHelper(BSRegularizerOutputHelper):
         return self._datasets[0]
 
     def mask_regularizer_func(self) -> List[Callable[[tf.Tensor], tf.Tensor]]:
-        f1 = lambda img: tf.image.resize(img, self._height_width_tuple)
-        return [f1]
+        return [lambda img: tf.image.resize(img, self._height_width_tuple)]
 
 
 class BaseBSRegularizerInOutHelper(BSRegularizerInputHelper, BSRegularizerOutputHelper):
     def __init__(
-        self,
-        input_datasets: List[tf.data.Dataset],
-        output_datasets: List[tf.data.Dataset],
-        height_width_tuple: Tuple[int, int],
+            self,
+            input_datasets: List[tf.data.Dataset],
+            output_datasets: List[tf.data.Dataset],
+            height_width_tuple: Tuple[int, int],
     ):
         self._input_datasets: List[tf.data.Dataset] = input_datasets
         self._output_datasets: List[tf.data.Dataset] = output_datasets
@@ -128,12 +127,10 @@ class BaseBSRegularizerInOutHelper(BSRegularizerInputHelper, BSRegularizerOutput
         return self._input_datasets[0]
 
     def image_regularizer_func(self) -> List[Callable[[tf.Tensor], tf.Tensor]]:
-        f1 = lambda img: tf.image.resize(img, self._height_width_tuple)
-        return [f1]
+        return [lambda img: tf.image.resize(img, self._height_width_tuple)]
 
     def get_mask_dataset(self) -> tf.data.Dataset:
         return self._output_datasets[0]
 
     def mask_regularizer_func(self) -> List[Callable[[tf.Tensor], tf.Tensor]]:
-        f1 = lambda img: tf.image.resize(img, self._height_width_tuple)
-        return [f1]
+        return [lambda img: tf.image.resize(img, self._height_width_tuple)]

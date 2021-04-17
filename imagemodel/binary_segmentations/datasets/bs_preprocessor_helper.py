@@ -1,6 +1,7 @@
 from typing import Callable, List
 
 import tensorflow as tf
+
 from imagemodel.common.datasets.manipulator.helper import (
     ManipulatorInputHelper,
     ManipulatorOutputHelper,
@@ -87,8 +88,7 @@ class BaseBSPreprocessorInputHelper(BSPreprocessorInputHelper):
         return self._datasets[0]
 
     def image_preprocess_func(self) -> List[Callable[[tf.Tensor], tf.Tensor]]:
-        f1 = lambda img: tf.cast(img, tf.float32) / 255.0
-        return [f1]
+        return [lambda img: tf.cast(img, tf.float32) / 255.0]
 
 
 class BaseBSPreprocessorOutputHelper(BSPreprocessorOutputHelper):
@@ -99,18 +99,17 @@ class BaseBSPreprocessorOutputHelper(BSPreprocessorOutputHelper):
         return self._datasets[0]
 
     def mask_preprocess_func(self) -> List[Callable[[tf.Tensor], tf.Tensor]]:
-        f1 = lambda img: tf.cast(img, tf.float32)
-        f2 = lambda img: tf.cast(tf.greater(img, 0.5), tf.float32)
-        return [f1, f2]
+        return [lambda img: tf.cast(img, tf.float32),
+                lambda img: tf.cast(tf.greater(img, 0.5), tf.float32)]
 
 
 class BaseBSPreprocessorInOutHelper(
     BSPreprocessorInputHelper, BSPreprocessorOutputHelper
 ):
     def __init__(
-        self,
-        input_datasets: List[tf.data.Dataset],
-        output_datasets: List[tf.data.Dataset],
+            self,
+            input_datasets: List[tf.data.Dataset],
+            output_datasets: List[tf.data.Dataset],
     ):
         self._input_datasets: List[tf.data.Dataset] = input_datasets
         self._output_datasets: List[tf.data.Dataset] = output_datasets
@@ -119,13 +118,11 @@ class BaseBSPreprocessorInOutHelper(
         return self._input_datasets[0]
 
     def image_preprocess_func(self) -> List[Callable[[tf.Tensor], tf.Tensor]]:
-        f1 = lambda img: tf.cast(img, tf.float32) / 255.0
-        return [f1]
+        return [lambda img: tf.cast(img, tf.float32) / 255.0]
 
     def get_mask_dataset(self) -> tf.data.Dataset:
         return self._output_datasets[0]
 
     def mask_preprocess_func(self) -> List[Callable[[tf.Tensor], tf.Tensor]]:
-        f1 = lambda img: tf.cast(img, tf.float32)
-        f2 = lambda img: tf.cast(tf.greater(img, 0.5), tf.float32)
-        return [f1, f2]
+        return [lambda img: tf.cast(img, tf.float32),
+                lambda img: tf.cast(tf.greater(img, 0.5), tf.float32)]

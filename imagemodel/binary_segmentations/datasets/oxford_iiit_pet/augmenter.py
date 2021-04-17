@@ -1,5 +1,6 @@
 from abc import abstractmethod
 
+from imagemodel.binary_segmentations.datasets.bs_augmenter import BSAugmenter
 from imagemodel.binary_segmentations.datasets.bs_augmenter_helper import (
     BSAugmenterInputHelper,
     BSAugmenterOutputHelper,
@@ -11,7 +12,7 @@ from imagemodel.binary_segmentations.datasets.oxford_iiit_pet.augmenter_helper i
 from imagemodel.common.datasets.manipulator.manipulator import SupervisedManipulator
 
 
-class BSOxfordIIITPetAugmenter(SupervisedManipulator):
+class BSOxfordIIITPetAugmenter(BSAugmenter[BSAugmenterInputHelper, BSAugmenterOutputHelper]):
     @abstractmethod
     def __init__(self, manipulator: SupervisedManipulator):
         self._manipulator: SupervisedManipulator = manipulator

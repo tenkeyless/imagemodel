@@ -1,4 +1,4 @@
-from abc import ABCMeta, abstractmethod
+from abc import ABCMeta
 
 from imagemodel.binary_segmentations.datasets.bs_augmenter_helper import (
     BaseBSAugmenterInOutHelper,
@@ -8,24 +8,9 @@ from imagemodel.binary_segmentations.datasets.bs_augmenter_helper import (
 from imagemodel.common.datasets.manipulator.manipulator import SupervisedManipulator
 
 
-class BSAugmenter(SupervisedManipulator, metaclass=ABCMeta):
-    @classmethod
-    def __subclasshook__(cls, subclass):
-        return (
-            hasattr(subclass, "input_helper")
-            and callable(subclass.input_helper)
-            and hasattr(subclass, "output_helper")
-            and callable(subclass.output_helper)
-            or NotImplemented
-        )
-
-    @property
-    def input_helper(self) -> BSAugmenterInputHelper:
-        pass
-
-    @property
-    def output_helper(self) -> BSAugmenterOutputHelper:
-        pass
+class BSAugmenter(SupervisedManipulator[BSAugmenterInputHelper, BSAugmenterOutputHelper],
+                  metaclass=ABCMeta):
+    pass
 
 
 class BaseBSAugmenter(BSAugmenter):
@@ -34,10 +19,10 @@ class BaseBSAugmenter(BSAugmenter):
 
     Examples
     --------
-    >>> from imagemodel.binary_segmentations.datasets.oxford_iiit_pet.feeder import BSOxfordIIITPetTrainingFeeder
-    >>> training_feeder = BSOxfordIIITPetTrainingFeeder()
-    >>> from imagemodel.binary_segmentations.datasets.bs_augmenter import BaseBSAugmenter
-    >>> augmenter = BaseBSAugmenter(manipulator=training_feeder)
+    >>> from imagemodel.binary_segmentations.datasets.oxford_iiit_pet import feeder
+    >>> training_feeder = feeder.BSOxfordIIITPetTrainingFeeder()
+    >>> from imagemodel.binary_segmentations.datasets import bs_augmenter
+    >>> augmenter = bs_augmenter.BaseBSAugmenter(manipulator=training_feeder)
     >>> import cv2
     >>> for index, inout in enumerate(augmenter.get_zipped_dataset().take(10)):
     ...     input_dataset = inout[0]

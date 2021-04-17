@@ -7,16 +7,17 @@ from imagemodel.binary_segmentations.datasets.bs_feeder_helper import (
 )
 from imagemodel.binary_segmentations.datasets.oxford_iiit_pet.feeder_helper import (
     BSOxfordIIITPetFeederInputHelper,
-    BSOxfordIIITPetFeederOutputHelper,
+    BSOxfordIIITPetFeederOutputHelper
 )
-from imagemodel.common.datasets.descriptor.oxford_iiit_pet_data_descriptor import (
-    OxfordIIITPetDataDescriptor,
-)
+from imagemodel.common.datasets.descriptor.oxford_iiit_pet_data_descriptor import \
+    OxfordIIITPetDataDescriptor
 
 
 class BSOxfordIIITPetFeeder(BSFeeder):
     @abstractmethod
-    def __init__(self, oxford_iiit_pet_3_data_descriptor: OxfordIIITPetDataDescriptor):
+    def __init__(
+            self,
+            oxford_iiit_pet_3_data_descriptor: OxfordIIITPetDataDescriptor):
         self._oxford_iiit_pet_3_data_descriptor = oxford_iiit_pet_3_data_descriptor
 
     @property
@@ -34,7 +35,6 @@ class BSOxfordIIITPetFeeder(BSFeeder):
 
 class BSOxfordIIITPetTrainingFeeder(BSOxfordIIITPetFeeder):
     def __init__(self):
-
         super(BSOxfordIIITPetTrainingFeeder, self).__init__(
             oxford_iiit_pet_3_data_descriptor=OxfordIIITPetDataDescriptor.init_with_train_dataset(
                 begin_optional=None, end_optional=80
