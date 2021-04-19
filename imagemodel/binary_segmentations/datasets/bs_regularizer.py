@@ -7,9 +7,10 @@ from imagemodel.binary_segmentations.datasets.bs_regularizer_helper import (
     BSRegularizerOutputHelper,
 )
 from imagemodel.common.datasets.manipulator.manipulator import SupervisedManipulator
+from imagemodel.common.datasets.regularizer import Regularizer
 
 
-class BSRegularizer(SupervisedManipulator[BSRegularizerInputHelper, BSRegularizerOutputHelper],
+class BSRegularizer(Regularizer[BSRegularizerInputHelper, BSRegularizerOutputHelper],
                     metaclass=ABCMeta):
     pass
 

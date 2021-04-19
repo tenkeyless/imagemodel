@@ -15,9 +15,10 @@ from imagemodel.binary_segmentations.datasets.bs_regularizer import (
     BaseBSRegularizer,
     BSRegularizer,
 )
+from imagemodel.common.datasets.pipeline import Pipeline
 
 
-class BSPipeline:
+class BSPipeline(Pipeline[BSFeeder, BSAugmenter, BSRegularizer, BSPreprocessor]):
     def __init__(
             self,
             feeder: BSFeeder,
@@ -26,8 +27,7 @@ class BSPipeline:
                     lambda el_bs_augmenter: BaseBSRegularizer(el_bs_augmenter, (256, 256))),
             preprocessor_func: Callable[
                 [BSRegularizer], BSPreprocessor
-            ] = BaseBSPreprocessor,
-    ):
+            ] = BaseBSPreprocessor):
         """
         Pipeline for Binary Segmentation.
 
@@ -48,10 +48,7 @@ class BSPipeline:
         ...     print(d[0][0].shape)
         ...     print(d[1][0].shape)
         """
-        self.feeder: BSFeeder = feeder
-        self.augmenter: BSAugmenter = augmenter_func(self.feeder)
-        self.regularizer: BSRegularizer = regularizer_func(self.augmenter)
-        self.preprocessor: BSPreprocessor = preprocessor_func(self.regularizer)
+        super().__init__(feeder, augmenter_func, regularizer_func, preprocessor_func)
 
     def get_zipped_dataset(self) -> tf.data.Dataset:
         return self.preprocessor.get_zipped_dataset()

@@ -5,10 +5,11 @@ from imagemodel.binary_segmentations.datasets.bs_augmenter_helper import (
     BSAugmenterInputHelper,
     BSAugmenterOutputHelper,
 )
+from imagemodel.common.datasets.augmenter import Augmenter
 from imagemodel.common.datasets.manipulator.manipulator import SupervisedManipulator
 
 
-class BSAugmenter(SupervisedManipulator[BSAugmenterInputHelper, BSAugmenterOutputHelper],
+class BSAugmenter(Augmenter[BSAugmenterInputHelper, BSAugmenterOutputHelper],
                   metaclass=ABCMeta):
     pass
 

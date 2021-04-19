@@ -2,13 +2,10 @@ from typing import Callable, List
 
 import tensorflow as tf
 
-from imagemodel.common.datasets.manipulator.helper import (
-    ManipulatorInputHelper,
-    ManipulatorOutputHelper,
-)
+from imagemodel.common.datasets.augmenter_helper import AugmenterInputHelper, AugmenterOutputHelper
 
 
-class BSAugmenterInputHelper(ManipulatorInputHelper):
+class BSAugmenterInputHelper(AugmenterInputHelper):
     """
     <Interface>
 
@@ -44,7 +41,7 @@ class BSAugmenterInputHelper(ManipulatorInputHelper):
         return [image_dataset]
 
 
-class BSAugmenterOutputHelper(ManipulatorOutputHelper):
+class BSAugmenterOutputHelper(AugmenterOutputHelper):
     """
     <Interface>
 

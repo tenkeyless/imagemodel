@@ -2,13 +2,13 @@ from typing import Callable, List, Tuple
 
 import tensorflow as tf
 
-from imagemodel.common.datasets.manipulator.helper import (
-    ManipulatorInputHelper,
-    ManipulatorOutputHelper,
+from imagemodel.common.datasets.regularizer_helper import (
+    RegularizerInputHelper,
+    RegularizerOutputHelper
 )
 
 
-class BSRegularizerInputHelper(ManipulatorInputHelper):
+class BSRegularizerInputHelper(RegularizerInputHelper):
     """
     <Interface>
 
@@ -44,7 +44,7 @@ class BSRegularizerInputHelper(ManipulatorInputHelper):
         return [image_dataset]
 
 
-class BSRegularizerOutputHelper(ManipulatorOutputHelper):
+class BSRegularizerOutputHelper(RegularizerOutputHelper):
     """
     <Interface>
 

@@ -6,9 +6,10 @@ from imagemodel.binary_segmentations.datasets.bs_preprocessor_helper import (
     BSPreprocessorOutputHelper,
 )
 from imagemodel.common.datasets.manipulator.manipulator import SupervisedManipulator
+from imagemodel.common.datasets.preprocessor import Preprocessor
 
 
-class BSPreprocessor(SupervisedManipulator[BSPreprocessorInputHelper, BSPreprocessorOutputHelper],
+class BSPreprocessor(Preprocessor[BSPreprocessorInputHelper, BSPreprocessorOutputHelper],
                      metaclass=ABCMeta):
     pass
 
