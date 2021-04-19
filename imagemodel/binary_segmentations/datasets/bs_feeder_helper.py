@@ -35,6 +35,12 @@ class BSFeederInputHelper(ManipulatorInputHelper):
         pass
 
     def get_inputs(self) -> List[tf.data.Dataset]:
+        # 1. cache, batch, repeat handle
+        # train_dataset.cache().shuffle(self.buffer_size).batch(batch_size).repeat()
+        # 2. prefetch handle
+        # .prefetch(
+        #     buffer_size=tf.data.experimental.AUTOTUNE
+        # )
         return [self.get_image()]
 
 

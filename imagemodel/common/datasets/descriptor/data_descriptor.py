@@ -18,9 +18,9 @@ class TFDataDescriptor(metaclass=ABCMeta):
     @classmethod
     def __subclasshook__(cls, subclass):
         return (
-            hasattr(subclass, "original_dataset")
-            and callable(subclass.original_dataset)
-            or NotImplemented
+                hasattr(subclass, "original_dataset")
+                and callable(subclass.original_dataset)
+                or NotImplemented
         )
 
     @property
@@ -40,8 +40,6 @@ class BaseTFDataDescriptor(TFDataDescriptor):
     ----------
     original_dataset : tf.data.Dataset
         A dataset of `tf.data.Dataset`.
-    original_info : tfds.core.DatasetInfo
-        Dataset info.
     """
 
     @abstractmethod
