@@ -2,6 +2,7 @@ from typing import Optional
 
 import tensorflow as tf
 import tensorflow_datasets as tfds
+
 from imagemodel.common.datasets.descriptor.data_descriptor import BaseTFDataDescriptor
 from imagemodel.common.utils.tfds import append_tfds_str_range
 
@@ -27,7 +28,7 @@ class OxfordIIITPetDataDescriptor(BaseTFDataDescriptor):
 
         Examples
         --------
-        >>> data_descriptor = OxfordPetDataDescriptor.init_with_train_dataset(
+        >>> data_descriptor = OxfordIIITPetDataDescriptor.init_with_train_dataset(
         ...     begin_optional=None, end_optional=80
         ... )
         >>> for d in data_descriptor.get_label_dataset().take(1)
@@ -39,6 +40,7 @@ class OxfordIIITPetDataDescriptor(BaseTFDataDescriptor):
             original_dataset=original_dataset
         )
 
+    @staticmethod
     def __from_tfds_oxford_iiit_pet_3(split_option: str):
         return tfds.load("oxford_iiit_pet:3.*.*", split=split_option, with_info=False)
 
@@ -48,14 +50,14 @@ class OxfordIIITPetDataDescriptor(BaseTFDataDescriptor):
 
     @classmethod
     def init_with_train_dataset(
-        cls, begin_optional: Optional[int] = None, end_optional: Optional[int] = None
+            cls, begin_optional: Optional[int] = None, end_optional: Optional[int] = None
     ):
         option_string = append_tfds_str_range("train", begin_optional, end_optional)
         return cls.init_with_split_option(option_string)
 
     @classmethod
     def init_with_test_dataset(
-        cls, begin_optional: Optional[int] = None, end_optional: Optional[int] = None
+            cls, begin_optional: Optional[int] = None, end_optional: Optional[int] = None
     ):
         option_string = append_tfds_str_range("test", begin_optional, end_optional)
         return cls.init_with_split_option(option_string)

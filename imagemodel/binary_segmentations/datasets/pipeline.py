@@ -22,7 +22,8 @@ class BSPipeline:
             self,
             feeder: BSFeeder,
             augmenter_func: Callable[[BSFeeder], BSAugmenter] = BaseBSAugmenter,
-            regularizer_func: Callable[[BSAugmenter], BSRegularizer] = BaseBSRegularizer,
+            regularizer_func: Callable[[BSAugmenter], BSRegularizer] = (
+                    lambda el_bs_augmenter: BaseBSRegularizer(el_bs_augmenter, (256, 256))),
             preprocessor_func: Callable[
                 [BSRegularizer], BSPreprocessor
             ] = BaseBSPreprocessor,
