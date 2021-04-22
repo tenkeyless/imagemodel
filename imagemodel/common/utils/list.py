@@ -4,13 +4,13 @@ T1 = TypeVar("T1")
 T2 = TypeVar("T2")
 
 
-def check_all_exists_or_not(list: List[T1]) -> bool:
+def check_all_exists_or_not(element_list: List[T1]) -> bool:
     """
     Check `None` exists or not in `list`.
 
     Parameters
     ----------
-    list : List[T1]
+    element_list : List[T1]
         A list to check `None` existance.
 
     Returns
@@ -25,7 +25,7 @@ def check_all_exists_or_not(list: List[T1]) -> bool:
     >>> check_all_exists_or_not([1, 2])
     True
     """
-    return not (any(list) and not all(list))
+    return not (any(element_list) and not all(element_list))
 
 
 def check_exists_or_not(*args) -> bool:
