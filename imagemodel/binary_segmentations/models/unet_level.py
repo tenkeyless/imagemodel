@@ -99,9 +99,9 @@ class UNetLevelModel(CommonModel, CommonModelDictGeneratable[UNetLevelArgumentsD
         self.level: int = level or __model_default_values.level
         self.input_shape: Tuple[int, int, int] = input_shape or __model_default_values.input_shape
         self.input_name: str = input_name or __model_default_values.input_name
-        self.input_name = self.input_name.replace(" ", "_")
+        self.input_name = self.layer_name_correction(input_name)
         self.output_name: str = output_name or __model_default_values.output_name
-        self.output_name = self.output_name.replace(" ", "_")
+        self.output_name = self.layer_name_correction(output_name)
         self.base_filters: int = base_filters or __model_default_values.base_filters
 
     @classmethod

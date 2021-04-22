@@ -13,6 +13,10 @@ class CommonModel(metaclass=abc.ABCMeta):
     def setup_model(self) -> Model:
         pass
 
+    @staticmethod
+    def layer_name_correction(name: str) -> str:
+        return name.replace(" ", "_")
+
 
 class CommonModelDictGeneratable(Generic[ST], metaclass=abc.ABCMeta):
     @classmethod
