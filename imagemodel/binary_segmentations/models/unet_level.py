@@ -1,23 +1,12 @@
 import warnings
 from typing import List, Optional, Tuple, Dict
 
-from tensorflow.keras.layers import (
-    Conv2D,
-    Dropout,
-    Input,
-    Layer,
-    MaxPooling2D,
-    UpSampling2D,
-    concatenate,
-)
+from tensorflow.keras.layers import Conv2D, Dropout, Input, Layer, MaxPooling2D, UpSampling2D, concatenate
 from tensorflow.keras.models import Model
 from typing_extensions import TypedDict
 
 from imagemodel.binary_segmentations.models.common_arguments import ModelArguments
-from imagemodel.binary_segmentations.models.common_model import (
-    CommonModel,
-    CommonModelDictGeneratable
-)
+from imagemodel.binary_segmentations.models.common_model import CommonModel, CommonModelDictGeneratable
 from imagemodel.common.utils.function import get_default_args
 from imagemodel.common.utils.functional import compose_left
 from imagemodel.common.utils.optional import optional_map
@@ -50,20 +39,13 @@ class UNetLevelArguments(ModelArguments[UNetLevelArgumentsDict]):
 
         # input shape
         input_shape_optional_str: Optional[str] = string_dict.get(__keys[1])
-        input_shape_optional: Optional[Tuple[int, int, int]] = optional_map(
-            input_shape_optional_str,
-            eval)
-        input_shape_tuples_optional: Optional[Tuple[int, ...]] = tuple(map(int,
-                                                                           input_shape_optional))
+        input_shape_optional: Optional[Tuple[int, int, int]] = optional_map(input_shape_optional_str, eval)
+        input_shape_tuples_optional: Optional[Tuple[int, ...]] = tuple(map(int, input_shape_optional))
         if input_shape_tuples_optional is not None:
             if type(input_shape_tuples_optional) is not tuple:
-                raise ValueError(
-                    "'input_shape' should be tuple of 3 ints. `Tuple[int, int, int]`."
-                )
+                raise ValueError("'input_shape' should be tuple of 3 ints. `Tuple[int, int, int]`.")
             if len(input_shape_tuples_optional) != 3:
-                raise ValueError(
-                    "'input_shape' should be tuple of 3 ints. `Tuple[int, int, int]`."
-                )
+                raise ValueError("'input_shape' should be tuple of 3 ints. `Tuple[int, int, int]`.")
 
         # input name
         input_name_optional_str: Optional[str] = string_dict.get(__keys[2])
@@ -80,8 +62,7 @@ class UNetLevelArguments(ModelArguments[UNetLevelArgumentsDict]):
             input_shape=input_shape_tuples_optional,
             input_name=input_name_optional_str,
             output_name=output_name_optional_str,
-            base_filters=base_filters_optional,
-        )
+            base_filters=base_filters_optional)
 
     @property
     def level(self) -> Optional[int]:
@@ -127,11 +108,12 @@ class UNetLevelModel(CommonModel, CommonModelDictGeneratable[UNetLevelArgumentsD
     def init_with_dict(cls, option_dict: Optional[UNetLevelArgumentsDict] = None):
         if option_dict is not None:
             unet_level_arguments = UNetLevelArguments(option_dict)
-            return cls(level=unet_level_arguments.level,
-                       input_shape=unet_level_arguments.input_shape,
-                       input_name=unet_level_arguments.input_name,
-                       output_name=unet_level_arguments.output_name,
-                       base_filters=unet_level_arguments.base_filters)
+            return cls(
+                level=unet_level_arguments.level,
+                input_shape=unet_level_arguments.input_shape,
+                input_name=unet_level_arguments.input_name,
+                output_name=unet_level_arguments.output_name,
+                base_filters=unet_level_arguments.base_filters)
         else:
             return cls()
 
@@ -144,11 +126,12 @@ class UNetLevelModel(CommonModel, CommonModelDictGeneratable[UNetLevelArgumentsD
             return cls()
 
     def setup_model(self) -> Model:
-        return self.unet_level(level=self.level,
-                               input_shape=self.input_shape,
-                               input_name=self.input_name,
-                               output_name=self.output_name,
-                               base_filters=self.base_filters)
+        return self.unet_level(
+            level=self.level,
+            input_shape=self.input_shape,
+            input_name=self.input_name,
+            output_name=self.output_name,
+            base_filters=self.base_filters)
 
     # noinspection DuplicatedCode
     @staticmethod
@@ -238,8 +221,6 @@ class UNetLevelModel(CommonModel, CommonModelDictGeneratable[UNetLevelArgumentsD
 
         # Output
         output: Layer = __unet_level_base_conv_2d(2)(decoder)
-        output = __unet_level_base_conv_2d(
-            1, kernel_size=1, activation="sigmoid", name_optional=output_name
-        )(output)
+        output = __unet_level_base_conv_2d(1, kernel_size=1, activation="sigmoid", name_optional=output_name)(output)
 
         return Model(inputs=[input_layer], outputs=[output])
