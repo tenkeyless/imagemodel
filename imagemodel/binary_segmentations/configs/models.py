@@ -5,7 +5,7 @@ from imagemodel.binary_segmentations.models.unet import UNetModel
 from imagemodel.binary_segmentations.models.unet_based_mobilenetv2 import (
     UNetBasedMobilenetv2Model,
 )
-from imagemodel.binary_segmentations.models.unet_level import UNetLevelModel
+from imagemodel.binary_segmentations.models.unet_level import UNetLevelModelManager
 
 
 class Models(Enum):
@@ -18,7 +18,7 @@ class Models(Enum):
         if self == Models.unet:
             return UNetModel()
         elif self == Models.unet_level:
-            return UNetLevelModel()
+            return UNetLevelModelManager()
         elif self == Models.unet_based_mobilenetv2:
             return UNetBasedMobilenetv2Model()
         else:

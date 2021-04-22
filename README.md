@@ -72,6 +72,24 @@ This project runs based on Docker.
     Real example.
 
     ```shell
+    mkdir ~/binary_segmentations_results
+    mkdir /data/tensorflow_datasets
+    cd code/imagemodel
+    docker run \
+        --gpus all \
+        -it \
+        --rm \
+        -u $(id -u):$(id -g) \
+        -v /etc/localtime:/etc/localtime:ro \
+        -v $(pwd):/imagemodel \
+        -v ~/binary_segmentations_results:/binary_segmentations_results \
+        -v /data/tensorflow_datasets:/tensorflow_datasets \
+        -p 6006:6006 \
+        --workdir="/imagemodel" \
+        imagemodel/tkl:1.0
+    ```
+
+    ```shell
     mkdir ~/category_segmentations_results
     mkdir ~/tensorflow_datasets
     cd code/imagemodel

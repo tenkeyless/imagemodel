@@ -12,7 +12,10 @@ from imagemodel.binary_segmentations.models.common_model_manager import (
 )
 from imagemodel.common.utils.function import get_default_args
 from imagemodel.common.utils.functional import compose_left
+from imagemodel.common.utils.gpu_check import check_first_gpu
 from imagemodel.common.utils.optional import optional_map
+
+check_first_gpu()
 
 
 class UNetLevelArgumentsDict(TypedDict):
@@ -102,9 +105,9 @@ class UNetLevelModelManager(CommonModelManager, CommonModelManagerDictGeneratabl
         self.level: int = level or __model_default_values.level
         self.input_shape: Tuple[int, int, int] = input_shape or __model_default_values.input_shape
         self.input_name: str = input_name or __model_default_values.input_name
-        self.input_name = self.layer_name_correction(input_name)
+        self.input_name = self.layer_name_correction(self.input_name)
         self.output_name: str = output_name or __model_default_values.output_name
-        self.output_name = self.layer_name_correction(output_name)
+        self.output_name = self.layer_name_correction(self.output_name)
         self.base_filters: int = base_filters or __model_default_values.base_filters
 
     @classmethod
