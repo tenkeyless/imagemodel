@@ -8,7 +8,7 @@ from typing_extensions import TypedDict
 ST = TypeVar('ST', bound=TypedDict)
 
 
-class CommonModel(metaclass=abc.ABCMeta):
+class CommonModelManager(metaclass=abc.ABCMeta):
     @abstractmethod
     def setup_model(self) -> Model:
         pass
@@ -18,7 +18,7 @@ class CommonModel(metaclass=abc.ABCMeta):
         return name.replace(" ", "_")
 
 
-class CommonModelDictGeneratable(Generic[ST], metaclass=abc.ABCMeta):
+class CommonModelManagerDictGeneratable(Generic[ST], metaclass=abc.ABCMeta):
     @classmethod
     @abstractmethod
     def init_with_dict(cls, option_dict: ST):

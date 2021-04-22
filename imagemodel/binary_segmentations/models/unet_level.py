@@ -6,7 +6,10 @@ from tensorflow.keras.models import Model
 from typing_extensions import TypedDict
 
 from imagemodel.binary_segmentations.models.common_arguments import ModelArguments
-from imagemodel.binary_segmentations.models.common_model import CommonModel, CommonModelDictGeneratable
+from imagemodel.binary_segmentations.models.common_model_manager import (
+    CommonModelManager,
+    CommonModelManagerDictGeneratable
+)
 from imagemodel.common.utils.function import get_default_args
 from imagemodel.common.utils.functional import compose_left
 from imagemodel.common.utils.optional import optional_map
@@ -85,7 +88,7 @@ class UNetLevelArguments(ModelArguments[UNetLevelArgumentsDict]):
         return self.dic.get('base_filters')
 
 
-class UNetLevelModel(CommonModel, CommonModelDictGeneratable[UNetLevelArgumentsDict]):
+class UNetLevelModelManager(CommonModelManager, CommonModelManagerDictGeneratable[UNetLevelArgumentsDict]):
     def __init__(
             self,
             level: Optional[int] = None,
