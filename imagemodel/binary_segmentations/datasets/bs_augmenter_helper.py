@@ -112,12 +112,10 @@ class BaseBSAugmenterInOutHelper(BSAugmenterInputHelper, BSAugmenterOutputHelper
         return self._input_datasets[0]
 
     def image_augment_func(self) -> List[Callable[[tf.Tensor], tf.Tensor]]:
-        return [lambda img: tf.image.random_flip_left_right(img, 42),
-                lambda img: tf.image.random_flip_up_down(img, 42)]
+        return [lambda img: img]
 
     def get_mask_dataset(self) -> tf.data.Dataset:
         return self._output_datasets[0]
 
     def mask_augment_func(self) -> List[Callable[[tf.Tensor], tf.Tensor]]:
-        return [lambda img: tf.image.random_flip_left_right(img, 42),
-                lambda img: tf.image.random_flip_up_down(img, 42)]
+        return [lambda img: img]
