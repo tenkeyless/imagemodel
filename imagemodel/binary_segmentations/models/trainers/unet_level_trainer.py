@@ -1,3 +1,4 @@
+from argparse import ArgumentParser, RawTextHelpFormatter
 from typing import List, Callable
 
 import tensorflow as tf
@@ -53,7 +54,15 @@ class FlipBSAugmenterInOutHelper(BSAugmenterInputHelper, BSAugmenterOutputHelper
 
 
 if __name__ == "__main__":
-    manager = UNetLevelModelManager(level=4, input_shape=(256, 256, 3))
+    parser: ArgumentParser = ArgumentParser(
+        description="Arguments for U-Net Level model in Binary Semantic Segmentation",
+        formatter_class=RawTextHelpFormatter,
+    )
+    parser.add_argument("--unet_level", type=int)
+    args = parser.parse_args()
+    unet_level: int = args.unet_level or 4
+
+    manager = UNetLevelModelManager(level=unet_level, input_shape=(256, 256, 3))
     helper = CompileOptions(
         optimizer=optimizers.Adam(lr=1e-4),
         loss_functions=[losses.BinaryCrossentropy()],
