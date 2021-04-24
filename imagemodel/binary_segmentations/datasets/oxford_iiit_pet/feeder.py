@@ -34,6 +34,10 @@ class BSOxfordIIITPetFeeder(BSFeeder):
 
 
 class BSOxfordIIITPetTrainingFeeder(BSOxfordIIITPetFeeder):
+    @property
+    def feeder_data_description(self):
+        return "oxford_iiit_pet:3.*.* training dataset. train[:80%]"
+
     def __init__(self):
         super(BSOxfordIIITPetTrainingFeeder, self).__init__(
             oxford_iiit_pet_3_data_descriptor=OxfordIIITPetDataDescriptor.init_with_train_dataset(
@@ -43,6 +47,10 @@ class BSOxfordIIITPetTrainingFeeder(BSOxfordIIITPetFeeder):
 
 
 class BSOxfordIIITPetValidationFeeder(BSOxfordIIITPetFeeder):
+    @property
+    def feeder_data_description(self):
+        return "oxford_iiit_pet:3.*.* validation dataset. train[80%:]"
+
     def __init__(self):
         super(BSOxfordIIITPetValidationFeeder, self).__init__(
             oxford_iiit_pet_3_data_descriptor=OxfordIIITPetDataDescriptor.init_with_train_dataset(
@@ -52,6 +60,10 @@ class BSOxfordIIITPetValidationFeeder(BSOxfordIIITPetFeeder):
 
 
 class BSOxfordIIITPetTestFeeder(BSOxfordIIITPetFeeder):
+    @property
+    def feeder_data_description(self):
+        return "oxford_iiit_pet:3.*.* test dataset. test"
+
     def __init__(self):
         super(BSOxfordIIITPetTestFeeder, self).__init__(
             oxford_iiit_pet_3_data_descriptor=OxfordIIITPetDataDescriptor.init_with_test_dataset()

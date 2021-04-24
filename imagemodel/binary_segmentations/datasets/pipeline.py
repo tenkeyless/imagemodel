@@ -52,3 +52,7 @@ class BSPipeline(Pipeline[BSFeeder, BSAugmenter, BSRegularizer, BSPreprocessor])
 
     def get_zipped_dataset(self) -> tf.data.Dataset:
         return self.preprocessor.get_zipped_dataset()
+
+    @property
+    def data_description(self):
+        return self.feeder.feeder_data_description

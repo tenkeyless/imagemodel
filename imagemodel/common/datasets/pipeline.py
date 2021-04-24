@@ -26,5 +26,9 @@ class Pipeline(Generic[F, A, R, P]):
         self.regularizer: R = regularizer_func(self.augmenter)
         self.preprocessor: P = preprocessor_func(self.regularizer)
 
+    @property
+    def data_description(self):
+        return self.feeder.feeder_data_description
+
     def get_zipped_dataset(self) -> tf.data.Dataset:
         return self.preprocessor.get_zipped_dataset()
