@@ -81,6 +81,7 @@ if __name__ == "__main__":
     ...     --run_id binary_segmentations__unet_level_test__20210424_163658 \
     ...     --without_early_stopping
     """
+    # Argument Parsing
     parser: ArgumentParser = ArgumentParser(
         description="Arguments for U-Net Level model in Binary Semantic Segmentation",
         formatter_class=RawTextHelpFormatter,
@@ -101,10 +102,17 @@ if __name__ == "__main__":
     validation_freq: int = args.validation_freq or 1
     run_id: str = args.run_id or get_run_id()
     without_early_stopping: bool = args.without_early_stopping
-
     run_id = run_id.replace(" ", "_")  # run id without space
     training_id: str = "training__model_{}__run_{}".format(model_name, run_id)
 
+    # Experiment Setup
+    experiment_setup = ExperimentSetup(result_base_folder, training_id, run_id)
+    callback_list = experiment_setup.setup_callbacks(
+        training_epochs=training_epochs,
+        without_early_stopping=without_early_stopping,
+        validation_freq=validation_freq)
+
+    # Dataset, Model Setup
     manager = UNetLevelModelManager(level=unet_level, input_shape=(256, 256, 3))
     helper = CompileOptions(
         optimizer=optimizers.Adam(lr=1e-4),
@@ -115,12 +123,7 @@ if __name__ == "__main__":
     validation_feeder = feeder.BSOxfordIIITPetValidationFeeder()
     bs_validation_pipeline = BSPipeline(validation_feeder)
 
-    experiment_setup = ExperimentSetup(result_base_folder, training_id, run_id)
-    callback_list = experiment_setup.setup_callbacks(
-        training_epochs=training_epochs,
-        without_early_stopping=without_early_stopping,
-        validation_freq=validation_freq)
-
+    # Trainer Setup
     trainer = Trainer(
         model_manager=manager,
         compile_helper=helper,
@@ -129,8 +132,11 @@ if __name__ == "__main__":
         validation_pipeline=bs_validation_pipeline,
         validation_batch_size=4,
         validation_freq=validation_freq)
-    trainer.fit(training_epochs=training_epochs, callbacks=callback_list)
 
+    # Report
     reporter = Reporter(setup=experiment_setup, trainer=trainer)
     reporter.report()
     reporter.plotmodel()
+
+    # Training
+    trainer.fit(training_epochs=training_epochs, callbacks=callback_list)
