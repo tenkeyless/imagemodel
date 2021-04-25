@@ -3,11 +3,11 @@ from argparse import ArgumentParser, RawTextHelpFormatter
 from tensorflow.keras import optimizers, losses, metrics
 
 import _path  # noqa
+from imagemodel.binary_segmentations.datasets.bs_augmenter import BaseBSAugmenter
 from imagemodel.binary_segmentations.datasets.oxford_iiit_pet import feeder
 from imagemodel.binary_segmentations.datasets.pipeline import BSPipeline
 from imagemodel.binary_segmentations.models.common_compile_options import CompileOptions
-from imagemodel.binary_segmentations.models.trainers._augmenter import FlipBSAugmenter
-from imagemodel.binary_segmentations.models.unet_level import UNetLevelModelManager
+from imagemodel.binary_segmentations.models.unet import UNetModelManager
 from imagemodel.binary_segmentations.run.common import get_run_id
 from imagemodel.common.reporter import Reporter
 from imagemodel.common.setup import ExperimentSetup
@@ -30,21 +30,19 @@ if __name__ == "__main__":
     ...     -p 6006:6006 \
     ...     --workdir="/imagemodel" \
     ...     imagemodel/tkl:1.0
-    >>> python imagemodel/binary_segmentations/models/trainers/unet_level_trainer.py \
-    ...     --unet_level 3 \
-    ...     --model_name unet_level \
+    >>> python imagemodel/binary_segmentations/models/trainers/unet_trainer.py \
+    ...     --model_name unet \
     ...     --result_base_folder /binary_segmentations_results \
     ...     --training_epochs 20 \
     ...     --validation_freq 1 \
-    ...     --run_id binary_segmentations__unet_level_test__20210424_163658 \
+    ...     --run_id binary_segmentations__unet_test__20210424_163658 \
     ...     --without_early_stopping
     """
     # Argument Parsing
     parser: ArgumentParser = ArgumentParser(
-        description="Arguments for U-Net Level model in Binary Semantic Segmentation",
+        description="Arguments for U-Net model in Binary Semantic Segmentation",
         formatter_class=RawTextHelpFormatter,
     )
-    parser.add_argument("--unet_level", type=int)
     parser.add_argument("--model_name", type=str, required=True)
     parser.add_argument("--result_base_folder", type=str, required=True)
     parser.add_argument("--training_epochs", type=int)
@@ -53,7 +51,6 @@ if __name__ == "__main__":
     parser.add_argument("--without_early_stopping", action="store_true")
 
     args = parser.parse_args()
-    unet_level: int = args.unet_level or 4
     model_name: str = args.model_name
     result_base_folder: str = args.result_base_folder
     training_epochs: int = args.training_epochs or 200
@@ -71,13 +68,13 @@ if __name__ == "__main__":
         validation_freq=validation_freq)
 
     # Dataset, Model Setup
-    manager = UNetLevelModelManager(level=unet_level, input_shape=(256, 256, 3))
+    manager = UNetModelManager(input_shape=(256, 256, 3))
     helper = CompileOptions(
         optimizer=optimizers.Adam(lr=1e-4),
         loss_functions=[losses.BinaryCrossentropy()],
         metrics=[metrics.BinaryAccuracy()])
     training_feeder = feeder.BSOxfordIIITPetTrainingFeeder()
-    bs_training_pipeline = BSPipeline(training_feeder, augmenter_func=FlipBSAugmenter)
+    bs_training_pipeline = BSPipeline(training_feeder, augmenter_func=BaseBSAugmenter)
     validation_feeder = feeder.BSOxfordIIITPetValidationFeeder()
     bs_validation_pipeline = BSPipeline(validation_feeder)
 
