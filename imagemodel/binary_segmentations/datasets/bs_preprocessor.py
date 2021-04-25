@@ -9,17 +9,15 @@ from imagemodel.common.datasets.manipulator.manipulator import SupervisedManipul
 from imagemodel.common.datasets.preprocessor import Preprocessor
 
 
-class BSPreprocessor(Preprocessor[BSPreprocessorInputHelper, BSPreprocessorOutputHelper],
-                     metaclass=ABCMeta):
+class BSPreprocessor(Preprocessor[BSPreprocessorInputHelper, BSPreprocessorOutputHelper], metaclass=ABCMeta):
     pass
 
 
 class BaseBSPreprocessor(BSPreprocessor):
     def __init__(self, manipulator: SupervisedManipulator):
         self._inout_helper = BaseBSPreprocessorInOutHelper(
-            input_datasets=manipulator.get_input_dataset(),
-            output_datasets=manipulator.get_output_dataset(),
-        )
+                input_datasets=manipulator.get_input_dataset(),
+                output_datasets=manipulator.get_output_dataset())
 
     @property
     def input_helper(self) -> BSPreprocessorInputHelper:

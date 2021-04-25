@@ -2,10 +2,7 @@ from typing import Callable, List
 
 import tensorflow as tf
 
-from imagemodel.common.datasets.preprocessor_helper import (
-    PreprocessorInputHelper,
-    PreprocessorOutputHelper
-)
+from imagemodel.common.datasets.preprocessor_helper import PreprocessorInputHelper, PreprocessorOutputHelper
 
 
 class BSPreprocessorInputHelper(PreprocessorInputHelper):
@@ -103,14 +100,8 @@ class BaseBSPreprocessorOutputHelper(BSPreprocessorOutputHelper):
                 lambda img: tf.cast(tf.greater(img, 0.5), tf.float32)]
 
 
-class BaseBSPreprocessorInOutHelper(
-    BSPreprocessorInputHelper, BSPreprocessorOutputHelper
-):
-    def __init__(
-            self,
-            input_datasets: List[tf.data.Dataset],
-            output_datasets: List[tf.data.Dataset],
-    ):
+class BaseBSPreprocessorInOutHelper(BSPreprocessorInputHelper, BSPreprocessorOutputHelper):
+    def __init__(self, input_datasets: List[tf.data.Dataset], output_datasets: List[tf.data.Dataset]):
         self._input_datasets: List[tf.data.Dataset] = input_datasets
         self._output_datasets: List[tf.data.Dataset] = output_datasets
 

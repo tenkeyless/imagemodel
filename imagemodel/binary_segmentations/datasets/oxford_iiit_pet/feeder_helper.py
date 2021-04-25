@@ -1,12 +1,7 @@
 import tensorflow as tf
 
-from imagemodel.binary_segmentations.datasets.bs_feeder_helper import (
-    BSFeederInputHelper,
-    BSFeederOutputHelper,
-)
-from imagemodel.common.datasets.descriptor.oxford_iiit_pet_data_descriptor import (
-    OxfordIIITPetDataDescriptor,
-)
+from imagemodel.binary_segmentations.datasets.bs_feeder_helper import BSFeederInputHelper, BSFeederOutputHelper
+from imagemodel.common.datasets.descriptor.oxford_iiit_pet_data_descriptor import OxfordIIITPetDataDescriptor
 
 
 @tf.autograph.experimental.do_not_convert

@@ -100,11 +100,7 @@ class BaseBSAugmenterOutputHelper(BSAugmenterOutputHelper):
 
 
 class BaseBSAugmenterInOutHelper(BSAugmenterInputHelper, BSAugmenterOutputHelper):
-    def __init__(
-            self,
-            input_datasets: List[tf.data.Dataset],
-            output_datasets: List[tf.data.Dataset],
-    ):
+    def __init__(self, input_datasets: List[tf.data.Dataset], output_datasets: List[tf.data.Dataset]):
         self._input_datasets: List[tf.data.Dataset] = input_datasets
         self._output_datasets: List[tf.data.Dataset] = output_datasets
 

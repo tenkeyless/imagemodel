@@ -2,10 +2,7 @@ from typing import Callable, List, Tuple
 
 import tensorflow as tf
 
-from imagemodel.common.datasets.regularizer_helper import (
-    RegularizerInputHelper,
-    RegularizerOutputHelper
-)
+from imagemodel.common.datasets.regularizer_helper import RegularizerInputHelper, RegularizerOutputHelper
 
 
 class BSRegularizerInputHelper(RegularizerInputHelper):
@@ -81,11 +78,7 @@ class BSRegularizerOutputHelper(RegularizerOutputHelper):
 
 
 class BaseBSRegularizerInputHelper(BSRegularizerInputHelper):
-    def __init__(
-            self,
-            datasets: List[tf.data.Dataset],
-            height_width_tuple: Tuple[int, int],
-    ):
+    def __init__(self, datasets: List[tf.data.Dataset], height_width_tuple: Tuple[int, int]):
         self._datasets: List[tf.data.Dataset] = datasets
         self._height_width_tuple: Tuple[int, int] = height_width_tuple
 
@@ -97,11 +90,7 @@ class BaseBSRegularizerInputHelper(BSRegularizerInputHelper):
 
 
 class BaseBSRegularizerOutputHelper(BSRegularizerOutputHelper):
-    def __init__(
-            self,
-            datasets: List[tf.data.Dataset],
-            height_width_tuple: Tuple[int, int],
-    ):
+    def __init__(self, datasets: List[tf.data.Dataset], height_width_tuple: Tuple[int, int]):
         self._datasets: List[tf.data.Dataset] = datasets
         self._height_width_tuple: Tuple[int, int] = height_width_tuple
 
@@ -117,8 +106,7 @@ class BaseBSRegularizerInOutHelper(BSRegularizerInputHelper, BSRegularizerOutput
             self,
             input_datasets: List[tf.data.Dataset],
             output_datasets: List[tf.data.Dataset],
-            height_width_tuple: Tuple[int, int],
-    ):
+            height_width_tuple: Tuple[int, int]):
         self._input_datasets: List[tf.data.Dataset] = input_datasets
         self._output_datasets: List[tf.data.Dataset] = output_datasets
         self._height_width_tuple: Tuple[int, int] = height_width_tuple

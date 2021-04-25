@@ -2,19 +2,10 @@ from typing import Callable
 
 import tensorflow as tf
 
-from imagemodel.binary_segmentations.datasets.bs_augmenter import (
-    BaseBSAugmenter,
-    BSAugmenter,
-)
+from imagemodel.binary_segmentations.datasets.bs_augmenter import BaseBSAugmenter, BSAugmenter
 from imagemodel.binary_segmentations.datasets.bs_feeder import BSFeeder
-from imagemodel.binary_segmentations.datasets.bs_preprocessor import (
-    BaseBSPreprocessor,
-    BSPreprocessor,
-)
-from imagemodel.binary_segmentations.datasets.bs_regularizer import (
-    BaseBSRegularizer,
-    BSRegularizer,
-)
+from imagemodel.binary_segmentations.datasets.bs_preprocessor import BaseBSPreprocessor, BSPreprocessor
+from imagemodel.binary_segmentations.datasets.bs_regularizer import BaseBSRegularizer, BSRegularizer
 from imagemodel.common.datasets.pipeline import Pipeline
 
 
@@ -25,9 +16,7 @@ class BSPipeline(Pipeline[BSFeeder, BSAugmenter, BSRegularizer, BSPreprocessor])
             augmenter_func: Callable[[BSFeeder], BSAugmenter] = BaseBSAugmenter,
             regularizer_func: Callable[[BSAugmenter], BSRegularizer] = (
                     lambda el_bs_augmenter: BaseBSRegularizer(el_bs_augmenter, (256, 256))),
-            preprocessor_func: Callable[
-                [BSRegularizer], BSPreprocessor
-            ] = BaseBSPreprocessor):
+            preprocessor_func: Callable[[BSRegularizer], BSPreprocessor] = BaseBSPreprocessor):
         """
         Pipeline for Binary Segmentation.
 

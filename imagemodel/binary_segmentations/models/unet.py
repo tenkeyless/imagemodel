@@ -7,7 +7,7 @@ from tensorflow.keras.layers import (
     Layer,
     MaxPooling2D,
     UpSampling2D,
-    concatenate,
+    concatenate
 )
 from tensorflow.keras.models import Model
 from typing_extensions import TypedDict
@@ -66,10 +66,10 @@ class UNetArguments(ModelArguments[UNetArgumentsDict]):
         base_filters_optional: Optional[int] = optional_map(base_filters_optional_str, eval)
 
         return UNetArgumentsDict(
-            input_shape=input_shape_tuples_optional,
-            input_name=input_name_optional_str,
-            output_name=output_name_optional_str,
-            base_filters=base_filters_optional)
+                input_shape=input_shape_tuples_optional,
+                input_name=input_name_optional_str,
+                output_name=output_name_optional_str,
+                base_filters=base_filters_optional)
 
     @property
     def input_shape(self) -> Optional[Tuple[int, int, int]]:
@@ -110,10 +110,10 @@ class UNetModelManager(CommonModelManager, CommonModelManagerDictGeneratable[UNe
         if option_dict is not None:
             unet_arguments = UNetArguments(option_dict)
             return cls(
-                input_shape=unet_arguments.input_shape,
-                input_name=unet_arguments.input_name,
-                output_name=unet_arguments.output_name,
-                base_filters=unet_arguments.base_filters)
+                    input_shape=unet_arguments.input_shape,
+                    input_name=unet_arguments.input_name,
+                    output_name=unet_arguments.output_name,
+                    base_filters=unet_arguments.base_filters)
         else:
             return cls()
 
@@ -127,10 +127,10 @@ class UNetModelManager(CommonModelManager, CommonModelManagerDictGeneratable[UNe
 
     def setup_model(self) -> Model:
         return self.unet(
-            input_shape=self.input_shape,
-            input_name=self.input_name,
-            output_name=self.output_name,
-            base_filters=self.base_filters)
+                input_shape=self.input_shape,
+                input_name=self.input_name,
+                output_name=self.output_name,
+                base_filters=self.base_filters)
 
     # noinspection DuplicatedCode
     @staticmethod
@@ -138,24 +138,21 @@ class UNetModelManager(CommonModelManager, CommonModelManagerDictGeneratable[UNe
             input_shape: Tuple[int, int, int] = (256, 256, 1),
             input_name: str = "unet_input",
             output_name: str = "unet_output",
-            base_filters: int = 16,
-    ) -> Model:
+            base_filters: int = 16) -> Model:
         def __unet_base_conv_2d(
                 filter_num: int,
                 kernel_size: int = 3,
                 activation="relu",
                 padding="same",
                 kernel_initializer="he_normal",
-                name_optional: Optional[str] = None,
-        ) -> Layer:
+                name_optional: Optional[str] = None) -> Layer:
             return Conv2D(
-                filters=filter_num,
-                kernel_size=kernel_size,
-                activation=activation,
-                padding=padding,
-                kernel_initializer=kernel_initializer,
-                name=name_optional,
-            )
+                    filters=filter_num,
+                    kernel_size=kernel_size,
+                    activation=activation,
+                    padding=padding,
+                    kernel_initializer=kernel_initializer,
+                    name=name_optional)
 
         def __unet_base_sub_sampling(pool_size=(2, 2)) -> Layer:
             return MaxPooling2D(pool_size=pool_size)
@@ -166,16 +163,14 @@ class UNetModelManager(CommonModelManager, CommonModelManagerDictGeneratable[UNe
                 kernel_size: int = 3,
                 activation="relu",
                 padding="same",
-                kernel_initializer="he_normal",
-        ) -> Layer:
+                kernel_initializer="he_normal") -> Layer:
             up_sample_func = UpSampling2D(size=up_size)
             conv_func = Conv2D(
-                filters=filter_num,
-                kernel_size=kernel_size,
-                activation=activation,
-                padding=padding,
-                kernel_initializer=kernel_initializer,
-            )
+                    filters=filter_num,
+                    kernel_size=kernel_size,
+                    activation=activation,
+                    padding=padding,
+                    kernel_initializer=kernel_initializer)
             return compose_left(up_sample_func, conv_func)
 
         # Input
@@ -226,15 +221,6 @@ class UNetModelManager(CommonModelManager, CommonModelManagerDictGeneratable[UNe
 
         # Output
         conv10: Layer = __unet_base_conv_2d(2)(conv9)
-        output: Layer = __unet_base_conv_2d(
-            1, kernel_size=1, activation="sigmoid", name_optional=output_name
-        )(conv10)
+        output: Layer = __unet_base_conv_2d(1, kernel_size=1, activation="sigmoid", name_optional=output_name)(conv10)
 
         return Model(inputs=[input_layer], outputs=[output])
-
-
-class UNetArgumentsDict(TypedDict):
-    input_shape: Optional[Tuple[int, int, int]]
-    input_name: Optional[str]
-    output_name: Optional[str]
-    base_filters: Optional[int]

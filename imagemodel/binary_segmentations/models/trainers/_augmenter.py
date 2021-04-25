@@ -10,9 +10,8 @@ from imagemodel.common.datasets.manipulator.manipulator import SupervisedManipul
 class FlipBSAugmenter(BSAugmenter):
     def __init__(self, manipulator: SupervisedManipulator):
         self._inout_helper = FlipBSAugmenterInOutHelper(
-            input_datasets=manipulator.get_input_dataset(),
-            output_datasets=manipulator.get_output_dataset(),
-        )
+                input_datasets=manipulator.get_input_dataset(),
+                output_datasets=manipulator.get_output_dataset())
 
     @property
     def input_helper(self) -> BSAugmenterInputHelper:
@@ -24,11 +23,7 @@ class FlipBSAugmenter(BSAugmenter):
 
 
 class FlipBSAugmenterInOutHelper(BSAugmenterInputHelper, BSAugmenterOutputHelper):
-    def __init__(
-            self,
-            input_datasets: List[tf.data.Dataset],
-            output_datasets: List[tf.data.Dataset],
-    ):
+    def __init__(self, input_datasets: List[tf.data.Dataset], output_datasets: List[tf.data.Dataset]):
         self._input_datasets: List[tf.data.Dataset] = input_datasets
         self._output_datasets: List[tf.data.Dataset] = output_datasets
 

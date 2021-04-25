@@ -64,11 +64,11 @@ class UNetLevelArguments(ModelArguments[UNetLevelArgumentsDict]):
         base_filters_optional: Optional[int] = optional_map(base_filters_optional_str, eval)
 
         return UNetLevelArgumentsDict(
-            level=level_optional,
-            input_shape=input_shape_tuples_optional,
-            input_name=input_name_optional_str,
-            output_name=output_name_optional_str,
-            base_filters=base_filters_optional)
+                level=level_optional,
+                input_shape=input_shape_tuples_optional,
+                input_name=input_name_optional_str,
+                output_name=output_name_optional_str,
+                base_filters=base_filters_optional)
 
     @property
     def level(self) -> Optional[int]:
@@ -115,11 +115,11 @@ class UNetLevelModelManager(CommonModelManager, CommonModelManagerDictGeneratabl
         if option_dict is not None:
             unet_level_arguments = UNetLevelArguments(option_dict)
             return cls(
-                level=unet_level_arguments.level,
-                input_shape=unet_level_arguments.input_shape,
-                input_name=unet_level_arguments.input_name,
-                output_name=unet_level_arguments.output_name,
-                base_filters=unet_level_arguments.base_filters)
+                    level=unet_level_arguments.level,
+                    input_shape=unet_level_arguments.input_shape,
+                    input_name=unet_level_arguments.input_name,
+                    output_name=unet_level_arguments.output_name,
+                    base_filters=unet_level_arguments.base_filters)
         else:
             return cls()
 
@@ -133,11 +133,11 @@ class UNetLevelModelManager(CommonModelManager, CommonModelManagerDictGeneratabl
 
     def setup_model(self) -> Model:
         return self.unet_level(
-            level=self.level,
-            input_shape=self.input_shape,
-            input_name=self.input_name,
-            output_name=self.output_name,
-            base_filters=self.base_filters)
+                level=self.level,
+                input_shape=self.input_shape,
+                input_name=self.input_name,
+                output_name=self.output_name,
+                base_filters=self.base_filters)
 
     # noinspection DuplicatedCode
     @staticmethod
@@ -146,24 +146,21 @@ class UNetLevelModelManager(CommonModelManager, CommonModelManagerDictGeneratabl
             input_shape: Tuple[int, int, int] = (256, 256, 1),
             input_name: str = "unet_input",
             output_name: str = "unet_output",
-            base_filters: int = 16,
-    ) -> Model:
+            base_filters: int = 16) -> Model:
         def __unet_level_base_conv_2d(
                 _filter_num: int,
                 kernel_size: int = 3,
                 activation="relu",
                 padding="same",
                 kernel_initializer="he_normal",
-                name_optional: Optional[str] = None,
-        ) -> Layer:
+                name_optional: Optional[str] = None) -> Layer:
             return Conv2D(
-                filters=_filter_num,
-                kernel_size=kernel_size,
-                activation=activation,
-                padding=padding,
-                kernel_initializer=kernel_initializer,
-                name=name_optional,
-            )
+                    filters=_filter_num,
+                    kernel_size=kernel_size,
+                    activation=activation,
+                    padding=padding,
+                    kernel_initializer=kernel_initializer,
+                    name=name_optional)
 
         def __unet_base_sub_sampling(pool_size=(2, 2)) -> Layer:
             return MaxPooling2D(pool_size=pool_size)
@@ -174,16 +171,14 @@ class UNetLevelModelManager(CommonModelManager, CommonModelManagerDictGeneratabl
                 kernel_size: int = 3,
                 activation="relu",
                 padding="same",
-                kernel_initializer="he_normal",
-        ) -> Layer:
+                kernel_initializer="he_normal") -> Layer:
             up_sample_func = UpSampling2D(size=up_size)
             conv_func = Conv2D(
-                filters=_filter_num,
-                kernel_size=kernel_size,
-                activation=activation,
-                padding=padding,
-                kernel_initializer=kernel_initializer,
-            )
+                    filters=_filter_num,
+                    kernel_size=kernel_size,
+                    activation=activation,
+                    padding=padding,
+                    kernel_initializer=kernel_initializer)
             return compose_left(up_sample_func, conv_func)
 
         # Parameter Check

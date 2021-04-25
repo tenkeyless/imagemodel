@@ -41,8 +41,7 @@ if __name__ == "__main__":
     # Argument Parsing
     parser: ArgumentParser = ArgumentParser(
             description="Arguments for U-Net based MobileNetV2 model in Binary Semantic Segmentation",
-            formatter_class=RawTextHelpFormatter,
-    )
+            formatter_class=RawTextHelpFormatter)
     parser.add_argument("--model_name", type=str, required=True)
     parser.add_argument("--result_base_folder", type=str, required=True)
     parser.add_argument("--training_epochs", type=int)

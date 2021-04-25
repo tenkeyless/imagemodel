@@ -9,8 +9,7 @@ from imagemodel.common.datasets.augmenter import Augmenter
 from imagemodel.common.datasets.manipulator.manipulator import SupervisedManipulator
 
 
-class BSAugmenter(Augmenter[BSAugmenterInputHelper, BSAugmenterOutputHelper],
-                  metaclass=ABCMeta):
+class BSAugmenter(Augmenter[BSAugmenterInputHelper, BSAugmenterOutputHelper], metaclass=ABCMeta):
     pass
 
 
@@ -36,9 +35,8 @@ class BaseBSAugmenter(BSAugmenter):
 
     def __init__(self, manipulator: SupervisedManipulator):
         self._inout_helper = BaseBSAugmenterInOutHelper(
-            input_datasets=manipulator.get_input_dataset(),
-            output_datasets=manipulator.get_output_dataset(),
-        )
+                input_datasets=manipulator.get_input_dataset(),
+                output_datasets=manipulator.get_output_dataset())
 
     @property
     def input_helper(self) -> BSAugmenterInputHelper:

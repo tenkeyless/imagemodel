@@ -41,9 +41,8 @@ if __name__ == "__main__":
     """
     # Argument Parsing
     parser: ArgumentParser = ArgumentParser(
-        description="Arguments for U-Net Level model in Binary Semantic Segmentation",
-        formatter_class=RawTextHelpFormatter,
-    )
+            description="Arguments for U-Net Level model in Binary Semantic Segmentation",
+            formatter_class=RawTextHelpFormatter)
     parser.add_argument("--unet_level", type=int)
     parser.add_argument("--model_name", type=str, required=True)
     parser.add_argument("--result_base_folder", type=str, required=True)
@@ -66,16 +65,16 @@ if __name__ == "__main__":
     # Experiment Setup
     experiment_setup = ExperimentSetup(result_base_folder, training_id, run_id)
     callback_list = experiment_setup.setup_callbacks(
-        training_epochs=training_epochs,
-        without_early_stopping=without_early_stopping,
-        validation_freq=validation_freq)
+            training_epochs=training_epochs,
+            without_early_stopping=without_early_stopping,
+            validation_freq=validation_freq)
 
     # Dataset, Model Setup
     manager = UNetLevelModelManager(level=unet_level, input_shape=(256, 256, 3))
     helper = CompileOptions(
-        optimizer=optimizers.Adam(lr=1e-4),
-        loss_functions=[losses.BinaryCrossentropy()],
-        metrics=[metrics.BinaryAccuracy()])
+            optimizer=optimizers.Adam(lr=1e-4),
+            loss_functions=[losses.BinaryCrossentropy()],
+            metrics=[metrics.BinaryAccuracy()])
     training_feeder = feeder.BSOxfordIIITPetTrainingFeeder()
     bs_training_pipeline = BSPipeline(training_feeder, augmenter_func=FlipBSAugmenter)
     validation_feeder = feeder.BSOxfordIIITPetValidationFeeder()
@@ -83,13 +82,13 @@ if __name__ == "__main__":
 
     # Trainer Setup
     trainer = Trainer(
-        model_manager=manager,
-        compile_helper=helper,
-        training_pipeline=bs_training_pipeline,
-        training_batch_size=4,
-        validation_pipeline=bs_validation_pipeline,
-        validation_batch_size=4,
-        validation_freq=validation_freq)
+            model_manager=manager,
+            compile_helper=helper,
+            training_pipeline=bs_training_pipeline,
+            training_batch_size=4,
+            validation_pipeline=bs_validation_pipeline,
+            validation_batch_size=4,
+            validation_freq=validation_freq)
 
     # Report
     reporter = Reporter(setup=experiment_setup, trainer=trainer)

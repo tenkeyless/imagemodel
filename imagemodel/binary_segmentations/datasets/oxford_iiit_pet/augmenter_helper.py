@@ -2,10 +2,7 @@ from typing import Callable, List
 
 import tensorflow as tf
 
-from imagemodel.binary_segmentations.datasets.bs_augmenter_helper import (
-    BSAugmenterInputHelper,
-    BSAugmenterOutputHelper,
-)
+from imagemodel.binary_segmentations.datasets.bs_augmenter_helper import BSAugmenterInputHelper, BSAugmenterOutputHelper
 
 
 def __img_augment_func(img: tf.Tensor, seed: int = 42) -> tf.Tensor:
@@ -14,14 +11,8 @@ def __img_augment_func(img: tf.Tensor, seed: int = 42) -> tf.Tensor:
     return augmented_img
 
 
-class BSOxfordIIITPetAugmenterInOutHelper(
-    BSAugmenterInputHelper, BSAugmenterOutputHelper
-):
-    def __init__(
-            self,
-            input_datasets: List[tf.data.Dataset],
-            output_datasets: List[tf.data.Dataset],
-    ):
+class BSOxfordIIITPetAugmenterInOutHelper(BSAugmenterInputHelper, BSAugmenterOutputHelper):
+    def __init__(self, input_datasets: List[tf.data.Dataset], output_datasets: List[tf.data.Dataset]):
         self._input_datasets: List[tf.data.Dataset] = input_datasets
         self._output_datasets: List[tf.data.Dataset] = output_datasets
 
