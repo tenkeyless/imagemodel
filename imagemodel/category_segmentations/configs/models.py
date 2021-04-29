@@ -1,5 +1,6 @@
 from enum import Enum
 
+from imagemodel.category_segmentations.models.deeplab_v3 import DeeplabV3Model
 from imagemodel.category_segmentations.models.model_interface import ModelInterface
 from imagemodel.category_segmentations.models.unet import UNetModel
 from imagemodel.category_segmentations.models.unet_based_mobilenetv2 import (
@@ -21,6 +22,8 @@ class Models(Enum):
             return UNetLevelModel()
         elif self == Models.unet_based_mobilenetv2:
             return UNetBasedMobilenetv2Model()
+        elif self == Models.deeplab_v3:
+            return DeeplabV3Model()
         else:
             return UNetModel()
 

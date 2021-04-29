@@ -268,3 +268,51 @@ Segmentation indicating which category each pixel in the image belongs to.
         --model_weight_path /category_segmentations_results/save/weights/training__model_unet_based_mobilenetv2__run_tkl_20210222_103422.epoch_03 \
         --run_id tkl_20210222_103443
     ```
+
+### DeepLab V3
+
+* Run training on docker container for `oxford_iiit_pet_v3` training dataset.
+
+    ```shell
+    python imagemodel/category_segmentations/run/train.py \
+      --dataset oxford_iiit_pet_v3 \
+      --model_name deeplab_v3 \
+      --model_option 'input_shape@(128, 128, 3)' \
+      --model_option 'classes@3' \
+      --model_option 'backbone@xception' \
+      --result_base_folder /category_segmentations_results \
+      --batch_size 8 \
+      --training_epochs 20 \
+      --val_freq 1 \
+      --run_id tkl_20210222_185702 \
+      --optimizer adam2 \
+      --losses 'sparse_categorical_crossentropy_from_logits',1.0 \
+      --metrics accuracy
+    ```
+
+* Run test on docker container for `oxford_iiit_pet_v3` test dataset.
+
+    ```shell
+    python imagemodel/category_segmentations/run/test.py \
+        --dataset oxford_iiit_pet_v3 \
+        --model_name deeplab_v3 \
+        --result_base_folder /category_segmentations_results \
+        --batch_size 8 \
+        --model_weight_path /category_segmentations_results/save/weights/training__model_deeplab_v3__run_tkl_20210222_185702.epoch_02 \
+        --run_id tkl_20210222_111347 \
+        --optimizer adam2 \
+        --losses 'sparse_categorical_crossentropy_from_logits',1.0 \
+        --metrics accuracy
+    ```
+
+* Run prediction on docker container for `oxford_iiit_pet_v3` test dataset.
+
+    ```shell
+    python imagemodel/category_segmentations/run/predict_on_test_dataset.py \
+        --dataset oxford_iiit_pet_v3 \
+        --model_name deeplab_v3 \
+        --result_base_folder /category_segmentations_results \
+        --batch_size 8 \
+        --model_weight_path /category_segmentations_results/save/weights/training__model_deeplab_v3__run_tkl_20210222_185702.epoch_02 \
+        --run_id tkl_20210222_111353
+    ```

@@ -1,25 +1,23 @@
 from typing import Callable, Optional, TypeVar
 
-OT = TypeVar("OT")
+T1 = TypeVar("T1")
 T2 = TypeVar("T2")
 
 
-def optional_map(
-    value_optional: Optional[OT], func: Callable[[OT], T2]
-) -> Optional[T2]:
+def optional_map(value_optional: Optional[T1], func: Callable[[T1], T2]) -> Optional[T2]:
     """
     Map for optional value.
 
     Parameters
     ----------
-    value_optional : Optional[OT]
+    value_optional : Optional[T1]
         Optional value.
-    func : Callable[[OT], T2]
+    func : Callable[[T1], T2]
         A function to apply to `value_optional`.
 
     Returns
     -------
-    Optional[T2]
+    Optional[T2].
         Optional value applied `func` function.
 
     Examples

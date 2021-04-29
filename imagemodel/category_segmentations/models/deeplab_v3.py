@@ -1,11 +1,15 @@
 from __future__ import absolute_import, division, print_function
 
-from typing import Optional, Tuple
+import os
+from typing import Dict, Optional, Tuple
 
+import numpy as np
 import tensorflow as tf
+from imagemodel.category_segmentations.models.model_interface import ModelInterface
+from imagemodel.common.utils.function import get_default_args
+from imagemodel.common.utils.optional import optional_map
 from tensorflow.python.keras import backend as K
 from tensorflow.python.keras import layers
-from tensorflow.python.keras.applications.imagenet_utils import preprocess_input
 from tensorflow.python.keras.layers import (
     Activation,
     Add,
@@ -22,6 +26,7 @@ from tensorflow.python.keras.layers import (
 from tensorflow.python.keras.models import Model
 from tensorflow.python.keras.utils.data_utils import get_file
 from tensorflow.python.keras.utils.layer_utils import get_source_inputs
+from typing_extensions import TypedDict
 
 WEIGHTS_PATH_X = "https://github.com/bonlime/keras-deeplab-v3-plus/releases/download/1.1/deeplabv3_xception_tf_dim_ordering_tf_kernels.h5"
 WEIGHTS_PATH_MOBILE = "https://github.com/bonlime/keras-deeplab-v3-plus/releases/download/1.1/deeplabv3_mobilenetv2_tf_dim_ordering_tf_kernels.h5"
@@ -89,19 +94,19 @@ def deeplab_v3(
         img_input = input_tensor
 
     # 인코더 ==>
-    atrous_rates: Optional[Tuple[int, int, int]] = None
+    xception_atrous_rates: Tuple[int, int, int] = (6, 12, 18)
     # `xception` 백본의 경우,
     if backbone == "xception":
         if OS == 8:
             entry_block3_stride = 1
             middle_block_rate = 2  # ! 논문에는 언급되지 않았지만, 필요하다.
             exit_block_rates = (2, 4)
-            atrous_rates = (12, 24, 36)
+            xception_atrous_rates = (12, 24, 36)
         else:
             entry_block3_stride = 2
             middle_block_rate = 1
             exit_block_rates = (1, 2)
-            atrous_rates = (6, 12, 18)
+            xception_atrous_rates = (6, 12, 18)
 
         # Entry Flow ===>
         # 32, 3x3, stride 2의 Conv 2D
@@ -389,11 +394,15 @@ def deeplab_v3(
 
     # upsample. align_corners 옵션 때문에 compat를 사용해야 합니다.
     size_before = tf.keras.backend.int_shape(x)
-    b4 = Lambda(
-        lambda x: tf.compat.v1.image.resize(
-            x, size_before[1:3], method="bilinear", align_corners=True
+
+    def b4_lambda(xx):
+        import tensorflow as tf
+
+        return tf.compat.v1.image.resize(
+            xx, size_before[1:3], method="bilinear", align_corners=True
         )
-    )(b4)
+
+    b4 = Lambda(b4_lambda)(b4)
 
     # simple 1x1 Conv
     b0 = Conv2D(256, (1, 1), padding="same", use_bias=False, name="aspp0")(x)
@@ -405,15 +414,30 @@ def deeplab_v3(
     if backbone == "xception":
         # rate = 6 (12)
         b1 = SepConv_BN(
-            x, 256, "aspp1", rate=atrous_rates[0], depth_activation=True, epsilon=1e-5
+            x,
+            256,
+            "aspp1",
+            rate=xception_atrous_rates[0],
+            depth_activation=True,
+            epsilon=1e-5,
         )
         # rate = 12 (24)
         b2 = SepConv_BN(
-            x, 256, "aspp2", rate=atrous_rates[1], depth_activation=True, epsilon=1e-5
+            x,
+            256,
+            "aspp2",
+            rate=xception_atrous_rates[1],
+            depth_activation=True,
+            epsilon=1e-5,
         )
         # rate = 18 (36)
         b3 = SepConv_BN(
-            x, 256, "aspp3", rate=atrous_rates[2], depth_activation=True, epsilon=1e-5
+            x,
+            256,
+            "aspp3",
+            rate=xception_atrous_rates[2],
+            depth_activation=True,
+            epsilon=1e-5,
         )
 
         # concatenate ASPP 브랜치 & project
@@ -434,11 +458,15 @@ def deeplab_v3(
         # 특성 projection
         # x4 (x2) 블록
         skip_size = tf.keras.backend.int_shape(skip1)
-        x = Lambda(
-            lambda xx: tf.compat.v1.image.resize(
+
+        def x_lambda_1(xx):
+            import tensorflow as tf
+
+            return tf.compat.v1.image.resize(
                 xx, skip_size[1:3], method="bilinear", align_corners=True
             )
-        )(x)
+
+        x = Lambda(x_lambda_1)(x)
         dec_skip1 = Conv2D(
             48, (1, 1), padding="same", use_bias=False, name="feature_projection0"
         )(skip1)
@@ -461,12 +489,15 @@ def deeplab_v3(
     # 이 소스코드에서는 그림의 3x3 Conv와 달리, 1x1 Conv를 사용합니다.
     x = Conv2D(classes, (1, 1), padding="same", name=last_layer_name)(x)
     size_before3 = tf.keras.backend.int_shape(img_input)
-    x = Lambda(
-        lambda xx: tf.compat.v1.image.resize(
+
+    def x_lambda_2(xx):
+        import tensorflow as tf
+
+        return tf.compat.v1.image.resize(
             xx, size_before3[1:3], method="bilinear", align_corners=True
         )
-    )(x)
 
+    x = Lambda(x_lambda_2)(x)
     # 모델이 `input_tensor`의 잠재적 predecessors를 고려하는지 확인합니다.
     if input_tensor is not None:
         inputs = get_source_inputs(input_tensor)
@@ -734,3 +765,92 @@ def _conv2d_same(x, filters, prefix, stride=1, kernel_size=3, rate=1):
             dilation_rate=(rate, rate),
             name=prefix,
         )(x)
+
+
+class DeeplabV3ArgumentsDict(TypedDict):
+    weights: Optional[str]
+    input_shape: Optional[Tuple[int, int, int]]
+    classes: Optional[int]
+    backbone: Optional[str]
+    OS: Optional[int]
+    alpha: Optional[float]
+
+
+class DeeplabV3Model(ModelInterface[DeeplabV3ArgumentsDict]):
+    __default_args = get_default_args(deeplab_v3)
+
+    def func(self):
+        return deeplab_v3
+
+    def get_model(self, option_dict: DeeplabV3ArgumentsDict) -> Model:
+        return deeplab_v3(
+            weights=option_dict.get("weights") or self.__default_args["weights"],
+            input_shape=option_dict.get("input_shape")
+            or self.__default_args["input_shape"],
+            classes=option_dict.get("classes") or self.__default_args["classes"],
+            backbone=option_dict.get("backbone") or self.__default_args["backbone"],
+            OS=option_dict.get("OS") or self.__default_args["OS"],
+            alpha=option_dict.get("alpha") or self.__default_args["alpha"],
+        )
+
+    def convert_str_model_option_dict(
+        self, option_dict: Dict[str, str]
+    ) -> DeeplabV3ArgumentsDict:
+        # weights
+        weights_optional_str: Optional[str] = option_dict.get("weights")
+
+        # input shape
+        input_shape_optional_str: Optional[str] = option_dict.get("input_shape")
+        input_shape_optional: Optional[Tuple[int, int, int]] = optional_map(
+            input_shape_optional_str, eval
+        )
+        if input_shape_optional is not None:
+            if type(input_shape_optional) is not tuple:
+                raise ValueError(
+                    "'input_shape' should be tuple of 3 ints. `Tuple[int, int, int]`."
+                )
+            if len(input_shape_optional) != 3:
+                raise ValueError(
+                    "'input_shape' should be tuple of 3 ints. `Tuple[int, int, int]`."
+                )
+
+        # classes
+        classes_optional_str: Optional[str] = option_dict.get("classes")
+        classes_optional: Optional[int] = optional_map(classes_optional_str, eval)
+
+        # backbone
+        backbone_optional_str: Optional[str] = option_dict.get("backbone")
+
+        # OS
+        OS_optional_str: Optional[str] = option_dict.get("OS")
+        OS_optional: Optional[int] = optional_map(OS_optional_str, eval)
+
+        # alpha
+        alpha_optional_str: Optional[str] = option_dict.get("alpha")
+        alpha_optional: Optional[float] = optional_map(alpha_optional_str, eval)
+
+        return DeeplabV3ArgumentsDict(
+            weights=weights_optional_str,
+            input_shape=input_shape_optional,
+            classes=classes_optional,
+            backbone=backbone_optional_str,
+            OS=OS_optional,
+            alpha=alpha_optional,
+        )
+
+    def post_processing(self, predicted_result):
+        def create_mask(pred_mask):
+            pred_mask = tf.argmax(pred_mask, axis=-1)
+            pred_mask = pred_mask[..., tf.newaxis]
+            return pred_mask
+
+        return create_mask(predicted_result)
+
+    def save_post_processed_result(self, filename: str, result):
+        foldername_only: str = os.path.dirname(filename)
+        filename_only: str = os.path.basename(filename)
+        filename_without_extension: str = filename_only[: filename_only.rfind(".")]
+        new_filename: str = os.path.join(
+            foldername_only, "{}.npy".format(filename_without_extension)
+        )
+        np.save(new_filename, result)
