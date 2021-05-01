@@ -31,12 +31,12 @@ if __name__ == "__main__":
     ...     --workdir="/imagemodel" \
     ...     imagemodel/tkl:1.0
     >>> python imagemodel/binary_segmentations/models/trainers/trans_unet_level_trainer.py \
-    ...     --unet_level 3 \
-    ...     --model_name unet_level \
+    ...     --unet_level 4 \
+    ...     --model_name trans_unet_level \
     ...     --result_base_folder /binary_segmentations_results \
-    ...     --training_epochs 20 \
+    ...     --training_epochs 100 \
     ...     --validation_freq 1 \
-    ...     --run_id binary_segmentations__unet_level_test__20210424_163658 \
+    ...     --run_id binary_segmentations__20210501_101143 \
     ...     --without_early_stopping
     """
     # Argument Parsing

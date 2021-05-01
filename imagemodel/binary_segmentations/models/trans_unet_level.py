@@ -34,9 +34,9 @@ check_first_gpu()
 
 
 class Patches(Layer):
-    def __init__(self, patch_size):
+    def __init__(self, patch_size: int):
         super(Patches, self).__init__()
-        self.patch_size = patch_size
+        self.patch_size: int = patch_size
     
     def call(self, images, **kwargs):
         batch_size = tf.shape(images)[0]
@@ -49,12 +49,15 @@ class Patches(Layer):
         patch_dims = patches.shape[-1]
         patches = tf.reshape(patches, [batch_size, -1, patch_dims])
         return patches
+    
+    def get_config(self):
+        return {"patch_size": self.patch_size}
 
 
 class PatchEncoder(Layer):
-    def __init__(self, num_patches, projection_dim):
+    def __init__(self, num_patches: int, projection_dim: int):
         super(PatchEncoder, self).__init__()
-        self.num_patches = num_patches
+        self.num_patches: int = num_patches
         # self.projection = Dense(units=projection_dim)
         self.projection = Reshape((-1, projection_dim))  # x = x.flatten(2)
         # transpose? x = x.transpose(-1, -2)  # (B, n_patches, hidden)
@@ -69,61 +72,113 @@ class PatchEncoder(Layer):
         positions = tf.zeros(self.num_patches, dtype=tf.int32)
         encoded = self.projection(patch) + self.position_embedding(positions)
         return encoded
+    
+    def get_config(self):
+        return {"num_patches": self.num_patches, "projection_dim": self.projection_dim}
+
+
+class Mlp(Layer):
+    def __init__(self, units: int, dropout_rate: float, **kwargs):
+        super().__init__(**kwargs)
+        self.dense_layer = Dense(units, activation=tf.nn.gelu)
+        self.dropout_layer = Dropout(dropout_rate)
+    
+    def call(self, inputs, **kwargs):
+        x = self.dense_layer(inputs)
+        x = self.dropout_layer(x)
+        return x
+    
+    def get_config(self):
+        return {"units": self.units, "dropout_rate": self.dropout_rate}
+
+
+class TransformerBlock(Layer):
+    def __init__(
+            self,
+            mh_num_heads: int,
+            mh_projection_dim: int,
+            mlp_transformer_units: List[int],
+            mh_dropout: float = 0.1,
+            mlp_dropout: float = 0.1,
+            **kwargs):
+        super().__init__(**kwargs)
+        self.norm_layer_1 = LayerNormalization(epsilon=1e-6)
+        self.norm_layer_2 = LayerNormalization(epsilon=1e-6)
+        self.multi_head_attention_layer = MultiHeadAttention(
+                num_heads=mh_num_heads,
+                key_dim=mh_projection_dim,
+                dropout=mh_dropout)
+        self.mlp_layers: List[Layer] = []
+        for mlp_transformer_unit in mlp_transformer_units:
+            self.mlp_layers.append(Mlp(mlp_transformer_unit, mlp_dropout))
+    
+    def call(self, inputs, **kwargs):
+        # 레이어 정규화(normalization) 1.
+        x1 = self.norm_layer_1(inputs)
+        # 멀티 헤드 어텐션 레이어 생성.
+        attention_output = self.multi_head_attention_layer(x1, x1)
+        # 스킵 연결 1.
+        x2 = Add()([attention_output, inputs])
+        # 레이어 정규화 2.
+        x3 = self.norm_layer_2(x2)
+        # MLP.
+        for mlp_layer in self.mlp_layers:
+            x3 = mlp_layer(x3)
+        # 스킵 연결 2.
+        return Add()([x3, x2])
+    
+    def get_config(self):
+        return {
+            "mh_num_heads": self.mh_num_heads,
+            "mh_projection_dim": self.mh_projection_dim,
+            "mlp_transformer_units": self.mlp_transformer_units,
+            "mh_dropout": self.mh_dropout,
+            "mlp_dropout": self.mlp_dropout}
 
 
 class ViT(Layer):
     def __init__(self, patch_size: int, projection_dim: int, num_transformer_layers: int, num_heads: int, **kwargs):
         super().__init__(**kwargs)
         self.patch_size: int = patch_size
-        self.patches_layer: Optional[Layer] = None
-        self.encoded_patches_layer: Optional[Layer] = None
-        self.multi_head_attention_layer: Optional[Layer] = None
         self.projection_dim: int = projection_dim
-        self.num_patches: int = 0
-        self.num_transformer_layers = num_transformer_layers
-        self.num_heads = num_heads
-    
-    def build(self, input_shape):
-        self.patches_layer = Patches(self.patch_size)
-        self.num_patches = input_shape[1] ** 2
-        self.encoded_patches_layer = PatchEncoder(self.num_patches, self.projection_dim)
-        self.multi_head_attention_layer = MultiHeadAttention(
-                num_heads=self.num_heads,
-                key_dim=self.projection_dim,
-                dropout=0.1)
-    
-    def call(self, inputs, **kwargs):
-        def mlp(x, hidden_units, dropout_rate):
-            for units in hidden_units:
-                x = Dense(units, activation=tf.nn.gelu)(x)
-                x = Dropout(dropout_rate)(x)
-            return x
+        
+        self.patches_layer: Layer = Patches(self.patch_size)
+        self.encoded_patches_layer: Optional[Layer] = None
+        self.norm_layer: Layer = LayerNormalization(epsilon=1e-6)
         
         # transformer_units = [self.projection_dim * 2, self.projection_dim]
         transformer_units = [3072, self.projection_dim]  # ViT-B/16 configuration
         
-        # 패치 생성.
+        self.transformer_block_layers: List[Layer] = []
+        for _ in range(num_transformer_layers):
+            self.transformer_block_layers.append(
+                    TransformerBlock(
+                            mh_num_heads=num_heads,
+                            mh_projection_dim=projection_dim,
+                            mlp_transformer_units=transformer_units))
+    
+    def build(self, input_shape):
+        num_patches = input_shape[1] ** 2
+        self.encoded_patches_layer = PatchEncoder(num_patches, self.projection_dim)
+    
+    def call(self, inputs, **kwargs):
+        # 패치 생성
         patches = self.patches_layer(inputs)
-        # 패치 인코딩.
+        # 패치 인코딩
         encoded_patches = self.encoded_patches_layer(patches)
+        # 트랜스포머 블록
+        for _transformer_block_layer in self.transformer_block_layers:
+            encoded_patches = _transformer_block_layer(encoded_patches)
         
-        # Transformer 블록의 여러 레이어를 만듭니다.
-        for _ in range(self.num_transformer_layers):
-            # 레이어 정규화(normalization) 1.
-            x1 = LayerNormalization(epsilon=1e-6)(encoded_patches)
-            # 멀티 헤드 어텐션 레이어 생성.
-            attention_output = self.multi_head_attention_layer(x1, x1)
-            # 스킵 연결 1.
-            x2 = Add()([attention_output, encoded_patches])
-            # 레이어 정규화 2.
-            x3 = LayerNormalization(epsilon=1e-6)(x2)
-            # MLP.
-            x3 = mlp(x3, hidden_units=transformer_units, dropout_rate=0.1)
-            # 스킵 연결 2.
-            encoded_patches = Add()([x3, x2])
-        
-        representation = LayerNormalization(epsilon=1e-6)(encoded_patches)
+        representation = self.norm_layer(encoded_patches)
         return representation
+    
+    def get_config(self):
+        return {
+            "patch_size": self.patch_size,
+            "projection_dim": self.projection_dim,
+            "num_transformer_layers": self.num_transformer_layers,
+            "num_heads": self.num_heads}
 
 
 class TransUNetLevelArgumentsDict(TypedDict):
@@ -315,8 +370,10 @@ class TransUNetLevelModelManager(CommonModelManager, CommonModelManagerDictGener
             encoder = __trans_unet_base_sub_sampling()(encoder)
         
         # Intermediate
-        patch_size = 32
+        patch_size = input_shape[0] // (2 ** (level - 1))
         projection_dim = 384
+        vit_head = 6
+        vit_transform_layers = 6
         
         intermedate: Layer = __trans_unet_level_base_conv_2d(filter_nums[-1])(encoder)
         intermedate = __trans_unet_level_base_conv_2d(filter_nums[-1])(intermedate)
@@ -330,8 +387,8 @@ class TransUNetLevelModelManager(CommonModelManager, CommonModelManagerDictGener
         intermedate = ViT(
                 patch_size=patch_size,
                 projection_dim=projection_dim,
-                num_transformer_layers=12,
-                num_heads=12)(intermedate)
+                num_transformer_layers=vit_transform_layers,
+                num_heads=vit_head)(intermedate)
         intermedate = Reshape((patch_size, patch_size, projection_dim))(intermedate)
         intermedate = Dropout(0.5)(intermedate)
         intermedate = Conv2D(
