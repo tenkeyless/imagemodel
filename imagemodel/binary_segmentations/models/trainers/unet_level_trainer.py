@@ -33,11 +33,11 @@ if __name__ == "__main__":
     >>> python imagemodel/binary_segmentations/models/trainers/unet_level_trainer.py \
     ...     --unet_level 3 \
     ...     --model_name unet_level \
-    ...     --result_base_folder /binary_segmentations_results \
+    ...     --result_base_folder binary_segmentations_results \
     ...     --training_epochs 20 \
     ...     --validation_freq 1 \
-    ...     --training_pipeline bs_oxford_iiit_pet_v3_training_1 \
-    ...     --validation_pipeline bs_oxford_iiit_pet_v3_validation_1 \
+    ...     --training_pipeline bs_gs_cell_tracking_training_1 \
+    ...     --validation_pipeline bs_gs_cell_tracking_validation_1 \
     ...     --run_id binary_segmentations__unet_level_test__20210424_163658 \
     ...     --without_early_stopping
     """
@@ -81,8 +81,10 @@ if __name__ == "__main__":
             optimizer=optimizers.Adam(lr=1e-4),
             loss_functions=[losses.BinaryCrossentropy()],
             metrics=[metrics.BinaryAccuracy()])
-    bs_training_pipeline = Datasets(training_pipeline).get_pipeline()
-    bs_validation_pipeline = optional_map(validation_pipeline, lambda el: Datasets(el).get_pipeline())
+    bs_training_pipeline = Datasets(training_pipeline).get_pipeline(resize_to=(256, 256))
+    bs_validation_pipeline = optional_map(
+            validation_pipeline,
+            lambda el: Datasets(el).get_pipeline(resize_to=(256, 256)))
     
     # Trainer Setup
     trainer = Trainer(
@@ -90,6 +92,8 @@ if __name__ == "__main__":
             compile_helper=helper,
             training_pipeline=bs_training_pipeline,
             training_batch_size=4,
+            training_shuffle_in_buffer=False,
+            training_shuffle_buffer_size=None,
             validation_pipeline=bs_validation_pipeline,
             validation_batch_size=4,
             validation_freq=validation_freq)

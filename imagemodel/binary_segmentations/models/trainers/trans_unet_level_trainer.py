@@ -81,8 +81,10 @@ if __name__ == "__main__":
             optimizer=optimizers.Adam(lr=1e-4),
             loss_functions=[losses.BinaryCrossentropy()],
             metrics=[metrics.BinaryAccuracy()])
-    bs_training_pipeline = Datasets(training_pipeline).get_pipeline()
-    bs_validation_pipeline = optional_map(validation_pipeline, lambda el: Datasets(el).get_pipeline())
+    bs_training_pipeline = Datasets(training_pipeline).get_pipeline(resize_to=(256, 256))
+    bs_validation_pipeline = optional_map(
+            validation_pipeline,
+            lambda el: Datasets(el).get_pipeline(resize_to=(256, 256)))
     
     # Trainer Setup
     trainer = Trainer(
@@ -90,6 +92,8 @@ if __name__ == "__main__":
             compile_helper=helper,
             training_pipeline=bs_training_pipeline,
             training_batch_size=4,
+            training_shuffle_in_buffer=False,
+            training_shuffle_buffer_size=None,
             validation_pipeline=bs_validation_pipeline,
             validation_batch_size=4,
             validation_freq=validation_freq)
