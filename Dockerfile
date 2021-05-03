@@ -32,3 +32,4 @@ RUN pip install -q git+https://github.com/tensorflow/examples.git
 
 RUN apt -y install graphviz
 RUN pip install pydot
+RUN pip install tf_clahe
