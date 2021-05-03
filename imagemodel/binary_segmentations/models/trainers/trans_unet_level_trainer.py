@@ -36,10 +36,11 @@ if __name__ == "__main__":
     ...     --result_base_folder /binary_segmentations_results \
     ...     --training_epochs 100 \
     ...     --validation_freq 1 \
-    ...     --training_pipeline bs_oxford_iiit_pet_v3_training_1 \
-    ...     --validation_pipeline bs_oxford_iiit_pet_v3_validation_1 \
-    ...     --run_id binary_segmentations__20210501_101143 \
-    ...     --without_early_stopping
+    ...     --training_pipeline bs_gs_cell_tracking_training_1 \
+    ...     --validation_pipeline bs_gs_cell_tracking_validation_1 \
+    ...     --run_id binary_segmentations__20210503_170519 \
+    ...     --without_early_stopping \
+    ...     --batch_size 2
     """
     # Argument Parsing
     parser: ArgumentParser = ArgumentParser(
@@ -54,6 +55,7 @@ if __name__ == "__main__":
     parser.add_argument("--validation_pipeline", type=str)
     parser.add_argument("--run_id", type=str)
     parser.add_argument("--without_early_stopping", action="store_true")
+    parser.add_argument("--batch_size", type=int)
     
     args = parser.parse_args()
     unet_level: int = args.unet_level or 4
@@ -67,6 +69,7 @@ if __name__ == "__main__":
     training_id: str = "training__model_{}__run_{}".format(model_name, run_id)
     training_pipeline: str = args.training_pipeline
     validation_pipeline: Optional[str] = args.validation_pipeline
+    batch_size: int = args.batch_size or 4
     
     # Experiment Setup
     experiment_setup = ExperimentSetup(result_base_folder, training_id, run_id)
@@ -91,11 +94,11 @@ if __name__ == "__main__":
             model_manager=manager,
             compile_helper=helper,
             training_pipeline=bs_training_pipeline,
-            training_batch_size=4,
+            training_batch_size=batch_size,
             training_shuffle_in_buffer=False,
             training_shuffle_buffer_size=None,
             validation_pipeline=bs_validation_pipeline,
-            validation_batch_size=4,
+            validation_batch_size=batch_size,
             validation_freq=validation_freq)
     
     # Report
