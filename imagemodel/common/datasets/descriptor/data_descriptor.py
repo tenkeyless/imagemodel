@@ -1,4 +1,5 @@
 from abc import ABCMeta, abstractmethod
+from typing import Optional
 
 import tensorflow as tf
 
@@ -14,7 +15,7 @@ class TFDataDescriptor(metaclass=ABCMeta):
     original_dataset : tf.data.Dataset
         A dataset of `tf.data.Dataset`.
     """
-
+    
     @classmethod
     def __subclasshook__(cls, subclass):
         return (
@@ -22,7 +23,7 @@ class TFDataDescriptor(metaclass=ABCMeta):
                 and callable(subclass.original_dataset)
                 or NotImplemented
         )
-
+    
     @property
     @abstractmethod
     def original_dataset(self) -> tf.data.Dataset:
@@ -41,11 +42,11 @@ class BaseTFDataDescriptor(TFDataDescriptor):
     original_dataset : tf.data.Dataset
         A dataset of `tf.data.Dataset`.
     """
-
+    
     @abstractmethod
-    def __init__(self, original_dataset: tf.data.Dataset):
+    def __init__(self, original_dataset: Optional[tf.data.Dataset]):
         self._original_dataset = original_dataset
-
+    
     @property
-    def original_dataset(self) -> tf.data.Dataset:
+    def original_dataset(self) -> Optional[tf.data.Dataset]:
         return self._original_dataset
