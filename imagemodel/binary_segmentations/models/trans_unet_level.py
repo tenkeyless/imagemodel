@@ -141,6 +141,8 @@ class ViT(Layer):
         super().__init__(**kwargs)
         self.patch_size: int = patch_size
         self.projection_dim: int = projection_dim
+        self.num_transformer_layers = num_transformer_layers
+        self.num_heads = num_heads
         
         self.patches_layer: Layer = Patches(self.patch_size)
         self.encoded_patches_layer: Optional[Layer] = None
