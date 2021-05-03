@@ -58,6 +58,7 @@ class PatchEncoder(Layer):
     def __init__(self, num_patches: int, projection_dim: int):
         super(PatchEncoder, self).__init__()
         self.num_patches: int = num_patches
+        self.projection_dim: int = projection_dim
         # self.projection = Dense(units=projection_dim)
         self.projection = Reshape((-1, projection_dim))  # x = x.flatten(2)
         # transpose? x = x.transpose(-1, -2)  # (B, n_patches, hidden)
