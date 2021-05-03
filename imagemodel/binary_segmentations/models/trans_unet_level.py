@@ -60,11 +60,11 @@ class PatchEncoder(Layer):
         self.num_patches: int = num_patches
         self.projection_dim: int = projection_dim
         # self.projection = Dense(units=projection_dim)
-        self.projection = Reshape((-1, projection_dim))  # x = x.flatten(2)
+        self.projection = Reshape((-1, self.projection_dim))  # x = x.flatten(2)
         # transpose? x = x.transpose(-1, -2)  # (B, n_patches, hidden)
         # 이게 있기는 하지만 안해도 될 것 같다.
         # block에서 attention 계산하는데, 다시 x.permute(0, 2, 1, 3)로 계산하기 때문이라 생각한다.
-        self.position_embedding = Embedding(input_dim=num_patches, output_dim=projection_dim)
+        self.position_embedding = Embedding(input_dim=self.num_patches, output_dim=self.projection_dim)
         # self.position_embeddings = nn.Parameter(torch.zeros(1, n_patches, config.hidden_size))
     
     def call(self, patch, **kwargs):
@@ -81,8 +81,11 @@ class PatchEncoder(Layer):
 class Mlp(Layer):
     def __init__(self, units: int, dropout_rate: float, **kwargs):
         super().__init__(**kwargs)
-        self.dense_layer = Dense(units, activation=tf.nn.gelu)
-        self.dropout_layer = Dropout(dropout_rate)
+        self.units = units
+        self.dropout_rate = dropout_rate
+        
+        self.dense_layer = Dense(self.units, activation=tf.nn.gelu)
+        self.dropout_layer = Dropout(self.dropout_rate)
     
     def call(self, inputs, **kwargs):
         x = self.dense_layer(inputs)
@@ -103,15 +106,21 @@ class TransformerBlock(Layer):
             mlp_dropout: float = 0.1,
             **kwargs):
         super().__init__(**kwargs)
+        self.mh_num_heads = mh_num_heads
+        self.mh_projection_dim = mh_projection_dim
+        self.mlp_transformer_units = mlp_transformer_units
+        self.mh_dropout = mh_dropout
+        self.mlp_dropout = mlp_dropout
+        
         self.norm_layer_1 = LayerNormalization(epsilon=1e-6)
         self.norm_layer_2 = LayerNormalization(epsilon=1e-6)
         self.multi_head_attention_layer = MultiHeadAttention(
-                num_heads=mh_num_heads,
-                key_dim=mh_projection_dim,
-                dropout=mh_dropout)
+                num_heads=self.mh_num_heads,
+                key_dim=self.mh_projection_dim,
+                dropout=self.mh_dropout)
         self.mlp_layers: List[Layer] = []
-        for mlp_transformer_unit in mlp_transformer_units:
-            self.mlp_layers.append(Mlp(mlp_transformer_unit, mlp_dropout))
+        for mlp_transformer_unit in self.mlp_transformer_units:
+            self.mlp_layers.append(Mlp(mlp_transformer_unit, self.mlp_dropout))
     
     def call(self, inputs, **kwargs):
         # 레이어 정규화(normalization) 1.
@@ -153,11 +162,11 @@ class ViT(Layer):
         transformer_units = [3072, self.projection_dim]  # ViT-B/16 configuration
         
         self.transformer_block_layers: List[Layer] = []
-        for _ in range(num_transformer_layers):
+        for _ in range(self.num_transformer_layers):
             self.transformer_block_layers.append(
                     TransformerBlock(
-                            mh_num_heads=num_heads,
-                            mh_projection_dim=projection_dim,
+                            mh_num_heads=self.num_heads,
+                            mh_projection_dim=self.projection_dim,
                             mlp_transformer_units=transformer_units))
     
     def build(self, input_shape):
