@@ -1,17 +1,17 @@
 from argparse import ArgumentParser, RawTextHelpFormatter
+from typing import Optional
 
 from tensorflow.keras import losses, metrics, optimizers
 
 import _path  # noqa
-from imagemodel.binary_segmentations.datasets.oxford_iiit_pet import feeder
-from imagemodel.binary_segmentations.datasets.pipeline import BSPipeline
+from imagemodel.binary_segmentations.configs.datasets import Datasets
 from imagemodel.binary_segmentations.models.common_compile_options import CompileOptions
-from imagemodel.binary_segmentations.models.trainers._augmenter import FlipBSAugmenter
 from imagemodel.binary_segmentations.models.trans_unet_level import TransUNetLevelModelManager
 from imagemodel.binary_segmentations.run.common import get_run_id
 from imagemodel.common.reporter import Reporter
 from imagemodel.common.setup import ExperimentSetup
 from imagemodel.common.trainer import Trainer
+from imagemodel.common.utils.optional import optional_map
 
 # noinspection DuplicatedCode
 if __name__ == "__main__":
@@ -36,6 +36,8 @@ if __name__ == "__main__":
     ...     --result_base_folder /binary_segmentations_results \
     ...     --training_epochs 100 \
     ...     --validation_freq 1 \
+    ...     --training_pipeline bs_oxford_iiit_pet_v3_training_1 \
+    ...     --validation_pipeline bs_oxford_iiit_pet_v3_validation_1 \
     ...     --run_id binary_segmentations__20210501_101143 \
     ...     --without_early_stopping
     """
@@ -48,6 +50,8 @@ if __name__ == "__main__":
     parser.add_argument("--result_base_folder", type=str, required=True)
     parser.add_argument("--training_epochs", type=int)
     parser.add_argument("--validation_freq", type=int)
+    parser.add_argument("--training_pipeline", type=str, required=True)
+    parser.add_argument("--validation_pipeline", type=str)
     parser.add_argument("--run_id", type=str)
     parser.add_argument("--without_early_stopping", action="store_true")
     
@@ -61,6 +65,8 @@ if __name__ == "__main__":
     without_early_stopping: bool = args.without_early_stopping
     run_id = run_id.replace(" ", "_")  # run id without space
     training_id: str = "training__model_{}__run_{}".format(model_name, run_id)
+    training_pipeline: str = args.training_pipeline
+    validation_pipeline: Optional[str] = args.validation_pipeline
     
     # Experiment Setup
     experiment_setup = ExperimentSetup(result_base_folder, training_id, run_id)
@@ -75,10 +81,8 @@ if __name__ == "__main__":
             optimizer=optimizers.Adam(lr=1e-4),
             loss_functions=[losses.BinaryCrossentropy()],
             metrics=[metrics.BinaryAccuracy()])
-    training_feeder = feeder.BSOxfordIIITPetTrainingFeeder()
-    bs_training_pipeline = BSPipeline(training_feeder, augmenter_func=FlipBSAugmenter)
-    validation_feeder = feeder.BSOxfordIIITPetValidationFeeder()
-    bs_validation_pipeline = BSPipeline(validation_feeder)
+    bs_training_pipeline = Datasets(training_pipeline).get_pipeline()
+    bs_validation_pipeline = optional_map(validation_pipeline, lambda el: Datasets(el).get_pipeline())
     
     # Trainer Setup
     trainer = Trainer(
