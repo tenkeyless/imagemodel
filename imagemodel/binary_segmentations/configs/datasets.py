@@ -3,7 +3,7 @@ from typing import Optional
 
 from imagemodel.binary_segmentations.datasets.oxford_iiit_pet import feeder
 from imagemodel.binary_segmentations.datasets.pipeline import BSPipeline
-from imagemodel.binary_segmentations.models.trainers.augmenter import FlipBSAugmenter
+from imagemodel.binary_segmentations.datasets.augmenters.flip_augmenter import FlipBSAugmenter
 from imagemodel.common.datasets.pipeline import Pipeline
 
 
