@@ -23,10 +23,10 @@ class BSCellTrackingFeeder(BSFeeder):
         return CellTrackingFeederOutputHelper(data_descriptor=self._cell_tracking_data_descriptor)
 
 
-class BSCellTrackingTrainingFeeder(BSCellTrackingFeeder):
+class BSGSCellTrackingTrainingFeeder(BSCellTrackingFeeder):
     @property
     def feeder_data_description(self):
-        return "Cell Tracking Training Dataset"
+        return "Cell Tracking Training Google Storage Dataset"
     
     def __init__(self):
         cell_tracking_data_descriptor = CellTrackingDataDescriptor(
@@ -35,10 +35,10 @@ class BSCellTrackingTrainingFeeder(BSCellTrackingFeeder):
         super().__init__(cell_tracking_data_descriptor=cell_tracking_data_descriptor)
 
 
-class BSCellTrackingValidationFeeder(BSCellTrackingFeeder):
+class BSGSCellTrackingValidationFeeder(BSCellTrackingFeeder):
     @property
     def feeder_data_description(self):
-        return "Cell Tracking Validation Dataset"
+        return "Cell Tracking Validation Google Storage Dataset"
     
     def __init__(self):
         cell_tracking_data_descriptor = CellTrackingDataDescriptor(
@@ -47,10 +47,10 @@ class BSCellTrackingValidationFeeder(BSCellTrackingFeeder):
         super().__init__(cell_tracking_data_descriptor=cell_tracking_data_descriptor)
 
 
-class BSCellTrackingTestFeeder(BSCellTrackingFeeder):
+class BSGSCellTrackingTestFeeder(BSCellTrackingFeeder):
     @property
     def feeder_data_description(self):
-        return "Cell Tracking Test Dataset"
+        return "Cell Tracking Test Google Storage Dataset"
     
     def __init__(self):
         cell_tracking_data_descriptor = CellTrackingDataDescriptor(

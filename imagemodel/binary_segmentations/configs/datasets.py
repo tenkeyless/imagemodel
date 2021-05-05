@@ -5,8 +5,8 @@ from imagemodel.binary_segmentations.datasets.augmenters.flip_augmenter import F
 from imagemodel.binary_segmentations.datasets.bs_augmenter import BSAugmenter
 from imagemodel.binary_segmentations.datasets.bs_regularizer import BSRegularizer, BaseBSRegularizer
 from imagemodel.binary_segmentations.datasets.cell_tracking.feeder import (
-    BSCellTrackingTrainingFeeder,
-    BSCellTrackingValidationFeeder
+    BSGSCellTrackingTrainingFeeder,
+    BSGSCellTrackingValidationFeeder
 )
 from imagemodel.binary_segmentations.datasets.cell_tracking.preprocessor import BSCellTrackingPreprocessor
 from imagemodel.binary_segmentations.datasets.oxford_iiit_pet import feeder
@@ -24,7 +24,7 @@ class Datasets(Enum):
     # ...     BSCellTrackingValidationFeeder
     # ... )
     # >>> from imagemodel.binary_segmentations.datasets.pipeline import BSPipeline
-    >>> training_feeder = BSCellTrackingTrainingFeeder()
+    >>> training_feeder = BSGSCellTrackingTrainingFeeder()
     >>> bs_training_pipeline = BSPipeline(training_feeder, preprocessor_func=BSCellTrackingPreprocessor)
     >>>
     >>> training_feeder.get_zipped_dataset()
@@ -68,14 +68,14 @@ class Datasets(Enum):
             bs_test_feeder = BSPipeline(test_feeder, regularizer_func=regularizer_func)
             return bs_test_feeder
         elif self == Datasets.bs_gs_cell_tracking_training_1:
-            training_feeder = BSCellTrackingTrainingFeeder()
+            training_feeder = BSGSCellTrackingTrainingFeeder()
             bs_training_pipeline = BSPipeline(
                     training_feeder,
                     regularizer_func=regularizer_func,
                     preprocessor_func=BSCellTrackingPreprocessor)
             return bs_training_pipeline
         elif self == Datasets.bs_gs_cell_tracking_validation_1:
-            validation_feeder = BSCellTrackingValidationFeeder()
+            validation_feeder = BSGSCellTrackingValidationFeeder()
             bs_validation_pipeline = BSPipeline(
                     validation_feeder,
                     regularizer_func=regularizer_func,
