@@ -65,7 +65,7 @@ if __name__ == "__main__":
     ...     --validation_freq 1 \
     ...     --training_pipeline bs_gs_cell_tracking_training_1 \
     ...     --validation_pipeline bs_gs_cell_tracking_validation_1 \
-    ...     --run_id binary_segmentations__20210504_082716 \
+    ...     --run_id binary_segmentations__20210506_102237 \
     ...     --without_early_stopping \
     ...     --batch_size 8 \
     ...     --ctpu_zone us-central1-b \

@@ -37,7 +37,7 @@ class BSPreprocessorInputHelper(PreprocessorInputHelper):
     def get_inputs(self) -> List[tf.data.Dataset]:
         image_dataset = self.get_image_dataset()
         for f in self.image_preprocess_func():
-            image_dataset = image_dataset.map(f)
+            image_dataset = image_dataset.map(f, num_parallel_calls=tf.data.experimental.AUTOTUNE)
         return [image_dataset]
 
 
@@ -73,7 +73,7 @@ class BSPreprocessorOutputHelper(PreprocessorOutputHelper):
     def get_outputs(self) -> List[tf.data.Dataset]:
         mask_dataset = self.get_mask_dataset()
         for f in self.mask_preprocess_func():
-            mask_dataset = mask_dataset.map(f)
+            mask_dataset = mask_dataset.map(f, num_parallel_calls=tf.data.experimental.AUTOTUNE)
         return [mask_dataset]
 
 
