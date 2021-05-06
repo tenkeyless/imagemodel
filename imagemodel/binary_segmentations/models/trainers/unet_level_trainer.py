@@ -90,21 +90,25 @@ if __name__ == "__main__":
     parser.add_argument("--input_color_image", action="store_true")
     
     args = parser.parse_args()
+    # model related
     unet_level: int = args.unet_level or 4
     model_name: str = args.model_name
-    result_base_folder: str = args.result_base_folder
+    input_color_image: bool = args.input_color_image
+    # training related
     training_epochs: int = args.training_epochs or 200
     validation_freq: int = args.validation_freq or 1
     run_id: str = args.run_id or get_run_id()
-    without_early_stopping: bool = args.without_early_stopping
     run_id = run_id.replace(" ", "_")  # run id without space
     training_id: str = "training__model_{}__run_{}".format(model_name, run_id)
+    without_early_stopping: bool = args.without_early_stopping
+    result_base_folder: str = args.result_base_folder
+    # dataset related
     training_pipeline: str = args.training_pipeline
     validation_pipeline: Optional[str] = args.validation_pipeline
     batch_size: int = args.batch_size or 4
+    # tpu related
     ctpu_zone: str = args.ctpu_zone or "us-central1-b"
     tpu_name_optional: Optional[str] = args.tpu_name
-    input_color_image: bool = args.input_color_image
     
     # TPU
     strategy_optional: Optional[TPUStrategy] = None
