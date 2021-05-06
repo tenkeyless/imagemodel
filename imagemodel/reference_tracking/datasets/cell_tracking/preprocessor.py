@@ -1,10 +1,9 @@
-from imagemodel.binary_segmentations.datasets.cell_tracking.preprocessor_helper import ClaheBSPreprocessorInOutHelper
 from imagemodel.common.datasets.manipulator.manipulator import SupervisedManipulator
+from imagemodel.reference_tracking.datasets.cell_tracking.preprocessor_helper import ClaheRTPreprocessorInputHelper
+from imagemodel.reference_tracking.datasets.rt_preprocessor import BaseRTPreprocessor, RTPreprocessor
 
 
 class RTCellTrackingPreprocessor(BaseRTPreprocessor, RTPreprocessor):
-    def __init__(self, manipulator: SupervisedManipulator):
-        super().__init__(manipulator)
-        self._inout_helper = ClaheBSPreprocessorInOutHelper(
-                input_datasets=manipulator.get_input_dataset(),
-                output_datasets=manipulator.get_output_dataset())
+    def __init__(self, manipulator: SupervisedManipulator, bin_size: int):
+        super().__init__(manipulator, bin_size)
+        self._input_helper = ClaheRTPreprocessorInputHelper(datasets=manipulator.get_input_dataset(), bin_size=bin_size)

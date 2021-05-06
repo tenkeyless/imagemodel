@@ -3,9 +3,10 @@ from typing import Callable
 import tensorflow as tf
 
 from imagemodel.common.datasets.pipeline import Pipeline
+from imagemodel.reference_tracking.datasets.cell_tracking.preprocessor import RTCellTrackingPreprocessor
 from imagemodel.reference_tracking.datasets.rt_augmenter import BaseRTAugmenter, RTAugmenter
 from imagemodel.reference_tracking.datasets.rt_feeder import RTFeeder
-from imagemodel.reference_tracking.datasets.rt_preprocessor import BaseRTPreprocessor, RTPreprocessor
+from imagemodel.reference_tracking.datasets.rt_preprocessor import RTPreprocessor
 from imagemodel.reference_tracking.datasets.rt_regularizer import BaseRTRegularizer, RTRegularizer
 
 
@@ -17,7 +18,7 @@ class RTPipeline(Pipeline[RTFeeder, RTAugmenter, RTRegularizer, RTPreprocessor])
             regularizer_func: Callable[[RTAugmenter], RTRegularizer] = (
                     lambda el_rt_augmenter: BaseRTRegularizer(el_rt_augmenter, (256, 256))),
             preprocessor_func: Callable[[RTRegularizer], RTPreprocessor] = (
-                    lambda el_rt_augmenter: BaseRTPreprocessor(el_rt_augmenter, 30))):
+                    lambda el_rt_augmenter: RTCellTrackingPreprocessor(el_rt_augmenter, 30))):
         """
         Pipeline for Binary Segmentation.
 
