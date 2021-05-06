@@ -21,8 +21,8 @@ from tensorflow.python.keras.utils.data_utils import get_file
 from tensorflow.python.keras.utils.layer_utils import get_source_inputs
 from typing_extensions import TypedDict
 
-from imagemodel.binary_segmentations.models.common_arguments import ModelArguments
-from imagemodel.binary_segmentations.models.common_model_manager import (
+from imagemodel.common.models.common_arguments import ModelArguments
+from imagemodel.common.models.common_model_manager import (
     CommonModelManager,
     CommonModelManagerDictGeneratable
 )

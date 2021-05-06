@@ -5,7 +5,7 @@ from tensorflow.keras import losses, metrics, optimizers
 
 import _path  # noqa
 from imagemodel.binary_segmentations.configs.datasets import Datasets
-from imagemodel.binary_segmentations.models.common_compile_options import CompileOptions
+from imagemodel.common.models.common_compile_options import CompileOptions
 from imagemodel.binary_segmentations.models.unet_based_mobilenetv2 import UNetBasedMobileNetV2ModelManager
 from imagemodel.binary_segmentations.run.common import get_run_id
 from imagemodel.common.reporter import Reporter

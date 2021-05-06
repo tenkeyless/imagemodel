@@ -5,8 +5,8 @@ from tensorflow.keras.callbacks import Callback, History
 from tensorflow.keras.models import Model
 from tensorflow.python.distribute.tpu_strategy import TPUStrategy
 
-from imagemodel.binary_segmentations.models.common_compile_options import CompileOptions
-from imagemodel.binary_segmentations.models.common_model_manager import CommonModelManager
+from imagemodel.common.models.common_compile_options import CompileOptions
+from imagemodel.common.models.common_model_manager import CommonModelManager
 from imagemodel.common.datasets.pipeline import Pipeline
 from imagemodel.common.utils.optional import optional_map
 
