@@ -1,5 +1,5 @@
 from argparse import ArgumentParser, RawTextHelpFormatter
-from typing import Optional
+from typing import Optional, Tuple
 
 from tensorflow.keras import losses, metrics, optimizers
 from tensorflow.python.distribute.tpu_strategy import TPUStrategy
@@ -87,6 +87,7 @@ if __name__ == "__main__":
     parser.add_argument("--batch_size", type=int)
     parser.add_argument("--ctpu_zone", type=str, help="VM, TPU zone. ex) 'us-central1-b'")
     parser.add_argument("--tpu_name", type=str, help="TPU name. ex) 'leetaekyu-1-trainer'")
+    parser.add_argument("--input_color_image", action="store_true")
     
     args = parser.parse_args()
     unet_level: int = args.unet_level or 4
@@ -103,6 +104,7 @@ if __name__ == "__main__":
     batch_size: int = args.batch_size or 4
     ctpu_zone: str = args.ctpu_zone or "us-central1-b"
     tpu_name_optional: Optional[str] = args.tpu_name
+    input_color_image: bool = args.input_color_image
     
     # TPU
     strategy_optional: Optional[TPUStrategy] = None
@@ -118,8 +120,8 @@ if __name__ == "__main__":
             validation_freq=validation_freq)
     
     # Dataset, Model Setup
-    # manager = UNetLevelModelManager(level=unet_level, input_shape=(256, 256, 3))
-    manager = UNetLevelModelManager(level=unet_level, input_shape=(256, 256, 1))
+    input_shape: Tuple[int, int, int] = (256, 256, 3) if input_color_image else (256, 256, 1)
+    manager = UNetLevelModelManager(level=unet_level, input_shape=input_shape)
     
     if tpu_name_optional:
         with strategy_optional.scope():
