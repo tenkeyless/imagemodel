@@ -57,7 +57,7 @@ class CellTrackingDataDescriptor(BaseTFDataDescriptor):
         """
         main_image_folder = os.path.join(self.base_folder, "framed_image", "zero")
         dataset = CellTrackingDataDescriptor.__base_files_with_folder(main_image_folder)
-        dataset = dataset.map(decode_png)
+        dataset = dataset.map(decode_png, num_parallel_calls=tf.data.experimental.AUTOTUNE)
         return dataset
     
     def get_main_mask_dataset(self) -> tf.data.Dataset:
@@ -71,7 +71,7 @@ class CellTrackingDataDescriptor(BaseTFDataDescriptor):
         """
         main_label_folder: str = os.path.join(self.base_folder, "framed_label", "zero")
         dataset = CellTrackingDataDescriptor.__base_files_with_folder(os.path.join(main_label_folder))
-        dataset = dataset.map(lambda el: decode_png(el, 3))
+        dataset = dataset.map(lambda el: decode_png(el, 3), num_parallel_calls=tf.data.experimental.AUTOTUNE)
         return dataset
     
     def get_main_bw_mask_dataset(self) -> tf.data.Dataset:
@@ -85,7 +85,7 @@ class CellTrackingDataDescriptor(BaseTFDataDescriptor):
         """
         main_bw_label_folder: str = os.path.join(self.base_folder, "framed_bw_label", "zero")
         dataset = CellTrackingDataDescriptor.__base_files_with_folder(main_bw_label_folder)
-        dataset = dataset.map(decode_png)
+        dataset = dataset.map(decode_png, num_parallel_calls=tf.data.experimental.AUTOTUNE)
         return dataset
     
     def get_ref_img_dataset(self) -> tf.data.Dataset:
@@ -99,7 +99,7 @@ class CellTrackingDataDescriptor(BaseTFDataDescriptor):
         """
         ref_image_folder: str = os.path.join(self.base_folder, "framed_image", "p1")
         dataset = CellTrackingDataDescriptor.__base_files_with_folder(ref_image_folder)
-        dataset = dataset.map(decode_png)
+        dataset = dataset.map(decode_png, num_parallel_calls=tf.data.experimental.AUTOTUNE)
         return dataset
     
     def get_ref_mask_dataset(self) -> tf.data.Dataset:
@@ -113,7 +113,7 @@ class CellTrackingDataDescriptor(BaseTFDataDescriptor):
         """
         ref_label_folder: str = os.path.join(self.base_folder, "framed_label", "p1")
         dataset = CellTrackingDataDescriptor.__base_files_with_folder(ref_label_folder)
-        dataset = dataset.map(lambda el: decode_png(el, 3))
+        dataset = dataset.map(lambda el: decode_png(el, 3), num_parallel_calls=tf.data.experimental.AUTOTUNE)
         return dataset
     
     def get_ref_bw_mask_dataset(self) -> tf.data.Dataset:
@@ -127,5 +127,5 @@ class CellTrackingDataDescriptor(BaseTFDataDescriptor):
         """
         ref_bw_label_folder: str = os.path.join(self.base_folder, "framed_bw_label", "p1")
         dataset = CellTrackingDataDescriptor.__base_files_with_folder(ref_bw_label_folder)
-        dataset = dataset.map(decode_png)
+        dataset = dataset.map(decode_png, num_parallel_calls=tf.data.experimental.AUTOTUNE)
         return dataset

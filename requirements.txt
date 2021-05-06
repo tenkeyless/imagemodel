@@ -8,3 +8,4 @@ paramiko
 Pillow
 opencv-python
 pydot
+google-cloud-storage
