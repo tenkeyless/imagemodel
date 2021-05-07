@@ -1,15 +1,18 @@
 import os
-from typing import List
+import time
+from typing import List, Optional
 
 from image_keras.supports import create_folder_if_not_exist
 from tensorflow.keras.callbacks import Callback, EarlyStopping, ModelCheckpoint, TensorBoard
 
+from imagemodel.common.utils.optional import optional_map
+
 
 class ExperimentSetup:
-    def __init__(self, result_base_folder: str, training_id: str, run_id: str):
-        self.result_base_folder = result_base_folder
-        self.training_id = training_id
-        self.run_id = run_id
+    def __init__(self, result_base_folder: str, model_name: str, run_id: Optional[str]):
+        self.result_base_folder: str = result_base_folder
+        self.run_id: str = optional_map(run_id, lambda el: el.replace(" ", "_")) or ExperimentSetup.__get_run_id()
+        self.training_id: str = "training__model_{}__run_{}".format(model_name, self.run_id)
         
         # data folder
         self.base_data_folder: str = os.path.join(self.result_base_folder, "data")
@@ -28,6 +31,12 @@ class ExperimentSetup:
         if not self.training_result_folder.startswith("gs://"):
             for folder in [save_models_folder, self.save_weights_folder, self.tf_run_log_dir]:
                 create_folder_if_not_exist(folder)
+    
+    @staticmethod
+    def __get_run_id() -> str:
+        os.environ["TZ"] = "Asia/Seoul"
+        time.tzset()
+        return time.strftime("%Y%m%d_%H%M%S")
     
     def setup_callbacks(
             self, training_epochs: int, without_early_stopping: bool, validation_freq: int) -> List[Callback]:

@@ -33,7 +33,7 @@ if __name__ == "__main__":
     ...     -p 6006:6006 \
     ...     --workdir="/imagemodel" \
     ...     imagemodel/tkl:1.0
-    >>> python imagemodel/binary_segmentations/models/trainers/unet_level_trainer.py \
+    >>> python imagemodel/binary_segmentations/models/trainers/ref_local_tracking_model_031_trainer.py \
     ...     --unet_level 3 \
     ...     --model_name unet_level \
     ...     --result_base_folder binary_segmentations_results \
@@ -57,7 +57,7 @@ if __name__ == "__main__":
     ...     -p 6006:6006 \
     ...     --workdir="/imagemodel" \
     ...     imagemodel_tpu/tkl:1.4
-    >>> python imagemodel/binary_segmentations/models/trainers/unet_level_trainer.py \
+    >>> python imagemodel/binary_segmentations/models/trainers/ref_local_tracking_model_031_trainer.py \
     ...     --unet_level 4 \
     ...     --model_name unet_level \
     ...     --result_base_folder gs://cell_dataset \
@@ -98,8 +98,6 @@ if __name__ == "__main__":
     training_epochs: int = args.training_epochs or 200
     validation_freq: int = args.validation_freq or 1
     run_id: str = args.run_id or get_run_id()
-    run_id = run_id.replace(" ", "_")  # run id without space
-    training_id: str = "training__model_{}__run_{}".format(model_name, run_id)
     without_early_stopping: bool = args.without_early_stopping
     result_base_folder: str = args.result_base_folder
     # dataset related
@@ -117,7 +115,7 @@ if __name__ == "__main__":
         strategy_optional = tpu_initialize(tpu_address=tpu_name_optional, tpu_zone=ctpu_zone)
     
     # Experiment Setup
-    experiment_setup = ExperimentSetup(result_base_folder, training_id, run_id)
+    experiment_setup = ExperimentSetup(result_base_folder, model_name, run_id)
     callback_list = experiment_setup.setup_callbacks(
             training_epochs=training_epochs,
             without_early_stopping=without_early_stopping,

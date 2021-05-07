@@ -62,14 +62,12 @@ if __name__ == "__main__":
     validation_freq: int = args.validation_freq or 1
     run_id: str = args.run_id or get_run_id()
     without_early_stopping: bool = args.without_early_stopping
-    run_id = run_id.replace(" ", "_")  # run id without space
-    training_id: str = "training__model_{}__run_{}".format(model_name, run_id)
     training_pipeline: str = args.training_pipeline
     validation_pipeline: Optional[str] = args.validation_pipeline
     batch_size: int = args.batch_size or 4
     
     # Experiment Setup
-    experiment_setup = ExperimentSetup(result_base_folder, training_id, run_id)
+    experiment_setup = ExperimentSetup(result_base_folder, model_name, run_id)
     callback_list = experiment_setup.setup_callbacks(
             training_epochs=training_epochs,
             without_early_stopping=without_early_stopping,

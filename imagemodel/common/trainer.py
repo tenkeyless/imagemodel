@@ -61,12 +61,14 @@ class Trainer:
                 self.model.compile(
                         optimizer=self.compile_helper.optimizer,
                         loss=self.compile_helper.loss_functions,
+                        loss_weights=self.compile_helper.loss_weights_optional,
                         metrics=self.compile_helper.metrics)
         else:
             self.model: Model = self.model_manager.setup_model()
             self.model.compile(
                     optimizer=self.compile_helper.optimizer,
                     loss=self.compile_helper.loss_functions,
+                    loss_weights=self.compile_helper.loss_weights_optional,
                     metrics=self.compile_helper.metrics)
     
     def fit(self, training_epochs: int, callbacks: List[Callback]) -> History:
