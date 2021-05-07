@@ -171,6 +171,7 @@ def tf_image_shrink(detached_img, bin_num: int, resize_by_power_of_two: int = 0)
     return result
 
 
+# noinspection PyPep8Naming
 def tf_shrink3D(data, rows: int, cols: int, channels: int):
     """
     Shrink 3D `Tensor` data.
@@ -193,7 +194,7 @@ def tf_shrink3D(data, rows: int, cols: int, channels: int):
 
     Examples
     --------
-    >>> import tensorflow as tf
+    >>> import numpy as np
     >>> from imagemodel.common.utils import tf_images
     >>> a = tf.constant(
     ...     np.array(
@@ -205,11 +206,11 @@ def tf_shrink3D(data, rows: int, cols: int, channels: int):
     ...         ]
     ...     )
     ... )
-    >>> print(shrink3D(a,2,1,2))
+    >>> print(tf_shrink3D(a,2,1,2))
     tf.Tensor(
     [[[16 20]]  # [[[   1+3+5+7, 2+4+6+8]],
     [[48 52]]], shape=(2, 1, 2), dtype=int64)   #  [[9+11+13+15, 10+12+14+16]]]
-    >>> print(shrink3D(a,2,1,1))
+    >>> print(tf_shrink3D(a,2,1,1))
     tf.Tensor(
     [[[ 36]]    # [[[   1+3+5+7+2+4+6+8]],
      [[100]]], shape=(2, 1, 1), dtype=int64)    #  [[9+11+13+15+10+12+14+16]]]
