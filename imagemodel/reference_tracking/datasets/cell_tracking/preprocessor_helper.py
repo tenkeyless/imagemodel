@@ -11,13 +11,31 @@ from imagemodel.reference_tracking.datasets.rt_preprocessor_helper import (
 
 class ClaheRTPreprocessorInputHelper(BaseRTPreprocessorInputHelper, RTPreprocessorInputHelper):
     def main_image_preprocess_func(self) -> List[Callable[[tf.Tensor], tf.Tensor]]:
-        return [lambda img: tf_clahe.clahe(img, tile_grid_size=[8, 8], clip_limit=2.0),
-                # TODO: tf_clahe should specify the size for reshaping.
-                lambda img: tf.reshape(img, (256, 256, 1)),
-                lambda img: tf.cast(img, tf.float32) / 255.0]
+        @tf.autograph.experimental.do_not_convert
+        def _clahe(img: tf.Tensor) -> tf.Tensor:
+            return tf_clahe.clahe(img, tile_grid_size=[8, 8], clip_limit=2.0)
+        
+        @tf.autograph.experimental.do_not_convert
+        def _reshape(img: tf.Tensor) -> tf.Tensor:
+            return tf.reshape(img, (256, 256, 1))
+        
+        @tf.autograph.experimental.do_not_convert
+        def _cast_norm(img: tf.Tensor) -> tf.Tensor:
+            return tf.cast(img, tf.float32) / 255.0
+        
+        return [_clahe, _reshape, _cast_norm]
     
     def ref_image_preprocess_func(self) -> List[Callable[[tf.Tensor], tf.Tensor]]:
-        return [lambda img: tf_clahe.clahe(img, tile_grid_size=[8, 8], clip_limit=2.0),
-                # TODO: tf_clahe should specify the size for reshaping.
-                lambda img: tf.reshape(img, (256, 256, 1)),
-                lambda img: tf.cast(img, tf.float32) / 255.0]
+        @tf.autograph.experimental.do_not_convert
+        def _clahe(img: tf.Tensor) -> tf.Tensor:
+            return tf_clahe.clahe(img, tile_grid_size=[8, 8], clip_limit=2.0)
+        
+        @tf.autograph.experimental.do_not_convert
+        def _reshape(img: tf.Tensor) -> tf.Tensor:
+            return tf.reshape(img, (256, 256, 1))
+        
+        @tf.autograph.experimental.do_not_convert
+        def _cast_norm(img: tf.Tensor) -> tf.Tensor:
+            return tf.cast(img, tf.float32) / 255.0
+        
+        return [_clahe, _reshape, _cast_norm]

@@ -87,19 +87,31 @@ class BaseRTRegularizerInputHelper(RTRegularizerInputHelper):
         return self._datasets[0]
     
     def main_image_regularizer_func(self) -> List[Callable[[tf.Tensor], tf.Tensor]]:
-        return [lambda img: tf.image.resize(img, self._height_width_tuple)]
+        @tf.autograph.experimental.do_not_convert
+        def _resize(img: tf.Tensor) -> tf.Tensor:
+            return tf.image.resize(img, self._height_width_tuple)
+        
+        return [_resize]
     
     def get_ref_image_dataset(self) -> tf.data.Dataset:
         return self._datasets[1]
     
     def ref_image_regularizer_func(self) -> List[Callable[[tf.Tensor], tf.Tensor]]:
-        return [lambda img: tf.image.resize(img, self._height_width_tuple)]
+        @tf.autograph.experimental.do_not_convert
+        def _resize(img: tf.Tensor) -> tf.Tensor:
+            return tf.image.resize(img, self._height_width_tuple)
+        
+        return [_resize]
     
     def get_ref_color_label_dataset(self) -> tf.data.Dataset:
         return self._datasets[2]
     
     def ref_color_label_regularizer_func(self) -> List[Callable[[tf.Tensor], tf.Tensor]]:
-        return [lambda img: tf.image.resize(img, self._height_width_tuple, method=ResizeMethod.NEAREST_NEIGHBOR)]
+        @tf.autograph.experimental.do_not_convert
+        def _resize_nn(img: tf.Tensor) -> tf.Tensor:
+            return tf.image.resize(img, self._height_width_tuple, method=ResizeMethod.NEAREST_NEIGHBOR)
+        
+        return [_resize_nn]
 
 
 class BaseRTRegularizerOutputHelper(RTRegularizerOutputHelper):
@@ -111,22 +123,38 @@ class BaseRTRegularizerOutputHelper(RTRegularizerOutputHelper):
         return self._datasets[0]
     
     def main_bw_mask_regularizer_func(self) -> List[Callable[[tf.Tensor], tf.Tensor]]:
-        return [lambda img: tf.image.resize(img, self._height_width_tuple)]
+        @tf.autograph.experimental.do_not_convert
+        def _resize(img: tf.Tensor) -> tf.Tensor:
+            return tf.image.resize(img, self._height_width_tuple)
+        
+        return [_resize]
     
     def get_ref_bw_mask_dataset(self) -> tf.data.Dataset:
         return self._datasets[1]
     
     def ref_bw_mask_regularizer_func(self) -> List[Callable[[tf.Tensor], tf.Tensor]]:
-        return [lambda img: tf.image.resize(img, self._height_width_tuple)]
+        @tf.autograph.experimental.do_not_convert
+        def _resize(img: tf.Tensor) -> tf.Tensor:
+            return tf.image.resize(img, self._height_width_tuple)
+        
+        return [_resize]
     
     def get_ref_color_label_dataset(self) -> tf.data.Dataset:
         return self._datasets[2]
     
     def ref_color_label_regularizer_func(self) -> List[Callable[[tf.Tensor], tf.Tensor]]:
-        return [lambda img: tf.image.resize(img, self._height_width_tuple, method=ResizeMethod.NEAREST_NEIGHBOR)]
+        @tf.autograph.experimental.do_not_convert
+        def _resize_nn(img: tf.Tensor) -> tf.Tensor:
+            return tf.image.resize(img, self._height_width_tuple, method=ResizeMethod.NEAREST_NEIGHBOR)
+        
+        return [_resize_nn]
     
     def get_main_color_label_dataset(self) -> tf.data.Dataset:
         return self._datasets[3]
     
     def main_color_label_regularizer_func(self) -> List[Callable[[tf.Tensor], tf.Tensor]]:
-        return [lambda img: tf.image.resize(img, self._height_width_tuple, method=ResizeMethod.NEAREST_NEIGHBOR)]
+        @tf.autograph.experimental.do_not_convert
+        def _resize_nn(img: tf.Tensor) -> tf.Tensor:
+            return tf.image.resize(img, self._height_width_tuple, method=ResizeMethod.NEAREST_NEIGHBOR)
+        
+        return [_resize_nn]

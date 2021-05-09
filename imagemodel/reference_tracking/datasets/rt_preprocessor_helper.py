@@ -119,13 +119,21 @@ class BaseRTPreprocessorInputHelper(RTPreprocessorInputHelper):
         return self._datasets[0]
     
     def main_image_preprocess_func(self) -> List[Callable[[tf.Tensor], tf.Tensor]]:
-        return [lambda img: tf.cast(img, tf.float32) / 255.0]
+        @tf.autograph.experimental.do_not_convert
+        def _cast_norm(img: tf.Tensor) -> tf.Tensor:
+            return tf.cast(img, tf.float32) / 255.0
+        
+        return [_cast_norm]
     
     def get_ref_image_dataset(self) -> tf.data.Dataset:
         return self._datasets[1]
     
     def ref_image_preprocess_func(self) -> List[Callable[[tf.Tensor], tf.Tensor]]:
-        return [lambda img: tf.cast(img, tf.float32) / 255.0]
+        @tf.autograph.experimental.do_not_convert
+        def _cast_norm(img: tf.Tensor) -> tf.Tensor:
+            return tf.cast(img, tf.float32) / 255.0
+        
+        return [_cast_norm]
     
     def get_ref_color_label_dataset(self) -> tf.data.Dataset:
         return self._datasets[2]
@@ -152,15 +160,29 @@ class BaseRTPreprocessorOutputHelper(RTPreprocessorOutputHelper):
         return self._datasets[0]
     
     def main_bw_mask_preprocess_func(self) -> List[Callable[[tf.Tensor], tf.Tensor]]:
-        return [lambda img: tf.cast(img, tf.float32),
-                lambda img: tf.cast(tf.greater(img, 0.5), tf.float32)]
+        @tf.autograph.experimental.do_not_convert
+        def _cast(img: tf.Tensor) -> tf.Tensor:
+            return tf.cast(img, tf.float32)
+        
+        @tf.autograph.experimental.do_not_convert
+        def _greater_cast(img: tf.Tensor) -> tf.Tensor:
+            return tf.cast(tf.greater(img, 0.5), tf.float32)
+        
+        return [_cast, _greater_cast]
     
     def get_ref_bw_mask_dataset(self) -> tf.data.Dataset:
         return self._datasets[1]
     
     def ref_bw_mask_preprocess_func(self) -> List[Callable[[tf.Tensor], tf.Tensor]]:
-        return [lambda img: tf.cast(img, tf.float32),
-                lambda img: tf.cast(tf.greater(img, 0.5), tf.float32)]
+        @tf.autograph.experimental.do_not_convert
+        def _cast(img: tf.Tensor) -> tf.Tensor:
+            return tf.cast(img, tf.float32)
+        
+        @tf.autograph.experimental.do_not_convert
+        def _greater_cast(img: tf.Tensor) -> tf.Tensor:
+            return tf.cast(tf.greater(img, 0.5), tf.float32)
+        
+        return [_cast, _greater_cast]
     
     def get_ref_color_label_dataset(self) -> tf.data.Dataset:
         return self._datasets[2]
