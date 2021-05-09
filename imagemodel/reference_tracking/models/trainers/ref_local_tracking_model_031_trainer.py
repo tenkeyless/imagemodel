@@ -28,19 +28,20 @@ if __name__ == "__main__":
     ...     -u $(id -u):$(id -g) \
     ...     -v /etc/localtime:/etc/localtime:ro \
     ...     -v $(pwd):/imagemodel \
+    ...     -v /data:/data \
     ...     -v ~/reference_tracking_results:/reference_tracking_results \
     ...     -v /data/tensorflow_datasets:/tensorflow_datasets \
     ...     -p 6006:6006 \
     ...     --workdir="/imagemodel" \
-    ...     imagemodel/tkl:1.0
+    ...     imagemodel/tkl:1.2
     >>> python imagemodel/reference_tracking/models/trainers/ref_local_tracking_model_031_trainer.py \
     ...     --model_name unet_level \
-    ...     --result_base_folder reference_tracking_results \
-    ...     --training_epochs 20 \
+    ...     --result_base_folder /reference_tracking_results \
+    ...     --training_epochs 100 \
     ...     --validation_freq 1 \
-    ...     --training_pipeline rt_gs_cell_tracking_training_1 \
-    ...     --validation_pipeline rt_gs_cell_tracking_validation_1 \
-    ...     --run_id binary_segmentations__unet_level_test__20210424_163658 \
+    ...     --training_pipeline rt_cell_tracking_training_1 \
+    ...     --validation_pipeline rt_cell_tracking_validation_1 \
+    ...     --run_id binary_segmentations__unet_level_test__20210509_151726 \
     ...     --without_early_stopping \
     ...     --batch_size 2
     
@@ -63,7 +64,7 @@ if __name__ == "__main__":
     ...     --validation_freq 1 \
     ...     --training_pipeline rt_gs_cell_tracking_training_1 \
     ...     --validation_pipeline rt_gs_cell_tracking_validation_1 \
-    ...     --run_id reference_tracking__20210507_111313 \
+    ...     --run_id reference_tracking__20210509_131615 \
     ...     --without_early_stopping \
     ...     --batch_size 8 \
     ...     --ctpu_zone us-central1-b \
@@ -126,8 +127,12 @@ if __name__ == "__main__":
     if tpu_name_optional:
         with strategy_optional.scope():
             u_net_model = UNetLevelModelManager.unet_level(input_shape=input_shape)
+            # u_net_model2 = tf.keras.models.clone_model(u_net_model)
+            # u_net_model2.set_weights(u_net_model.get_weights())
     else:
         u_net_model = UNetLevelModelManager.unet_level(input_shape=input_shape)
+        # u_net_model2 = tf.keras.models.clone_model(u_net_model)
+        # u_net_model2.set_weights(u_net_model.get_weights())
     manager = RefLocalTrackingModel031Manager(
             unet_l4_model_main=u_net_model,
             unet_l4_model_ref=u_net_model,

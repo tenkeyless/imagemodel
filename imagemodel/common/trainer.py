@@ -42,8 +42,9 @@ class Trainer:
                     buffer_size=training_shuffle_buffer_size,
                     seed=training_shuffle_buffer_seed,
                     reshuffle_each_iteration=True)
-        self.training_dataset = self.training_dataset.repeat().batch(self.training_batch_size, drop_remainder=True)
-        self.training_dataset = self.training_dataset.cache().prefetch(tf.data.experimental.AUTOTUNE)
+        self.training_dataset = self.training_dataset.batch(self.training_batch_size, drop_remainder=True)
+        self.training_dataset = self.training_dataset.prefetch(tf.data.experimental.AUTOTUNE)
+        # self.training_dataset = self.training_dataset.cache().prefetch(tf.data.experimental.AUTOTUNE)
         
         self.validation_dataset_optional: Optional[tf.data.Dataset] = optional_map(
                 self.validation_pipeline_optional, lambda el: el.get_zipped_dataset())
@@ -53,7 +54,10 @@ class Trainer:
                 lambda el: el.batch(self.validation_batch_size, drop_remainder=True))
         self.validation_dataset_optional = optional_map(
                 self.validation_dataset_optional,
-                lambda el: el.cache().prefetch(tf.data.experimental.AUTOTUNE))
+                lambda el: el.prefetch(tf.data.experimental.AUTOTUNE))
+        # self.validation_dataset_optional = optional_map(
+        #         self.validation_dataset_optional,
+        #         lambda el: el.cache().prefetch(tf.data.experimental.AUTOTUNE))
         
         if self.strategy_optional:
             with self.strategy_optional.scope():
