@@ -2,8 +2,8 @@ import io
 import os
 import platform
 
-from tensorflow.python.keras import Model
-from tensorflow.python.keras.utils.vis_utils import plot_model
+from tensorflow.keras import Model
+from tensorflow.keras.utils import plot_model
 
 from imagemodel.common.setup import ExperimentSetup
 from imagemodel.common.trainer import Trainer
