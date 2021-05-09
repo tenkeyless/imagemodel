@@ -1,7 +1,8 @@
 import tensorflow as tf
 from tensorflow.keras.layers import Layer, Reshape
 
-from imagemodel.reference_tracking.layers.extract_patch_layer import ExtractPatchLayer
+# from imagemodel.reference_tracking.layers.extract_patch_layer import ExtractPatchLayer
+from imagemodel.reference_tracking.layers.extract_patch_layer2 import ExtractPatchLayer2 as ExtractPatchLayer
 
 
 class AggregationLayer(Layer):
@@ -19,7 +20,7 @@ class AggregationLayer(Layer):
         self.input_main_batch_size = input_shape[0][0]
         self.input_main_h_size = input_shape[0][1]
         self.input_main_channels_size = input_shape[0][-1]
-        self.aggregate_patch_layer = ExtractPatchLayer(k_size=self.k_size)
+        # self.aggregate_patch_layer = ExtractPatchLayer(k_size=self.k_size)
     
     def get_config(self):
         config = super().get_config()
@@ -32,7 +33,7 @@ class AggregationLayer(Layer):
         
         # Aggregate
         if self.aggregate_mode == "weighted_sum":
-            ref_value_stacked = self.aggregate_patch_layer(ref_value)
+            ref_value_stacked = ExtractPatchLayer(k_size=self.k_size)(ref_value)
             ref_value_stacked = Reshape(
                     (self.input_main_h_size, self.input_main_h_size, self.k_size * self.k_size, self.bin_size))(
                     ref_value_stacked)
