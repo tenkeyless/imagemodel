@@ -30,6 +30,14 @@ RUN pip install tensorflow-metadata
 RUN apt-get -y install git
 RUN pip install -q git+https://github.com/tensorflow/examples.git
 
+# Google Storage
+RUN pip install google-cloud-storage
+RUN echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
+RUN apt-get install apt-transport-https ca-certificates gnupg curl -y
+RUN curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key --keyring /usr/share/keyrings/cloud.google.gpg add -
+RUN apt-get update && apt-get install google-cloud-sdk -y
+RUN pip install cloud-tpu-client
+
 RUN apt -y install graphviz
 RUN pip install pydot
 RUN pip install tf_clahe

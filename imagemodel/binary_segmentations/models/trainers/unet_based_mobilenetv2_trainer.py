@@ -5,7 +5,7 @@ from tensorflow.keras import losses, metrics, optimizers
 
 import _path  # noqa
 from imagemodel.binary_segmentations.configs.datasets import Datasets
-from imagemodel.binary_segmentations.models.common_compile_options import CompileOptions
+from imagemodel.common.models.common_compile_options import CompileOptions
 from imagemodel.binary_segmentations.models.unet_based_mobilenetv2 import UNetBasedMobileNetV2ModelManager
 from imagemodel.binary_segmentations.run.common import get_run_id
 from imagemodel.common.reporter import Reporter
@@ -62,14 +62,12 @@ if __name__ == "__main__":
     validation_freq: int = args.validation_freq or 1
     run_id: str = args.run_id or get_run_id()
     without_early_stopping: bool = args.without_early_stopping
-    run_id = run_id.replace(" ", "_")  # run id without space
-    training_id: str = "training__model_{}__run_{}".format(model_name, run_id)
     training_pipeline: str = args.training_pipeline
     validation_pipeline: Optional[str] = args.validation_pipeline
     batch_size: int = args.batch_size or 4
     
     # Experiment Setup
-    experiment_setup = ExperimentSetup(result_base_folder, training_id, run_id)
+    experiment_setup = ExperimentSetup(result_base_folder, model_name, run_id)
     callback_list = experiment_setup.setup_callbacks(
             training_epochs=training_epochs,
             without_early_stopping=without_early_stopping,

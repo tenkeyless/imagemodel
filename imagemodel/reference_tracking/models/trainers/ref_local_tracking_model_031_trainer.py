@@ -5,15 +5,15 @@ from tensorflow.keras import losses, metrics, optimizers
 from tensorflow.python.distribute.tpu_strategy import TPUStrategy
 
 import _path  # noqa
-from imagemodel.binary_segmentations.configs.datasets import Datasets
-from imagemodel.common.models.common_compile_options import CompileOptions
 from imagemodel.binary_segmentations.models.unet_level import UNetLevelModelManager
-from imagemodel.binary_segmentations.run.common import get_run_id
+from imagemodel.common.models.common_compile_options import CompileOptions
 from imagemodel.common.reporter import Reporter
 from imagemodel.common.setup import ExperimentSetup
 from imagemodel.common.trainer import Trainer
 from imagemodel.common.utils.common_tpu import create_tpu, delete_tpu, tpu_initialize
 from imagemodel.common.utils.optional import optional_map
+from imagemodel.reference_tracking.configs.datasets import Datasets
+from imagemodel.reference_tracking.models.ref_local_tracking_model_031 import RefLocalTrackingModel031Manager
 
 # noinspection DuplicatedCode
 if __name__ == "__main__":
@@ -28,20 +28,20 @@ if __name__ == "__main__":
     ...     -u $(id -u):$(id -g) \
     ...     -v /etc/localtime:/etc/localtime:ro \
     ...     -v $(pwd):/imagemodel \
-    ...     -v ~/binary_segmentations_results:/binary_segmentations_results \
+    ...     -v /data:/data \
+    ...     -v ~/reference_tracking_results:/reference_tracking_results \
     ...     -v /data/tensorflow_datasets:/tensorflow_datasets \
     ...     -p 6006:6006 \
     ...     --workdir="/imagemodel" \
-    ...     imagemodel/tkl:1.0
-    >>> python imagemodel/binary_segmentations/models/trainers/ref_local_tracking_model_031_trainer.py \
-    ...     --unet_level 3 \
+    ...     imagemodel/tkl:1.2
+    >>> python imagemodel/reference_tracking/models/trainers/ref_local_tracking_model_031_trainer.py \
     ...     --model_name unet_level \
-    ...     --result_base_folder binary_segmentations_results \
-    ...     --training_epochs 20 \
+    ...     --result_base_folder /reference_tracking_results \
+    ...     --training_epochs 100 \
     ...     --validation_freq 1 \
-    ...     --training_pipeline bs_gs_cell_tracking_training_1 \
-    ...     --validation_pipeline bs_gs_cell_tracking_validation_1 \
-    ...     --run_id binary_segmentations__unet_level_test__20210424_163658 \
+    ...     --training_pipeline rt_cell_tracking_training_1 \
+    ...     --validation_pipeline rt_cell_tracking_validation_1 \
+    ...     --run_id binary_segmentations__unet_level_test__20210509_151726 \
     ...     --without_early_stopping \
     ...     --batch_size 2
     
@@ -57,15 +57,14 @@ if __name__ == "__main__":
     ...     -p 6006:6006 \
     ...     --workdir="/imagemodel" \
     ...     imagemodel_tpu/tkl:1.4
-    >>> python imagemodel/binary_segmentations/models/trainers/ref_local_tracking_model_031_trainer.py \
-    ...     --unet_level 4 \
-    ...     --model_name unet_level \
+    >>> python imagemodel/reference_tracking/models/trainers/ref_local_tracking_model_031_trainer.py \
+    ...     --model_name ref_local_tracking_model_031 \
     ...     --result_base_folder gs://cell_dataset \
     ...     --training_epochs 100 \
     ...     --validation_freq 1 \
-    ...     --training_pipeline bs_gs_cell_tracking_training_1 \
-    ...     --validation_pipeline bs_gs_cell_tracking_validation_1 \
-    ...     --run_id binary_segmentations__20210506_102237 \
+    ...     --training_pipeline rt_gs_cell_tracking_training_1 \
+    ...     --validation_pipeline rt_gs_cell_tracking_validation_1 \
+    ...     --run_id reference_tracking__20210509_131615 \
     ...     --without_early_stopping \
     ...     --batch_size 8 \
     ...     --ctpu_zone us-central1-b \
@@ -73,31 +72,33 @@ if __name__ == "__main__":
     """
     # Argument Parsing
     parser: ArgumentParser = ArgumentParser(
-            description="Arguments for U-Net Level model in Binary Semantic Segmentation",
+            description="Arguments for Ref Local Tracking model 031 in Reference Tracking",
             formatter_class=RawTextHelpFormatter)
-    parser.add_argument("--unet_level", type=int)
+    # model related
     parser.add_argument("--model_name", type=str, required=True)
-    parser.add_argument("--result_base_folder", type=str, required=True)
+    parser.add_argument("--input_color_image", action="store_true")
+    # training related
     parser.add_argument("--training_epochs", type=int)
     parser.add_argument("--validation_freq", type=int)
-    parser.add_argument("--training_pipeline", type=str, required=True)
-    parser.add_argument("--validation_pipeline", type=str)
     parser.add_argument("--run_id", type=str)
     parser.add_argument("--without_early_stopping", action="store_true")
+    parser.add_argument("--result_base_folder", type=str, required=True)
+    # dataset related
+    parser.add_argument("--training_pipeline", type=str, required=True)
+    parser.add_argument("--validation_pipeline", type=str)
     parser.add_argument("--batch_size", type=int)
+    # tpu related
     parser.add_argument("--ctpu_zone", type=str, help="VM, TPU zone. ex) 'us-central1-b'")
     parser.add_argument("--tpu_name", type=str, help="TPU name. ex) 'leetaekyu-1-trainer'")
-    parser.add_argument("--input_color_image", action="store_true")
     
     args = parser.parse_args()
     # model related
-    unet_level: int = args.unet_level or 4
     model_name: str = args.model_name
     input_color_image: bool = args.input_color_image
     # training related
     training_epochs: int = args.training_epochs or 200
     validation_freq: int = args.validation_freq or 1
-    run_id: str = args.run_id or get_run_id()
+    run_id: Optional[str] = args.run_id
     without_early_stopping: bool = args.without_early_stopping
     result_base_folder: str = args.result_base_folder
     # dataset related
@@ -121,22 +122,42 @@ if __name__ == "__main__":
             without_early_stopping=without_early_stopping,
             validation_freq=validation_freq)
     
-    # Dataset, Model Setup
+    # Model Setup
     input_shape: Tuple[int, int, int] = (256, 256, 3) if input_color_image else (256, 256, 1)
-    manager = UNetLevelModelManager(level=unet_level, input_shape=input_shape)
-    
+    if tpu_name_optional:
+        with strategy_optional.scope():
+            u_net_model = UNetLevelModelManager.unet_level(input_shape=input_shape)
+            # u_net_model2 = tf.keras.models.clone_model(u_net_model)
+            # u_net_model2.set_weights(u_net_model.get_weights())
+    else:
+        u_net_model = UNetLevelModelManager.unet_level(input_shape=input_shape)
+        # u_net_model2 = tf.keras.models.clone_model(u_net_model)
+        # u_net_model2.set_weights(u_net_model.get_weights())
+    manager = RefLocalTrackingModel031Manager(
+            unet_l4_model_main=u_net_model,
+            unet_l4_model_ref=u_net_model,
+            bin_num=30,
+            input_main_image_shape=(256, 256, 1),
+            input_ref_image_shape=(256, 256, 1),
+            input_ref_bin_label_shape=(256, 256, 30))
+    # Output - [Main BW Mask, Ref BW Mask, Main Color Bin Label]
     if tpu_name_optional:
         with strategy_optional.scope():
             helper = CompileOptions(
                     optimizer=optimizers.Adam(lr=1e-4),
-                    loss_functions=[losses.BinaryCrossentropy()],
-                    metrics=[metrics.BinaryAccuracy()])
+                    loss_functions=[losses.BinaryCrossentropy(), losses.BinaryCrossentropy(),
+                                    losses.CategoricalCrossentropy()],
+                    loss_weights_optional=[0.1, 0.1, 0.8],
+                    metrics=[[metrics.BinaryAccuracy()], [metrics.BinaryAccuracy()], [metrics.CategoricalAccuracy()]])
     else:
         helper = CompileOptions(
                 optimizer=optimizers.Adam(lr=1e-4),
-                loss_functions=[losses.BinaryCrossentropy()],
-                metrics=[metrics.BinaryAccuracy()])
+                loss_functions=[losses.BinaryCrossentropy(), losses.BinaryCrossentropy(),
+                                losses.CategoricalCrossentropy()],
+                loss_weights_optional=[0.1, 0.1, 0.8],
+                metrics=[[metrics.BinaryAccuracy()], [metrics.BinaryAccuracy()], [metrics.CategoricalAccuracy()]])
     
+    # Dataset Setup
     bs_training_pipeline = Datasets(training_pipeline).get_pipeline(resize_to=(256, 256))
     bs_validation_pipeline = optional_map(
             validation_pipeline,

@@ -20,8 +20,8 @@ from tensorflow.keras.layers import (
 from tensorflow.keras.models import Model
 from typing_extensions import TypedDict
 
-from imagemodel.binary_segmentations.models.common_arguments import ModelArguments
-from imagemodel.binary_segmentations.models.common_model_manager import (
+from imagemodel.common.models.common_arguments import ModelArguments
+from imagemodel.common.models.common_model_manager import (
     CommonModelManager,
     CommonModelManagerDictGeneratable
 )

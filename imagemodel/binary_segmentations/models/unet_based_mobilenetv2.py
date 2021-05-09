@@ -13,8 +13,8 @@ from tensorflow.keras.models import Model
 from tensorflow_examples.models.pix2pix import pix2pix
 from typing_extensions import TypedDict
 
-from imagemodel.binary_segmentations.models.common_arguments import ModelArguments
-from imagemodel.binary_segmentations.models.common_model_manager import (
+from imagemodel.common.models.common_arguments import ModelArguments
+from imagemodel.common.models.common_model_manager import (
     CommonModelManager,
     CommonModelManagerDictGeneratable
 )
