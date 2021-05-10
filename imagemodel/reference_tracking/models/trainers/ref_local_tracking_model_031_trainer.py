@@ -31,7 +31,6 @@ if __name__ == "__main__":
     ...     -v /data:/data \
     ...     -v ~/reference_tracking_results:/reference_tracking_results \
     ...     -v /data/tensorflow_datasets:/tensorflow_datasets \
-    ...     -p 6006:6006 \
     ...     --workdir="/imagemodel" \
     ...     imagemodel/tkl:1.2
     >>> python imagemodel/reference_tracking/models/trainers/ref_local_tracking_model_031_trainer.py \
@@ -41,7 +40,7 @@ if __name__ == "__main__":
     ...     --validation_freq 1 \
     ...     --training_pipeline rt_cell_tracking_training_1 \
     ...     --validation_pipeline rt_cell_tracking_validation_1 \
-    ...     --run_id binary_segmentations__unet_level_test__20210509_151726 \
+    ...     --run_id binary_segmentations__unet_level_test__20210510_080109 \
     ...     --without_early_stopping \
     ...     --batch_size 2
     
@@ -54,7 +53,6 @@ if __name__ == "__main__":
     ...     -v ~/.config:/.config \
     ...     -v ~/.local:/.local \
     ...     -v $(pwd):/imagemodel \
-    ...     -p 6006:6006 \
     ...     --workdir="/imagemodel" \
     ...     imagemodel_tpu/tkl:1.4
     >>> python imagemodel/reference_tracking/models/trainers/ref_local_tracking_model_031_trainer.py \

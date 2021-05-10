@@ -75,6 +75,7 @@ class RTPreprocessorOutputHelper(PreprocessorOutputHelper):
         return [main_bw_mask_dataset, ref_bw_mask_dataset, main_color_bin_label_dataset]
 
 
+@tf.autograph.experimental.do_not_convert
 def __tf_color_to_random_map(ref_label_img, bin_size, exclude_first=1):
     return tf_generate_random_color_map(
             ref_label_img,
@@ -95,6 +96,7 @@ def tf_image_detach_with_id_color_probability_list(
     return result2
 
 
+@tf.autograph.experimental.do_not_convert
 def tf_input_ref_label_preprocessing_function(label, color_info, bin_size):
     result = tf_image_detach_with_id_color_probability_list(label, color_info, bin_size, 0)
     result = tf.reshape(result, (256 // (2 ** 0), 256 // (2 ** 0), bin_size))
@@ -103,6 +105,7 @@ def tf_input_ref_label_preprocessing_function(label, color_info, bin_size):
     return result
 
 
+@tf.autograph.experimental.do_not_convert
 def tf_output_label_processing(label, color_info, bin_size):
     result = tf_image_detach_with_id_color_probability_list(label, color_info, bin_size, 0)
     result = tf.reshape(result, (256 // (2 ** 0), 256 // (2 ** 0), bin_size))
@@ -161,28 +164,20 @@ class BaseRTPreprocessorOutputHelper(RTPreprocessorOutputHelper):
     
     def main_bw_mask_preprocess_func(self) -> List[Callable[[tf.Tensor], tf.Tensor]]:
         @tf.autograph.experimental.do_not_convert
-        def _cast(img: tf.Tensor) -> tf.Tensor:
-            return tf.cast(img, tf.float32)
-        
-        @tf.autograph.experimental.do_not_convert
         def _greater_cast(img: tf.Tensor) -> tf.Tensor:
-            return tf.cast(tf.greater(img, 0.5), tf.float32)
+            return tf.cast(tf.greater(tf.cast(img, tf.float32), 0.5), tf.float32)
         
-        return [_cast, _greater_cast]
+        return [_greater_cast]
     
     def get_ref_bw_mask_dataset(self) -> tf.data.Dataset:
         return self._datasets[1]
     
     def ref_bw_mask_preprocess_func(self) -> List[Callable[[tf.Tensor], tf.Tensor]]:
         @tf.autograph.experimental.do_not_convert
-        def _cast(img: tf.Tensor) -> tf.Tensor:
-            return tf.cast(img, tf.float32)
-        
-        @tf.autograph.experimental.do_not_convert
         def _greater_cast(img: tf.Tensor) -> tf.Tensor:
-            return tf.cast(tf.greater(img, 0.5), tf.float32)
+            return tf.cast(tf.greater(tf.cast(img, tf.float32), 0.5), tf.float32)
         
-        return [_cast, _greater_cast]
+        return [_greater_cast]
     
     def get_ref_color_label_dataset(self) -> tf.data.Dataset:
         return self._datasets[2]
@@ -197,7 +192,7 @@ class BaseRTPreprocessorOutputHelper(RTPreprocessorOutputHelper):
                     num_parallel_calls=tf.data.experimental.AUTOTUNE)
             zipped_dataset = tf.data.Dataset.zip((main_dataset, ref_img_color_list_dataset))
             main_color_bin_separated_dataset = zipped_dataset.map(
-                    lambda img, color_info: tf_input_ref_label_preprocessing_function(img, color_info, self.bin_size),
+                    lambda img, color_info: tf_output_label_processing(img, color_info, self.bin_size),
                     num_parallel_calls=tf.data.experimental.AUTOTUNE)
             return main_color_bin_separated_dataset
         
