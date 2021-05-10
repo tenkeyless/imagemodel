@@ -13,7 +13,7 @@ from imagemodel.common.trainer import Trainer
 from imagemodel.common.utils.common_tpu import create_tpu, delete_tpu, tpu_initialize
 from imagemodel.common.utils.optional import optional_map
 from imagemodel.reference_tracking.configs.datasets import Datasets
-from imagemodel.reference_tracking.models.ref_local_tracking_model_031 import RefLocalTrackingModel031Manager
+from imagemodel.reference_tracking.models.ref_local_tracking_model_031_mh import RefLocalTrackingModel031MHManager
 
 # noinspection DuplicatedCode
 if __name__ == "__main__":
@@ -33,8 +33,8 @@ if __name__ == "__main__":
     ...     -v /data/tensorflow_datasets:/tensorflow_datasets \
     ...     --workdir="/imagemodel" \
     ...     imagemodel/tkl:1.2
-    >>> python imagemodel/reference_tracking/models/trainers/ref_local_tracking_model_031_trainer.py \
-    ...     --model_name unet_level \
+    >>> python imagemodel/reference_tracking/models/trainers/ref_local_tracking_model_031_mh_trainer.py \
+    ...     --model_name ref_local_tracking_model_031_mh \
     ...     --result_base_folder reference_tracking_results \
     ...     --training_epochs 100 \
     ...     --validation_freq 1 \
@@ -55,14 +55,15 @@ if __name__ == "__main__":
     ...     -v $(pwd):/imagemodel \
     ...     --workdir="/imagemodel" \
     ...     imagemodel_tpu/tkl:1.4
-    >>> python imagemodel/reference_tracking/models/trainers/ref_local_tracking_model_031_trainer.py \
-    ...     --model_name ref_local_tracking_model_031 \
+    >>> python imagemodel/reference_tracking/models/trainers/ref_local_tracking_model_031_mh_trainer.py \
+    ...     --model_name ref_local_tracking_model_031_mh \
+    ...     --head_num 4 \
     ...     --result_base_folder gs://cell_dataset \
     ...     --training_epochs 100 \
     ...     --validation_freq 1 \
     ...     --training_pipeline rt_gs_cell_tracking_training_2 \
     ...     --validation_pipeline rt_gs_cell_tracking_validation_2 \
-    ...     --run_id reference_tracking__20210510_215226 \
+    ...     --run_id reference_tracking__20210511_055305 \
     ...     --without_early_stopping \
     ...     --batch_size 8 \
     ...     --ctpu_zone us-central1-b \
@@ -75,6 +76,7 @@ if __name__ == "__main__":
     # model related
     parser.add_argument("--model_name", type=str, required=True)
     parser.add_argument("--input_color_image", action="store_true")
+    parser.add_argument("--head_num", type=int)
     # training related
     parser.add_argument("--training_epochs", type=int)
     parser.add_argument("--validation_freq", type=int)
@@ -93,6 +95,7 @@ if __name__ == "__main__":
     # model related
     model_name: str = args.model_name
     input_color_image: bool = args.input_color_image
+    head_num: int = args.head_num
     # training related
     training_epochs: int = args.training_epochs or 200
     validation_freq: int = args.validation_freq or 1
@@ -131,13 +134,14 @@ if __name__ == "__main__":
         u_net_model = UNetLevelModelManager.unet_level(input_shape=input_shape)
         # u_net_model2 = tf.keras.models.clone_model(u_net_model)
         # u_net_model2.set_weights(u_net_model.get_weights())
-    manager = RefLocalTrackingModel031Manager(
+    manager = RefLocalTrackingModel031MHManager(
             unet_l4_model_main=u_net_model,
             unet_l4_model_ref=u_net_model,
             bin_num=30,
             input_main_image_shape=(256, 256, 1),
             input_ref_image_shape=(256, 256, 1),
-            input_ref_bin_label_shape=(256, 256, 30))
+            input_ref_bin_label_shape=(256, 256, 30),
+            head_num=head_num)
     # Output - [Main BW Mask, Ref BW Mask, Main Color Bin Label]
     if tpu_name_optional:
         with strategy_optional.scope():

@@ -1,4 +1,4 @@
-from typing import Callable, List
+from typing import Callable, List, Tuple
 
 import tensorflow as tf
 from image_keras.tf.utils.images import (
@@ -11,72 +11,84 @@ from image_keras.tf.utils.images import (
 from imagemodel.common.datasets.preprocessor_helper import PreprocessorInputHelper, PreprocessorOutputHelper
 
 
-def apply_funcs_to(dataset: tf.data.Dataset, functions: List[Callable[[tf.Tensor], tf.Tensor]]) -> tf.data.Dataset:
-    _dataset = dataset
-    for f in functions:
-        _dataset = _dataset.map(f, num_parallel_calls=tf.data.experimental.AUTOTUNE)
-    return _dataset
-
-
 class RTPreprocessorInputHelper(PreprocessorInputHelper):
-    def get_main_image_dataset(self) -> tf.data.Dataset:
+    def get_dataset(self) -> tf.data.Dataset:
         pass
     
     def main_image_preprocess_func(self) -> List[Callable[[tf.Tensor], tf.Tensor]]:
         pass
     
-    def get_ref_image_dataset(self) -> tf.data.Dataset:
-        pass
-    
     def ref_image_preprocess_func(self) -> List[Callable[[tf.Tensor], tf.Tensor]]:
         pass
     
-    def get_ref_color_label_dataset(self) -> tf.data.Dataset:
+    def ref_color_bin_label_preprocess_func(self) -> List[Callable[[tf.Tensor], tf.Tensor]]:
         pass
     
-    def ref_color_bin_label_preprocess_func(self) -> Callable[[tf.data.Dataset], tf.data.Dataset]:
-        pass
+    def __input_preprocess(self, main_images: tf.Tensor, ref_images: tf.Tensor, ref_labels: tf.Tensor) -> \
+            Tuple[tf.Tensor, tf.Tensor, tf.Tensor]:
+        result_main_images = main_images
+        for f in self.main_image_preprocess_func():
+            result_main_images = f(result_main_images)
+        
+        result_ref_images = ref_images
+        for f in self.ref_image_preprocess_func():
+            result_ref_images = f(result_ref_images)
+        
+        result_ref_labels = ref_labels
+        for f in self.ref_color_bin_label_preprocess_func():
+            result_ref_labels = f(result_ref_labels)
+        
+        return result_main_images, result_ref_images, result_ref_labels
     
     def get_inputs(self) -> List[tf.data.Dataset]:
-        main_image_dataset = apply_funcs_to(self.get_main_image_dataset(), self.main_image_preprocess_func())
-        ref_image_dataset = apply_funcs_to(self.get_ref_image_dataset(), self.ref_image_preprocess_func())
-        ref_color_bin_label_dataset = self.ref_color_bin_label_preprocess_func()(self.get_ref_color_label_dataset())
-        return [main_image_dataset, ref_image_dataset, ref_color_bin_label_dataset]
+        dataset = self.get_dataset()
+        dataset = dataset.map(self.__input_preprocess)
+        return [dataset]
 
 
 class RTPreprocessorOutputHelper(PreprocessorOutputHelper):
-    def get_main_bw_mask_dataset(self) -> tf.data.Dataset:
+    def get_dataset(self) -> tf.data.Dataset:
         pass
     
     def main_bw_mask_preprocess_func(self) -> List[Callable[[tf.Tensor], tf.Tensor]]:
         pass
     
-    def get_ref_bw_mask_dataset(self) -> tf.data.Dataset:
-        pass
-    
     def ref_bw_mask_preprocess_func(self) -> List[Callable[[tf.Tensor], tf.Tensor]]:
         pass
     
-    def get_ref_color_label_dataset(self) -> tf.data.Dataset:
+    def main_color_label_preprocess_func(self) -> List[Callable[[tf.Tensor, tf.Tensor], tf.Tensor]]:
         pass
     
-    def get_main_color_label_dataset(self) -> tf.data.Dataset:
-        pass
-    
-    def main_color_label_preprocess_func(self) -> Callable[[tf.data.Dataset, tf.data.Dataset], tf.data.Dataset]:
-        pass
+    def __output_augments(
+            self,
+            main_bw_images: tf.Tensor,
+            ref_bw_images: tf.Tensor,
+            ref_label_images: tf.Tensor,
+            main_label_images: tf.Tensor) -> Tuple[tf.Tensor, tf.Tensor, tf.Tensor]:
+        result_main_bw_images = main_bw_images
+        for f in self.main_bw_mask_preprocess_func():
+            result_main_bw_images = f(result_main_bw_images)
+        
+        result_ref_bw_images = ref_bw_images
+        for f in self.ref_bw_mask_preprocess_func():
+            result_ref_bw_images = f(result_ref_bw_images)
+        
+        result_new_main_label_images = None
+        result_ref_label_images = ref_label_images
+        result_main_label_images = main_label_images
+        for f in self.main_color_label_preprocess_func():
+            result_new_main_label_images = f(result_ref_label_images, result_main_label_images)
+        
+        return result_main_bw_images, result_ref_bw_images, result_new_main_label_images
     
     def get_outputs(self) -> List[tf.data.Dataset]:
-        main_bw_mask_dataset = apply_funcs_to(self.get_main_bw_mask_dataset(), self.main_bw_mask_preprocess_func())
-        ref_bw_mask_dataset = apply_funcs_to(self.get_ref_bw_mask_dataset(), self.ref_bw_mask_preprocess_func())
-        main_color_bin_label_dataset = self.main_color_label_preprocess_func()(
-                self.get_ref_color_label_dataset(),
-                self.get_main_color_label_dataset())
-        return [main_bw_mask_dataset, ref_bw_mask_dataset, main_color_bin_label_dataset]
+        dataset = self.get_dataset()
+        dataset = dataset.map(self.__output_augments)
+        return [dataset]
 
 
 @tf.autograph.experimental.do_not_convert
-def __tf_color_to_random_map(ref_label_img, bin_size, exclude_first=1):
+def tf_color_to_random_map(ref_label_img, bin_size, exclude_first=1):
     return tf_generate_random_color_map(
             ref_label_img,
             bin_size=bin_size,
@@ -118,7 +130,7 @@ class BaseRTPreprocessorInputHelper(RTPreprocessorInputHelper):
         self._datasets: List[tf.data.Dataset] = datasets
         self.bin_size: int = bin_size
     
-    def get_main_image_dataset(self) -> tf.data.Dataset:
+    def get_dataset(self) -> tf.data.Dataset:
         return self._datasets[0]
     
     def main_image_preprocess_func(self) -> List[Callable[[tf.Tensor], tf.Tensor]]:
@@ -128,9 +140,6 @@ class BaseRTPreprocessorInputHelper(RTPreprocessorInputHelper):
         
         return [_cast_norm]
     
-    def get_ref_image_dataset(self) -> tf.data.Dataset:
-        return self._datasets[1]
-    
     def ref_image_preprocess_func(self) -> List[Callable[[tf.Tensor], tf.Tensor]]:
         @tf.autograph.experimental.do_not_convert
         def _cast_norm(img: tf.Tensor) -> tf.Tensor:
@@ -138,20 +147,17 @@ class BaseRTPreprocessorInputHelper(RTPreprocessorInputHelper):
         
         return [_cast_norm]
     
-    def get_ref_color_label_dataset(self) -> tf.data.Dataset:
-        return self._datasets[2]
-    
-    def ref_color_bin_label_preprocess_func(self) -> Callable[[tf.data.Dataset], tf.data.Dataset]:
-        def _generate_ref_color_bin(dataset: tf.data.Dataset) -> tf.data.Dataset:
-            ref_img_color_list_dataset = dataset.map(
-                    lambda img: (img, __tf_color_to_random_map(img, self.bin_size, 1)),
-                    num_parallel_calls=tf.data.experimental.AUTOTUNE)
-            ref_color_bin_separated_dataset = ref_img_color_list_dataset.map(
-                    lambda img, color_info: tf_input_ref_label_preprocessing_function(img, color_info, self.bin_size),
-                    num_parallel_calls=tf.data.experimental.AUTOTUNE)
-            return ref_color_bin_separated_dataset
+    def ref_color_bin_label_preprocess_func(self) -> List[Callable[[tf.Tensor], tf.Tensor]]:
+        @tf.autograph.experimental.do_not_convert
+        def _generate_ref_color_bin(image: tf.Tensor) -> tf.Tensor:
+            ref_img_color_list = tf_color_to_random_map(image, self.bin_size, 1)
+            ref_color_bin_separated = tf_input_ref_label_preprocessing_function(
+                    image,
+                    ref_img_color_list,
+                    self.bin_size)
+            return ref_color_bin_separated
         
-        return _generate_ref_color_bin
+        return [_generate_ref_color_bin]
 
 
 class BaseRTPreprocessorOutputHelper(RTPreprocessorOutputHelper):
@@ -159,7 +165,7 @@ class BaseRTPreprocessorOutputHelper(RTPreprocessorOutputHelper):
         self._datasets: List[tf.data.Dataset] = datasets
         self.bin_size: int = bin_size
     
-    def get_main_bw_mask_dataset(self) -> tf.data.Dataset:
+    def get_dataset(self) -> tf.data.Dataset:
         return self._datasets[0]
     
     def main_bw_mask_preprocess_func(self) -> List[Callable[[tf.Tensor], tf.Tensor]]:
@@ -179,21 +185,14 @@ class BaseRTPreprocessorOutputHelper(RTPreprocessorOutputHelper):
         
         return [_greater_cast]
     
-    def get_ref_color_label_dataset(self) -> tf.data.Dataset:
-        return self._datasets[2]
-    
-    def get_main_color_label_dataset(self) -> tf.data.Dataset:
-        return self._datasets[3]
-    
-    def main_color_label_preprocess_func(self) -> Callable[[tf.data.Dataset, tf.data.Dataset], tf.data.Dataset]:
-        def _generate_main_color_bin(ref_dataset: tf.data.Dataset, main_dataset: tf.data.Dataset) -> tf.data.Dataset:
-            ref_img_color_list_dataset = ref_dataset.map(
-                    lambda img: __tf_color_to_random_map(img, self.bin_size, 1),
-                    num_parallel_calls=tf.data.experimental.AUTOTUNE)
-            zipped_dataset = tf.data.Dataset.zip((main_dataset, ref_img_color_list_dataset))
-            main_color_bin_separated_dataset = zipped_dataset.map(
-                    lambda img, color_info: tf_output_label_processing(img, color_info, self.bin_size),
-                    num_parallel_calls=tf.data.experimental.AUTOTUNE)
-            return main_color_bin_separated_dataset
+    def main_color_label_preprocess_func(self) -> List[Callable[[tf.Tensor, tf.Tensor], tf.Tensor]]:
+        @tf.autograph.experimental.do_not_convert
+        def _generate_main_color_bin(ref_image: tf.Tensor, main_image: tf.Tensor) -> tf.Tensor:
+            ref_img_color_list = tf_color_to_random_map(ref_image, self.bin_size, 1)
+            main_color_bin_separated = tf_output_label_processing(
+                    main_image,
+                    ref_img_color_list,
+                    self.bin_size)
+            return main_color_bin_separated
         
-        return _generate_main_color_bin
+        return [_generate_main_color_bin]
