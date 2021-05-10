@@ -35,12 +35,12 @@ if __name__ == "__main__":
     ...     imagemodel/tkl:1.2
     >>> python imagemodel/reference_tracking/models/trainers/ref_local_tracking_model_031_trainer.py \
     ...     --model_name unet_level \
-    ...     --result_base_folder /reference_tracking_results \
+    ...     --result_base_folder reference_tracking_results \
     ...     --training_epochs 100 \
     ...     --validation_freq 1 \
-    ...     --training_pipeline rt_cell_tracking_training_1 \
-    ...     --validation_pipeline rt_cell_tracking_validation_1 \
-    ...     --run_id binary_segmentations__unet_level_test__20210510_080109 \
+    ...     --training_pipeline rt_cell_tracking_training_2 \
+    ...     --validation_pipeline rt_cell_tracking_validation_2 \
+    ...     --run_id binary_segmentations__unet_level_test__20210510_2120915 \
     ...     --without_early_stopping \
     ...     --batch_size 2
     
@@ -60,9 +60,9 @@ if __name__ == "__main__":
     ...     --result_base_folder gs://cell_dataset \
     ...     --training_epochs 100 \
     ...     --validation_freq 1 \
-    ...     --training_pipeline rt_gs_cell_tracking_training_1 \
-    ...     --validation_pipeline rt_gs_cell_tracking_validation_1 \
-    ...     --run_id reference_tracking__20210509_131615 \
+    ...     --training_pipeline rt_gs_cell_tracking_training_2 \
+    ...     --validation_pipeline rt_gs_cell_tracking_validation_2 \
+    ...     --run_id reference_tracking__20210510_215226 \
     ...     --without_early_stopping \
     ...     --batch_size 8 \
     ...     --ctpu_zone us-central1-b \
@@ -156,8 +156,8 @@ if __name__ == "__main__":
                 metrics=[[metrics.BinaryAccuracy()], [metrics.BinaryAccuracy()], [metrics.CategoricalAccuracy()]])
     
     # Dataset Setup
-    bs_training_pipeline = Datasets(training_pipeline).get_pipeline(resize_to=(256, 256))
-    bs_validation_pipeline = optional_map(
+    rt_training_pipeline = Datasets(training_pipeline).get_pipeline(resize_to=(256, 256))
+    rt_validation_pipeline = optional_map(
             validation_pipeline,
             lambda el: Datasets(el).get_pipeline(resize_to=(256, 256)))
     
@@ -166,11 +166,11 @@ if __name__ == "__main__":
             model_manager=manager,
             compile_helper=helper,
             strategy_optional=strategy_optional,
-            training_pipeline=bs_training_pipeline,
+            training_pipeline=rt_training_pipeline,
             training_batch_size=batch_size,
             training_shuffle_in_buffer=False,
             training_shuffle_buffer_size=None,
-            validation_pipeline=bs_validation_pipeline,
+            validation_pipeline=rt_validation_pipeline,
             validation_batch_size=batch_size,
             validation_freq=validation_freq)
     
