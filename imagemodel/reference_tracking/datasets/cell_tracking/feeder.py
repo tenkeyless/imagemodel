@@ -1,6 +1,8 @@
 from abc import abstractmethod
 
 from imagemodel.common.datasets.descriptor.cell_tracking_data_descriptor import CellTrackingDataDescriptor
+from imagemodel.common.datasets.descriptor.cell_tracking_sample_data_descriptor import \
+    CellTrackingSampleTestDataDescriptor
 from imagemodel.reference_tracking.datasets.cell_tracking.feeder_helper import (
     CellTrackingFeederInputHelper,
     CellTrackingFeederOutputHelper
@@ -78,6 +80,18 @@ class RTGSCellTrackingTestFeeder(RTCellTrackingFeeder):
     
     def __init__(self):
         cell_tracking_data_descriptor = CellTrackingDataDescriptor(
+                original_dataset=None,
+                base_folder="gs://cell_dataset/dataset/tracking_test")
+        super().__init__(cell_tracking_data_descriptor=cell_tracking_data_descriptor)
+
+
+class RTGSCellTrackingSampleTestFeeder(RTCellTrackingFeeder):
+    @property
+    def feeder_data_description(self):
+        return "Cell Tracking Sample Test Google Storage Dataset"
+    
+    def __init__(self):
+        cell_tracking_data_descriptor = CellTrackingSampleTestDataDescriptor(
                 original_dataset=None,
                 base_folder="gs://cell_dataset/dataset/tracking_test")
         super().__init__(cell_tracking_data_descriptor=cell_tracking_data_descriptor)
