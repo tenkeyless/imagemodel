@@ -54,7 +54,7 @@ class Reporter:
     def _plotmodel(self, model: Model, result_folder: str):
         # Model Structure
         # Upload to gs bucket
-        if self.setup.training_result_folder.startswith("gs://"):
+        if result_folder.startswith("gs://"):
             tmp_plot_model_img_path = "/tmp/model_{}.png".format(self.setup.run_id)
             plot_model(model, show_shapes=True, to_file=tmp_plot_model_img_path, dpi=144)
             self.__upload_file_to_google_storage(result_folder, tmp_plot_model_img_path)
@@ -65,7 +65,7 @@ class Reporter:
         
         # Model Nested Structure
         # Upload to gs bucket
-        if self.setup.training_result_folder.startswith("gs://"):
+        if result_folder.startswith("gs://"):
             tmp_plot_model_nested_img_path = "/tmp/model_nested_{}.png".format(self.setup.run_id)
             plot_model(
                     model,
