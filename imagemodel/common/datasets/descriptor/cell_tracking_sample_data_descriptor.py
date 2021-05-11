@@ -32,7 +32,7 @@ class CellTrackingSampleTestDataDescriptor(CellTrackingDataDescriptor, BaseTFDat
         tf.data.Dataset
             `tf.Tensor` of shape=(), dtype=string.
         """
-        dataset = CellTrackingSampleTestDataDescriptor.__base_files(self.sample_folder)
+        dataset = CellTrackingSampleTestDataDescriptor.base_files(self.sample_folder)
         return dataset
     
     def get_main_img_dataset(self) -> tf.data.Dataset:
@@ -44,7 +44,7 @@ class CellTrackingSampleTestDataDescriptor(CellTrackingDataDescriptor, BaseTFDat
         tf.data.Dataset
             `tf.Tensor` of shape=(height, width, 1), dtype=uint8.
         """
-        dataset: tf.data.Dataset = CellTrackingSampleTestDataDescriptor.__base_files(
+        dataset: tf.data.Dataset = CellTrackingSampleTestDataDescriptor.base_files(
                 self.sample_folder,
                 shuffle_seed=None)
         dataset = dataset.map(lambda fname: combine_folder_file(self.main_image_folder, fname))
@@ -60,7 +60,7 @@ class CellTrackingSampleTestDataDescriptor(CellTrackingDataDescriptor, BaseTFDat
         tf.data.Dataset
             `tf.Tensor` of shape=(height, width, 3), dtype=uint8.
         """
-        dataset: tf.data.Dataset = CellTrackingSampleTestDataDescriptor.__base_files(
+        dataset: tf.data.Dataset = CellTrackingSampleTestDataDescriptor.base_files(
                 self.sample_folder,
                 shuffle_seed=None)
         dataset = dataset.map(lambda fname: combine_folder_file(self.main_label_folder, fname))
@@ -76,7 +76,7 @@ class CellTrackingSampleTestDataDescriptor(CellTrackingDataDescriptor, BaseTFDat
         tf.data.Dataset
             `tf.Tensor` of shape=(height, width, 1), dtype=uint8.
         """
-        dataset: tf.data.Dataset = CellTrackingSampleTestDataDescriptor.__base_files(
+        dataset: tf.data.Dataset = CellTrackingSampleTestDataDescriptor.base_files(
                 self.sample_folder,
                 shuffle_seed=None)
         dataset = dataset.map(lambda fname: combine_folder_file(self.main_bw_label_folder, fname))
@@ -92,7 +92,7 @@ class CellTrackingSampleTestDataDescriptor(CellTrackingDataDescriptor, BaseTFDat
         tf.data.Dataset
             `tf.Tensor` of shape=(height, width, 1), dtype=uint8.
         """
-        dataset: tf.data.Dataset = CellTrackingSampleTestDataDescriptor.__base_files(
+        dataset: tf.data.Dataset = CellTrackingSampleTestDataDescriptor.base_files(
                 self.sample_folder,
                 shuffle_seed=None)
         dataset = dataset.map(lambda fname: combine_folder_file(self.ref_image_folder, fname))
@@ -108,7 +108,7 @@ class CellTrackingSampleTestDataDescriptor(CellTrackingDataDescriptor, BaseTFDat
         tf.data.Dataset
             `tf.Tensor` of shape=(height, width, 3), dtype=uint8.
         """
-        dataset: tf.data.Dataset = CellTrackingSampleTestDataDescriptor.__base_files(
+        dataset: tf.data.Dataset = CellTrackingSampleTestDataDescriptor.base_files(
                 self.sample_folder,
                 shuffle_seed=None)
         dataset = dataset.map(lambda fname: combine_folder_file(self.ref_label_folder, fname))
@@ -124,7 +124,7 @@ class CellTrackingSampleTestDataDescriptor(CellTrackingDataDescriptor, BaseTFDat
         tf.data.Dataset
             `tf.Tensor` of shape=(height, width, 1), dtype=uint8.
         """
-        dataset: tf.data.Dataset = CellTrackingSampleTestDataDescriptor.__base_files(
+        dataset: tf.data.Dataset = CellTrackingSampleTestDataDescriptor.base_files(
                 self.sample_folder,
                 shuffle_seed=None)
         dataset = dataset.map(lambda fname: combine_folder_file(self.ref_bw_label_folder, fname))

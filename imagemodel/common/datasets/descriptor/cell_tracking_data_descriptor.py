@@ -31,14 +31,14 @@ class CellTrackingDataDescriptor(BaseTFDataDescriptor):
         self.ref_bw_label_folder: str = os.path.join(self.base_folder, "framed_bw_label", "p1")
     
     @staticmethod
-    def __base_files(folder_name: str, shuffle_seed: Optional[int] = 42) -> tf.data.Dataset:
+    def base_files(folder_name: str, shuffle_seed: Optional[int] = 42) -> tf.data.Dataset:
         shuffle = True if shuffle_seed else False
         return tf.data.Dataset.list_files(folder_name + "/*", shuffle=shuffle, seed=shuffle_seed).map(
                 get_filename_from_fullpath)
     
     @staticmethod
-    def __base_files_with_folder(folder_name: str, shuffle_seed: Optional[int] = 42) -> tf.data.Dataset:
-        file_dataset: tf.data.Dataset = CellTrackingDataDescriptor.__base_files(folder_name, shuffle_seed)
+    def base_files_with_folder(folder_name: str, shuffle_seed: Optional[int] = 42) -> tf.data.Dataset:
+        file_dataset: tf.data.Dataset = CellTrackingDataDescriptor.base_files(folder_name, shuffle_seed)
         return file_dataset.map(lambda fname: combine_folder_file(folder_name, fname))
     
     def get_filename_dataset(self) -> tf.data.Dataset:
@@ -50,7 +50,7 @@ class CellTrackingDataDescriptor(BaseTFDataDescriptor):
         tf.data.Dataset
             `tf.Tensor` of shape=(), dtype=string.
         """
-        dataset = CellTrackingDataDescriptor.__base_files(self.main_image_folder)
+        dataset = CellTrackingDataDescriptor.base_files(self.main_image_folder)
         return dataset
     
     def get_main_img_dataset(self) -> tf.data.Dataset:
@@ -62,7 +62,7 @@ class CellTrackingDataDescriptor(BaseTFDataDescriptor):
         tf.data.Dataset
             `tf.Tensor` of shape=(height, width, 1), dtype=uint8.
         """
-        dataset = CellTrackingDataDescriptor.__base_files_with_folder(self.main_image_folder)
+        dataset = CellTrackingDataDescriptor.base_files_with_folder(self.main_image_folder)
         dataset = dataset.map(decode_png, num_parallel_calls=tf.data.experimental.AUTOTUNE)
         return dataset
     
@@ -75,7 +75,7 @@ class CellTrackingDataDescriptor(BaseTFDataDescriptor):
         tf.data.Dataset
             `tf.Tensor` of shape=(height, width, 3), dtype=uint8.
         """
-        dataset = CellTrackingDataDescriptor.__base_files_with_folder(os.path.join(self.main_label_folder))
+        dataset = CellTrackingDataDescriptor.base_files_with_folder(os.path.join(self.main_label_folder))
         dataset = dataset.map(lambda el: decode_png(el, 3), num_parallel_calls=tf.data.experimental.AUTOTUNE)
         return dataset
     
@@ -89,7 +89,7 @@ class CellTrackingDataDescriptor(BaseTFDataDescriptor):
             `tf.Tensor` of shape=(height, width, 1), dtype=uint8.
         """
         
-        dataset = CellTrackingDataDescriptor.__base_files_with_folder(self.main_bw_label_folder)
+        dataset = CellTrackingDataDescriptor.base_files_with_folder(self.main_bw_label_folder)
         dataset = dataset.map(decode_png, num_parallel_calls=tf.data.experimental.AUTOTUNE)
         return dataset
     
@@ -102,7 +102,7 @@ class CellTrackingDataDescriptor(BaseTFDataDescriptor):
         tf.data.Dataset
             `tf.Tensor` of shape=(height, width, 1), dtype=uint8.
         """
-        dataset = CellTrackingDataDescriptor.__base_files_with_folder(self.ref_image_folder)
+        dataset = CellTrackingDataDescriptor.base_files_with_folder(self.ref_image_folder)
         dataset = dataset.map(decode_png, num_parallel_calls=tf.data.experimental.AUTOTUNE)
         return dataset
     
@@ -115,7 +115,7 @@ class CellTrackingDataDescriptor(BaseTFDataDescriptor):
         tf.data.Dataset
             `tf.Tensor` of shape=(height, width, 3), dtype=uint8.
         """
-        dataset = CellTrackingDataDescriptor.__base_files_with_folder(self.ref_label_folder)
+        dataset = CellTrackingDataDescriptor.base_files_with_folder(self.ref_label_folder)
         dataset = dataset.map(lambda el: decode_png(el, 3), num_parallel_calls=tf.data.experimental.AUTOTUNE)
         return dataset
     
@@ -128,6 +128,6 @@ class CellTrackingDataDescriptor(BaseTFDataDescriptor):
         tf.data.Dataset
             `tf.Tensor` of shape=(height, width, 1), dtype=uint8.
         """
-        dataset = CellTrackingDataDescriptor.__base_files_with_folder(self.ref_bw_label_folder)
+        dataset = CellTrackingDataDescriptor.base_files_with_folder(self.ref_bw_label_folder)
         dataset = dataset.map(decode_png, num_parallel_calls=tf.data.experimental.AUTOTUNE)
         return dataset
