@@ -23,7 +23,7 @@ class Predictor:
                 tuple(self.predict_pipeline.preprocessor.get_input_dataset()))
         self.predict_dataset_num: int = len(self.predict_dataset)
         self.predict_dataset = self.predict_dataset.batch(self.predict_batch_size, drop_remainder=True)
-        self.predict_dataset = self.predict_dataset.cache().prefetch(tf.data.experimental.AUTOTUNE)
     
     def predict(self):
-        return self.model.predict(self.predict_dataset, batch_size=self.predict_batch_size, verbose=1)
+        for predict_data in self.predict_dataset:
+            self.model.predict(predict_data, batch_size=self.predict_batch_size, verbose=1)
