@@ -103,6 +103,9 @@ class PredictExperimentSetup(ExperimentSetup):
         # data folder
         self.base_data_folder: str = os.path.join(self.result_base_folder, "data")
         self.predict_result_folder: str = os.path.join(self.base_data_folder, self.experiment_id)
+        self.save_result_images_folder: str = os.path.join(self.predict_result_folder, "images")
+        
         # create folder not gs
         if not self.predict_result_folder.startswith("gs://"):
-            create_folder_if_not_exist(self.predict_result_folder)
+            for folder in [self.predict_result_folder, self.save_result_images_folder]:
+                create_folder_if_not_exist(folder)
