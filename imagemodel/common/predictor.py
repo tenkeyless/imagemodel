@@ -19,8 +19,7 @@ class Predictor:
         self.predict_batch_size: int = predict_batch_size
         self.strategy_optional: Optional[TPUStrategy] = strategy_optional
         
-        self.predict_dataset: tf.data.Dataset = tf.data.Dataset.zip(
-                tuple(self.predict_pipeline.preprocessor.get_input_dataset()))
+        self.predict_dataset: tf.data.Dataset = self.predict_pipeline.get_input_zipped_dataset()
         self.predict_dataset_num: int = len(self.predict_dataset)
         self.predict_dataset = self.predict_dataset.batch(self.predict_batch_size, drop_remainder=True)
     

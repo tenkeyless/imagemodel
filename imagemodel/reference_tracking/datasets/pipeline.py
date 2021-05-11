@@ -65,6 +65,9 @@ class RTPipeline(Pipeline[RTFeeder, RTAugmenter, RTRegularizer, RTPreprocessor])
         """
         super().__init__(feeder, augmenter_func, regularizer_func, preprocessor_func)
     
+    def get_input_zipped_dataset(self) -> tf.data.Dataset:
+        return tf.data.Dataset.zip(tuple(self.preprocessor.get_input_dataset()))
+    
     def get_zipped_dataset(self) -> tf.data.Dataset:
         return self.preprocessor.get_zipped_dataset()
     
