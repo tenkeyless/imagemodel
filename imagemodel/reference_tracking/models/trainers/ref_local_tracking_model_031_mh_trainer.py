@@ -8,7 +8,7 @@ import _path  # noqa
 from imagemodel.binary_segmentations.models.unet_level import UNetLevelModelManager
 from imagemodel.common.models.common_compile_options import CompileOptions
 from imagemodel.common.reporter import Reporter
-from imagemodel.common.setup import ExperimentSetup
+from imagemodel.common.setup import TrainingExperimentSetup
 from imagemodel.common.trainer import Trainer
 from imagemodel.common.utils.common_tpu import create_tpu, delete_tpu, tpu_initialize
 from imagemodel.common.utils.optional import optional_map
@@ -117,7 +117,7 @@ if __name__ == "__main__":
         strategy_optional = tpu_initialize(tpu_address=tpu_name_optional, tpu_zone=ctpu_zone)
     
     # Experiment Setup
-    experiment_setup = ExperimentSetup(result_base_folder, model_name, run_id)
+    experiment_setup = TrainingExperimentSetup(result_base_folder, model_name, run_id)
     callback_list = experiment_setup.setup_callbacks(
             training_epochs=training_epochs,
             without_early_stopping=without_early_stopping,

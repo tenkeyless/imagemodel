@@ -5,11 +5,11 @@ from tensorflow.keras import losses, metrics, optimizers
 
 import _path  # noqa
 from imagemodel.binary_segmentations.configs.datasets import Datasets
-from imagemodel.common.models.common_compile_options import CompileOptions
 from imagemodel.binary_segmentations.models.unet import UNetModelManager
 from imagemodel.binary_segmentations.run.common import get_run_id
+from imagemodel.common.models.common_compile_options import CompileOptions
 from imagemodel.common.reporter import Reporter
-from imagemodel.common.setup import ExperimentSetup
+from imagemodel.common.setup import TrainingExperimentSetup
 from imagemodel.common.trainer import Trainer
 from imagemodel.common.utils.optional import optional_map
 
@@ -67,7 +67,7 @@ if __name__ == "__main__":
     batch_size: int = args.batch_size or 4
     
     # Experiment Setup
-    experiment_setup = ExperimentSetup(result_base_folder, model_name, run_id)
+    experiment_setup = TrainingExperimentSetup(result_base_folder, model_name, run_id)
     callback_list = experiment_setup.setup_callbacks(
             training_epochs=training_epochs,
             without_early_stopping=without_early_stopping,
