@@ -34,6 +34,9 @@ class RTPreprocessorInputHelper(PreprocessorInputHelper):
     def get_ref_color_label_dataset(self) -> tf.data.Dataset:
         pass
     
+    def ref_random_color_info_map(self, dataset: tf.data.Dataset) -> tf.data.Dataset:
+        pass
+    
     def ref_color_bin_label_preprocess_func(self) -> Callable[[tf.data.Dataset], tf.data.Dataset]:
         pass
     
@@ -141,11 +144,18 @@ class BaseRTPreprocessorInputHelper(RTPreprocessorInputHelper):
     def get_ref_color_label_dataset(self) -> tf.data.Dataset:
         return self._datasets[2]
     
+    def ref_random_color_info_map(self, dataset: tf.data.Dataset) -> tf.data.Dataset:
+        _dataset = dataset
+        return _dataset.map(
+                lambda img: (img, __tf_color_to_random_map(img, self.bin_size, 1)),
+                num_parallel_calls=tf.data.experimental.AUTOTUNE)
+    
     def ref_color_bin_label_preprocess_func(self) -> Callable[[tf.data.Dataset], tf.data.Dataset]:
         def _generate_ref_color_bin(dataset: tf.data.Dataset) -> tf.data.Dataset:
-            ref_img_color_list_dataset = dataset.map(
-                    lambda img: (img, __tf_color_to_random_map(img, self.bin_size, 1)),
-                    num_parallel_calls=tf.data.experimental.AUTOTUNE)
+            # ref_img_color_list_dataset = dataset.map(
+            #         lambda img: (img, __tf_color_to_random_map(img, self.bin_size, 1)),
+            #         num_parallel_calls=tf.data.experimental.AUTOTUNE)
+            ref_img_color_list_dataset = self.ref_random_color_info_map(dataset)
             ref_color_bin_separated_dataset = ref_img_color_list_dataset.map(
                     lambda img, color_info: tf_input_ref_label_preprocessing_function(img, color_info, self.bin_size),
                     num_parallel_calls=tf.data.experimental.AUTOTUNE)

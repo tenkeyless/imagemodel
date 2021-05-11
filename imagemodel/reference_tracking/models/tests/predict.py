@@ -6,11 +6,11 @@ from tensorflow.keras.models import Model
 from tensorflow.python.distribute.tpu_strategy import TPUStrategy
 
 import _path  # noqa
-from imagemodel.common.predictor import Predictor
 from imagemodel.common.reporter import PredictorReporter
 from imagemodel.common.setup import PredictExperimentSetup, predict_experiment_id
 from imagemodel.common.utils.common_tpu import create_tpu, delete_tpu, tpu_initialize
 from imagemodel.reference_tracking.configs.datasets import Datasets
+from imagemodel.reference_tracking.models.tests.rt_predictor import RTPredictor
 
 # noinspection DuplicatedCode
 if __name__ == "__main__":
@@ -33,7 +33,7 @@ if __name__ == "__main__":
     >>> python imagemodel/reference_tracking/models/tests/predict.py \
     ...     --model_name ref_local_tracking_model_031 \
     ...     --model_weight_path saved/training__model_ref_local_tracking_model_031_mh__run_reference_tracking__20210511_063754.epoch_12 \
-    ...     --run_id reference_tracking__20210511_133606 \
+    ...     --run_id reference_tracking__20210511_170914 \
     ...     --result_base_folder gs://cell_dataset \
     ...     --predict_pipeline rt_gs_cell_sample_test_1 \
     ...     --batch_size 1
@@ -117,11 +117,12 @@ if __name__ == "__main__":
     rt_predict_pipeline = Datasets(predict_pipeline).get_pipeline(resize_to=(256, 256))
     
     # Trainer Setup
-    predictor = Predictor(
+    predictor = RTPredictor(
             model=model,
             predict_pipeline=rt_predict_pipeline,
             predict_batch_size=batch_size,
-            strategy_optional=strategy_optional)
+            strategy_optional=strategy_optional,
+            filled_empty_with=(255, 255, 255))
     
     # Report
     reporter = PredictorReporter(setup=experiment_setup, predictor=predictor)

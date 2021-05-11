@@ -1,18 +1,25 @@
 from abc import abstractmethod
+from typing import Optional
+
+import tensorflow as tf
 
 from imagemodel.common.datasets.descriptor.cell_tracking_data_descriptor import CellTrackingDataDescriptor
+from imagemodel.reference_tracking.datasets.rt_feeder import RTFeeder
+from imagemodel.reference_tracking.datasets.rt_feeder_helper import RTFeederInputHelper, RTFeederOutputHelper
 from imagemodel.reference_tracking.datasets.single_pipeline.cell_tracking.feeder_helper import (
     CellTrackingFeederInputHelper,
     CellTrackingFeederOutputHelper
 )
-from imagemodel.reference_tracking.datasets.rt_feeder import RTFeeder
-from imagemodel.reference_tracking.datasets.rt_feeder_helper import RTFeederInputHelper, RTFeederOutputHelper
 
 
 class RTCellTrackingFeeder(RTFeeder):
     @abstractmethod
     def __init__(self, cell_tracking_data_descriptor: CellTrackingDataDescriptor):
         self._cell_tracking_data_descriptor = cell_tracking_data_descriptor
+    
+    @property
+    def filename_optional(self) -> Optional[tf.data.Dataset]:
+        return self._cell_tracking_data_descriptor.get_filename_dataset()
     
     @property
     def input_helper(self) -> RTFeederInputHelper:
