@@ -69,12 +69,6 @@ class TrainingExperimentSetup(ExperimentSetup):
             for folder in [save_models_folder, self.save_weights_folder, self.tf_run_log_dir]:
                 create_folder_if_not_exist(folder)
     
-    @staticmethod
-    def __get_run_id() -> str:
-        os.environ["TZ"] = "Asia/Seoul"
-        time.tzset()
-        return time.strftime("%Y%m%d_%H%M%S")
-    
     def setup_callbacks(
             self, training_epochs: int, without_early_stopping: bool, validation_freq: int) -> List[Callback]:
         model_checkpoint_cb: Callback = ModelCheckpoint(
@@ -91,3 +85,24 @@ class TrainingExperimentSetup(ExperimentSetup):
             callback_list.append(early_stopping_cb)
         
         return callback_list
+
+
+class PredictExperimentSetup(ExperimentSetup):
+    def __init__(
+            self,
+            result_base_folder: str,
+            model_name: str,
+            run_id: Optional[str],
+            experiment_id_generator: Callable[[str, str], str] = predict_experiment_id):
+        super().__init__(
+                result_base_folder=result_base_folder,
+                model_name=model_name,
+                run_id=run_id,
+                experiment_id_generator=experiment_id_generator)
+        
+        # data folder
+        self.base_data_folder: str = os.path.join(self.result_base_folder, "data")
+        self.predict_result_folder: str = os.path.join(self.base_data_folder, self.experiment_id)
+        # create folder not gs
+        if not self.predict_result_folder.startswith("gs://"):
+            create_folder_if_not_exist(self.predict_result_folder)
