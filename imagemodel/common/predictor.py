@@ -20,7 +20,7 @@ class Predictor:
         self.strategy_optional: Optional[TPUStrategy] = strategy_optional
         
         self.predict_dataset: tf.data.Dataset = tf.data.Dataset.zip(
-                self.predict_pipeline.preprocessor.get_input_dataset())
+                tuple(self.predict_pipeline.preprocessor.get_input_dataset()))
         self.predict_dataset_num: int = len(self.predict_dataset)
         self.predict_dataset = self.predict_dataset.batch(self.predict_batch_size, drop_remainder=True)
         self.predict_dataset = self.predict_dataset.cache().prefetch(tf.data.experimental.AUTOTUNE)
