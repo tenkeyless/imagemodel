@@ -7,7 +7,7 @@ from tensorflow.python.distribute.tpu_strategy import TPUStrategy
 import _path  # noqa
 from imagemodel.binary_segmentations.models.unet_level import UNetLevelModelManager
 from imagemodel.common.models.common_compile_options import CompileOptions
-from imagemodel.common.reporter import Reporter
+from imagemodel.common.reporter import TrainerReporter
 from imagemodel.common.setup import TrainingExperimentSetup
 from imagemodel.common.trainer import Trainer
 from imagemodel.common.utils.common_tpu import create_tpu, delete_tpu, tpu_initialize
@@ -175,7 +175,7 @@ if __name__ == "__main__":
             validation_freq=validation_freq)
     
     # Report
-    reporter = Reporter(setup=experiment_setup, trainer=trainer)
+    reporter = TrainerReporter(setup=experiment_setup, trainer=trainer)
     reporter.report()
     reporter.plotmodel()
     

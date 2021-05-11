@@ -8,7 +8,7 @@ from imagemodel.binary_segmentations.configs.datasets import Datasets
 from imagemodel.binary_segmentations.models.deeplab_v3 import DeeplabV3ModelManager
 from imagemodel.binary_segmentations.run.common import get_run_id
 from imagemodel.common.models.common_compile_options import CompileOptions
-from imagemodel.common.reporter import Reporter
+from imagemodel.common.reporter import TrainerReporter
 from imagemodel.common.setup import TrainingExperimentSetup
 from imagemodel.common.trainer import Trainer
 from imagemodel.common.utils.optional import optional_map
@@ -97,7 +97,7 @@ if __name__ == "__main__":
             validation_freq=validation_freq)
     
     # Report
-    reporter = Reporter(setup=experiment_setup, trainer=trainer)
+    reporter = TrainerReporter(setup=experiment_setup, trainer=trainer)
     reporter.report()
     reporter.plotmodel()
     
