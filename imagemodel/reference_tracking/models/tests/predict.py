@@ -33,21 +33,10 @@ if __name__ == "__main__":
     ...     --model_name ref_local_tracking_model_031_mh \
     ...     --model_weight_path saved/\
     ... training__model_ref_local_tracking_model_031_mh__run_reference_tracking__20210511_063754.epoch_23 \
-    ...     --run_id reference_tracking__20210512_104120 \
+    ...     --run_id reference_tracking__20210513_050631 \
     ...     --result_base_folder /reference_tracking_results \
-    ...     --predict_pipeline rt_cell_sample_test_1 \
-    ...     --batch_size 1
-    >>> python imagemodel/reference_tracking/models/tests/predict.py \
-    ...     --model_name ref_local_tracking_model_031_mh \
-    ...     --model_weight_path saved/\
-    ... training__model_ref_local_tracking_model_031_mh__run_reference_tracking__20210511_063754.epoch_23 \
-    ...     --run_id reference_tracking__20210512_163049 \
-    ...     --result_base_folder ~/reference_tracking_results \
     ...     --predict_pipeline rt_cell_sample_2_test_1 \
-    ...     --batch_size 1
-    >>> python3 imagemodel/reference_tracking/models/tests/predict.py \
-    ...     --model_name ref_local_tracking_model_031_mh \
-    ...     --model_weight_path gs://cell_dataset/save/weights/\
+    ...     --batch_size 4
     ... training__model_ref_local_tracking_model_031_mh__run_reference_tracking__20210511_063754.epoch_12 \
     ...     --run_id reference_tracking__20210511_213704 \
     ...     --result_base_folder gs://cell_dataset \

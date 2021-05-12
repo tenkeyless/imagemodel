@@ -18,25 +18,22 @@ class RTPredictor(Predictor[RTPipeline]):
             strategy_optional: Optional[TPUStrategy] = None):
         super().__init__(model, predict_pipeline, predict_batch_size, strategy_optional)
         self.post_processing: Callable[[tf.Tensor, tf.Tensor, tf.Tensor], None] = post_processing
-    
-    def setup_predict_dataset(self):
+        
         filename_dataset = self.predict_pipeline.feeder.filename_optional
-        
-        self.predict_dataset = self.predict_pipeline.get_input_zipped_dataset()
+        self.predict_dataset: tf.data.Dataset = self.predict_pipeline.get_input_zipped_dataset()
         self.predict_dataset_num: int = len(self.predict_dataset)
-        
         self.predict_dataset = tf.data.Dataset.zip((self.predict_dataset, filename_dataset))
         self.predict_dataset = self.predict_dataset.batch(self.predict_batch_size, drop_remainder=True)
     
     def predict(self):
         for predict_data in self.predict_dataset:
-            # predict_data = (zipped_dataset, color_info_dataset, filename_dataset, color_map)
-            predicted = self.model.predict((predict_data[0][0], predict_data[0][1], predict_data[0][2]), verbose=1)
-            
+            # predict_data = ((main_image, ref_image, (ref_label_with_bin, bin_color_map)), filenames)
+            # predicted = (main_bw_label, ref_bw_label, predicted_main_label_with_bin)
+            predicted = self.model.predict((predict_data[0][0], predict_data[0][1], predict_data[0][2][0]), verbose=1)
             predicted_current_bin_label = predicted[2]
             
-            # prev_bin_label = predict_data[0][2]
-            bin_color_map = predict_data[0][3][1]
+            bin_color_map = predict_data[0][2][1]
             current_filenames = predict_data[1]
+            print(current_filenames)
             
             self.post_processing(predicted_current_bin_label, bin_color_map, current_filenames)

@@ -5,7 +5,10 @@ import tf_clahe
 
 from imagemodel.reference_tracking.datasets.rt_preprocessor_helper import (
     BaseRTPreprocessorInputHelper,
-    RTPreprocessorInputHelper, apply_funcs_to, tf_color_to_random_map
+    RTPreprocessorInputHelper,
+    apply_funcs_to,
+    tf_color_to_random_map,
+    tf_input_ref_label_preprocessing_function
 )
 
 
@@ -46,8 +49,11 @@ class ClaheRTPreprocessorPredictInputHelper(ClaheRTPreprocessorInputHelper):
         super().__init__(datasets=datasets, bin_size=bin_size)
         self.fill_with = fill_with
     
-    def ref_color_map_func(self) -> Callable[[tf.data.Dataset], tf.data.Dataset]:
-        def _generate_ref_color_bin(dataset: tf.data.Dataset) -> tf.data.Dataset:
+    def get_inputs(self) -> List[tf.data.Dataset]:
+        main_image_dataset = apply_funcs_to(self.get_main_image_dataset(), self.main_image_preprocess_func())
+        ref_image_dataset = apply_funcs_to(self.get_ref_image_dataset(), self.ref_image_preprocess_func())
+        
+        def generate_filled_color_map(color_map):
             @tf.autograph.experimental.do_not_convert
             def _color_fill(_color, _color_index, fill_with: Tuple[int, int, int]):
                 fill_empty_with = tf.repeat([fill_with], repeats=tf.shape(_color_index)[-1], axis=0)
@@ -57,20 +63,16 @@ class ClaheRTPreprocessorPredictInputHelper(ClaheRTPreprocessorInputHelper):
                 result = tf.gather(filled_bin, tf.cast(_color_index, tf.int32), axis=0)
                 return result
             
-            _dataset = dataset.map(
-                    lambda img: tf_color_to_random_map(img, self.bin_size, 1),
-                    num_parallel_calls=tf.data.experimental.AUTOTUNE)
-            
-            _dataset = _dataset.map(
-                    lambda color_index, color: (color_index, _color_fill(color, color_index, self.fill_with)))
-            
-            return _dataset
+            return _color_fill(color_map[1], color_map[0], self.fill_with)
         
-        return _generate_ref_color_bin
-    
-    def get_inputs(self) -> List[tf.data.Dataset]:
-        main_image_dataset = apply_funcs_to(self.get_main_image_dataset(), self.main_image_preprocess_func())
-        ref_image_dataset = apply_funcs_to(self.get_ref_image_dataset(), self.ref_image_preprocess_func())
-        ref_color_bin_label_dataset = self.ref_color_bin_label_preprocess_func()(self.get_ref_color_label_dataset())
-        ref_color_map_dataset = self.ref_color_map_func()(self.get_ref_color_label_dataset())
-        return [main_image_dataset, ref_image_dataset, ref_color_bin_label_dataset, ref_color_map_dataset]
+        def label_to_separate_bin_map(img, color_map):
+            return tf_input_ref_label_preprocessing_function(img, color_map, self.bin_size)
+        
+        ref_color_bin_label__color_map_dataset = self.get_ref_color_label_dataset().map(
+                lambda img: (img, tf_color_to_random_map(img, self.bin_size, 1)),
+                num_parallel_calls=tf.data.experimental.AUTOTUNE).map(
+                lambda img, color_map: (
+                    label_to_separate_bin_map(img, color_map), generate_filled_color_map(color_map)),
+                num_parallel_calls=tf.data.experimental.AUTOTUNE)
+        
+        return [main_image_dataset, ref_image_dataset, ref_color_bin_label__color_map_dataset]

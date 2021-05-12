@@ -19,11 +19,6 @@ class Predictor(Generic[PI]):
         self.predict_pipeline: PI = predict_pipeline
         self.predict_batch_size: int = predict_batch_size
         self.strategy_optional: Optional[TPUStrategy] = strategy_optional
-        
-        self.setup_predict_dataset()
-    
-    def setup_predict_dataset(self):
-        pass
     
     def predict(self):
         pass
