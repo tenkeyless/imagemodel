@@ -10,7 +10,7 @@ from imagemodel.common.reporter import PredictorReporter
 from imagemodel.common.setup import PredictExperimentSetup, predict_experiment_id
 from imagemodel.common.utils.common_tpu import create_tpu, delete_tpu, tpu_initialize
 from imagemodel.reference_tracking.configs.datasets import Datasets
-from imagemodel.reference_tracking.models.tests.rt_predictor import RTPredictor
+from imagemodel.reference_tracking.models.testers.rt_predictor import RTPredictor
 
 # noinspection DuplicatedCode
 if __name__ == "__main__":
