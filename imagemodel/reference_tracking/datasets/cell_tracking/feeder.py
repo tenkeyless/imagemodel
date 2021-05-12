@@ -80,6 +80,18 @@ class RTCellTrackingSample2TestFeeder(RTCellTrackingFeeder):
         super().__init__(cell_tracking_data_descriptor=cell_tracking_data_descriptor)
 
 
+class RTGSCellTrackingSample2TestFeeder(RTCellTrackingFeeder):
+    @property
+    def feeder_data_description(self):
+        return "Cell Tracking Sample 2 Test Google Storage Dataset"
+    
+    def __init__(self):
+        cell_tracking_data_descriptor = CellTrackingSampleTestDataDescriptor(
+                original_dataset=None,
+                base_folder="gs://cell_dataset/dataset/tracking_test2")
+        super().__init__(cell_tracking_data_descriptor=cell_tracking_data_descriptor)
+
+
 class RTGSCellTrackingTrainingFeeder(RTCellTrackingFeeder):
     @property
     def feeder_data_description(self):

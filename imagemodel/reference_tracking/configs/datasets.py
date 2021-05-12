@@ -6,6 +6,7 @@ from imagemodel.reference_tracking.datasets.cell_tracking.feeder import (
     RTCellTrackingSample2TestFeeder, RTCellTrackingSampleTestFeeder,
     RTCellTrackingTrainingFeeder,
     RTCellTrackingValidationFeeder,
+    RTGSCellTrackingSample2TestFeeder,
     RTGSCellTrackingSampleTestFeeder,
     RTGSCellTrackingTrainingFeeder,
     RTGSCellTrackingValidationFeeder
@@ -41,6 +42,7 @@ class Datasets(Enum):
     rt_cell_sample_test_1 = "rt_cell_sample_test_1"
     rt_cell_sample_2_test_1 = "rt_cell_sample_2_test_1"
     rt_gs_cell_sample_test_1 = "rt_gs_cell_sample_test_1"
+    rt_gs_cell_sample_2_test_1 = "rt_gs_cell_sample_2_test_1"
     none = "none"
     
     def get_pipeline(self, resize_to: Tuple[int, int]) -> Optional[Pipeline]:
@@ -103,6 +105,15 @@ class Datasets(Enum):
         elif self == Datasets.rt_gs_cell_sample_test_1:
             test_sample_feeder = RTGSCellTrackingSampleTestFeeder()
             rt_test_sample_pipeline = RTPipeline(test_sample_feeder, regularizer_func=regularizer_func)
+            return rt_test_sample_pipeline
+        elif self == Datasets.rt_gs_cell_sample_2_test_1:
+            preprocessor_func: Callable[[RTRegularizer], RTPreprocessor] = lambda \
+                    el_rt_augmenter: RTCellTrackingPredictPreprocessor(el_rt_augmenter, 30, fill_with=(255, 255, 255))
+            test_sample_feeder = RTGSCellTrackingSample2TestFeeder()
+            rt_test_sample_pipeline = RTPipeline(
+                    test_sample_feeder,
+                    regularizer_func=regularizer_func,
+                    preprocessor_func=preprocessor_func)
             return rt_test_sample_pipeline
         else:
             return None

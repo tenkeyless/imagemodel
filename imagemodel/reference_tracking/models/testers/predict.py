@@ -29,7 +29,7 @@ if __name__ == "__main__":
     ...     -v /data/tensorflow_datasets:/tensorflow_datasets \
     ...     --workdir="/imagemodel" \
     ...     imagemodel/tkl:1.2
-    >>> python imagemodel/reference_tracking/models/tests/predict.py \
+    >>> python imagemodel/reference_tracking/models/testers/predict.py \
     ...     --model_name ref_local_tracking_model_031_mh \
     ...     --model_weight_path saved/\
     ... training__model_ref_local_tracking_model_031_mh__run_reference_tracking__20210511_063754.epoch_23 \
@@ -37,11 +37,6 @@ if __name__ == "__main__":
     ...     --result_base_folder /reference_tracking_results \
     ...     --predict_pipeline rt_cell_sample_2_test_1 \
     ...     --batch_size 4
-    ... training__model_ref_local_tracking_model_031_mh__run_reference_tracking__20210511_063754.epoch_12 \
-    ...     --run_id reference_tracking__20210511_213704 \
-    ...     --result_base_folder gs://cell_dataset \
-    ...     --predict_pipeline rt_gs_cell_sample_test_1 \
-    ...     --batch_size 1
     
     # With GPU (X)
     >>> docker run \
@@ -56,13 +51,13 @@ if __name__ == "__main__":
     ...     -v /data/tensorflow_datasets:/tensorflow_datasets \
     ...     --workdir="/imagemodel" \
     ...     imagemodel/tkl:1.2
-    >>> python imagemodel/reference_tracking/models/tests/predict.py \
-    ...     --model_name ref_local_tracking_model_031 \
+    >>> python imagemodel/reference_tracking/models/testers/predict.py \
+    ...     --model_name ref_local_tracking_model_031_mh \
     ...     --model_weight_path saved/\
-    ... training__model_ref_local_tracking_model_031__run_reference_tracking__20210510_215226.epoch_60 \
-    ...     --run_id reference_tracking__20210512_072032 \
+    ... training__model_ref_local_tracking_model_031_mh__run_reference_tracking__20210511_063754.epoch_23 \
+    ...     --run_id reference_tracking__20210513_053050 \
     ...     --result_base_folder /reference_tracking_results \
-    ...     --predict_pipeline rt_cell_sample_test_1 \
+    ...     --predict_pipeline rt_cell_sample_2_test_1 \
     ...     --batch_size 2
 
     # With TPU (X)
@@ -76,13 +71,13 @@ if __name__ == "__main__":
     ...     -v $(pwd):/imagemodel \
     ...     --workdir="/imagemodel" \
     ...     imagemodel_tpu/tkl:1.0
-    >>> python imagemodel/reference_tracking/models/tests/predict.py \
+    >>> python imagemodel/reference_tracking/models/testers/predict.py \
     ...     --model_name ref_local_tracking_model_031_mh \
     ...     --model_weight_path gs://cell_dataset/save/weights/\
-    ... training__model_ref_local_tracking_model_031_mh__run_reference_tracking__20210511_063754.epoch_12 \
-    ...     --run_id reference_tracking__20210511_213704 \
+    ... training__model_ref_local_tracking_model_031_mh__run_reference_tracking__20210511_063754.epoch_23 \
+    ...     --run_id reference_tracking__20210513_052931 \
     ...     --result_base_folder gs://cell_dataset \
-    ...     --predict_pipeline rt_gs_cell_sample_test_1 \
+    ...     --predict_pipeline rt_gs_cell_sample_2_test_1 \
     ...     --batch_size 4 \
     ...     --ctpu_zone us-central1-b \
     ...     --tpu_name leetaekyu-1-trainer
