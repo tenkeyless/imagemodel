@@ -1,5 +1,5 @@
 from argparse import ArgumentParser, RawTextHelpFormatter
-from typing import Optional, Tuple
+from typing import Callable, Optional, Tuple
 
 import tensorflow as tf
 from tensorflow.keras.models import Model
@@ -11,6 +11,11 @@ from imagemodel.common.setup import PredictExperimentSetup, predict_experiment_i
 from imagemodel.common.utils.common_tpu import create_tpu, delete_tpu, tpu_initialize
 from imagemodel.common.utils.gpu_check import check_first_gpu
 from imagemodel.reference_tracking.configs.datasets import Datasets
+from imagemodel.reference_tracking.datasets.cell_tracking.preprocessor import RTCellTrackingPredictPreprocessor
+from imagemodel.reference_tracking.datasets.pipeline import RTPipeline
+from imagemodel.reference_tracking.datasets.rt_augmenter import RTAugmenter
+from imagemodel.reference_tracking.datasets.rt_preprocessor import RTPreprocessor
+from imagemodel.reference_tracking.datasets.rt_regularizer import BaseRTRegularizer, RTRegularizer
 from imagemodel.reference_tracking.models.testers.rt_predictor import RTPredictor
 
 check_first_gpu()
@@ -142,7 +147,16 @@ if __name__ == "__main__":
         model: Model = tf.keras.models.load_model(model_weight_path)
     
     # Dataset Setup
-    rt_predict_pipeline = Datasets(predict_pipeline).get_pipeline(resize_to=(256, 256))
+    feeder = Datasets(predict_pipeline).get_feeder()
+    regularizer_func: Callable[[RTAugmenter], RTRegularizer] = lambda el_bs_augmenter: BaseRTRegularizer(
+            el_bs_augmenter,
+            (256, 256))
+    preprocessor_func: Callable[[RTRegularizer], RTPreprocessor] = \
+        lambda el_rt_augmenter: RTCellTrackingPredictPreprocessor(el_rt_augmenter, 30, fill_with=(255, 255, 255))
+    rt_predict_pipeline = RTPipeline(
+            feeder,
+            regularizer_func=regularizer_func,
+            preprocessor_func=preprocessor_func)
     
     
     def combine_folder_file(a, b):

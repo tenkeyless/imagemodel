@@ -1,6 +1,7 @@
 from enum import Enum
 from typing import Callable, Optional, Tuple
 
+from imagemodel.common.datasets.feeder import Feeder
 from imagemodel.common.datasets.pipeline import Pipeline
 from imagemodel.reference_tracking.datasets.cell_tracking.feeder import (
     RTCellTrackingSample2TestFeeder, RTCellTrackingSampleTestFeeder,
@@ -28,6 +29,26 @@ class Datasets(Enum):
     rt_gs_cell_sample_test_1 = "rt_gs_cell_sample_test_1"  # for Predict
     rt_gs_cell_sample_2_test_1 = "rt_gs_cell_sample_2_test_1"  # for Predict
     none = "none"
+    
+    def get_feeder(self) -> Optional[Feeder]:
+        if self == Datasets.rt_cell_tracking_training_1:
+            return RTCellTrackingTrainingFeeder()
+        elif self == Datasets.rt_cell_tracking_validation_1:
+            return RTCellTrackingValidationFeeder()
+        elif self == Datasets.rt_gs_cell_tracking_training_1:
+            return RTGSCellTrackingTrainingFeeder()
+        elif self == Datasets.rt_gs_cell_tracking_validation_1:
+            return RTGSCellTrackingValidationFeeder()
+        elif self == Datasets.rt_cell_sample_test_1:
+            return RTCellTrackingSampleTestFeeder()
+        elif self == Datasets.rt_cell_sample_2_test_1:
+            return RTCellTrackingSample2TestFeeder()
+        elif self == Datasets.rt_gs_cell_sample_test_1:
+            return RTGSCellTrackingSampleTestFeeder()
+        elif self == Datasets.rt_gs_cell_sample_2_test_1:
+            return RTGSCellTrackingSample2TestFeeder()
+        else:
+            return None
     
     def get_pipeline(self, resize_to: Tuple[int, int]) -> Optional[Pipeline]:
         regularizer_func: Callable[[RTAugmenter], RTRegularizer] = lambda el_bs_augmenter: BaseRTRegularizer(
