@@ -9,8 +9,11 @@ import _path  # noqa
 from imagemodel.common.reporter import PredictorReporter
 from imagemodel.common.setup import PredictExperimentSetup, predict_experiment_id
 from imagemodel.common.utils.common_tpu import create_tpu, delete_tpu, tpu_initialize
+from imagemodel.common.utils.gpu_check import check_first_gpu
 from imagemodel.reference_tracking.configs.datasets import Datasets
 from imagemodel.reference_tracking.models.testers.rt_predictor import RTPredictor
+
+check_first_gpu()
 
 # noinspection DuplicatedCode
 if __name__ == "__main__":
@@ -38,7 +41,7 @@ if __name__ == "__main__":
     ...     --predict_pipeline rt_cell_sample_2_test_1 \
     ...     --batch_size 4
     
-    # With GPU (X)
+    # With GPU (O)
     >>> docker run \
     ...     --gpus all \
     ...     -it \
