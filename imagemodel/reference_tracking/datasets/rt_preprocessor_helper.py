@@ -34,12 +34,6 @@ class RTPreprocessorInputHelper(PreprocessorInputHelper):
     def get_ref_color_label_dataset(self) -> tf.data.Dataset:
         pass
     
-    # def get_ref_img_color_list_dataset(self) -> tf.data.Dataset:
-    #     pass
-    
-    # def ref_random_color_info_map(self, dataset: tf.data.Dataset) -> tf.data.Dataset:
-    #     pass
-    
     def ref_color_bin_label_preprocess_func(self) -> Callable[[tf.data.Dataset], tf.data.Dataset]:
         pass
     
