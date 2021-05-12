@@ -39,10 +39,10 @@ class Datasets(Enum):
     rt_gs_cell_tracking_validation_1 = "rt_gs_cell_tracking_validation_1"
     rt_gs_cell_tracking_training_2 = "rt_gs_cell_tracking_training_2"
     rt_gs_cell_tracking_validation_2 = "rt_gs_cell_tracking_validation_2"
-    rt_cell_sample_test_1 = "rt_cell_sample_test_1"
-    rt_cell_sample_2_test_1 = "rt_cell_sample_2_test_1"
-    rt_gs_cell_sample_test_1 = "rt_gs_cell_sample_test_1"
-    rt_gs_cell_sample_2_test_1 = "rt_gs_cell_sample_2_test_1"
+    rt_cell_sample_test_1 = "rt_cell_sample_test_1"  # for Predict
+    rt_cell_sample_2_test_1 = "rt_cell_sample_2_test_1"  # for Predict
+    rt_gs_cell_sample_test_1 = "rt_gs_cell_sample_test_1"  # for Predict
+    rt_gs_cell_sample_2_test_1 = "rt_gs_cell_sample_2_test_1"  # for Predict
     none = "none"
     
     def get_pipeline(self, resize_to: Tuple[int, int]) -> Optional[Pipeline]:
@@ -90,8 +90,13 @@ class Datasets(Enum):
             rt_validation_pipeline = RTSinglePipeline(validation_feeder, regularizer_func=regularizer_func)
             return rt_validation_pipeline
         elif self == Datasets.rt_cell_sample_test_1:
+            preprocessor_func: Callable[[RTRegularizer], RTPreprocessor] = lambda \
+                    el_rt_augmenter: RTCellTrackingPredictPreprocessor(el_rt_augmenter, 30, fill_with=(255, 255, 255))
             test_sample_feeder = RTCellTrackingSampleTestFeeder()
-            rt_test_sample_pipeline = RTPipeline(test_sample_feeder, regularizer_func=regularizer_func)
+            rt_test_sample_pipeline = RTPipeline(
+                    test_sample_feeder,
+                    regularizer_func=regularizer_func,
+                    preprocessor_func=preprocessor_func)
             return rt_test_sample_pipeline
         elif self == Datasets.rt_cell_sample_2_test_1:
             preprocessor_func: Callable[[RTRegularizer], RTPreprocessor] = lambda \
@@ -103,8 +108,13 @@ class Datasets(Enum):
                     preprocessor_func=preprocessor_func)
             return rt_test_sample_pipeline
         elif self == Datasets.rt_gs_cell_sample_test_1:
+            preprocessor_func: Callable[[RTRegularizer], RTPreprocessor] = lambda \
+                    el_rt_augmenter: RTCellTrackingPredictPreprocessor(el_rt_augmenter, 30, fill_with=(255, 255, 255))
             test_sample_feeder = RTGSCellTrackingSampleTestFeeder()
-            rt_test_sample_pipeline = RTPipeline(test_sample_feeder, regularizer_func=regularizer_func)
+            rt_test_sample_pipeline = RTPipeline(
+                    test_sample_feeder,
+                    regularizer_func=regularizer_func,
+                    preprocessor_func=preprocessor_func)
             return rt_test_sample_pipeline
         elif self == Datasets.rt_gs_cell_sample_2_test_1:
             preprocessor_func: Callable[[RTRegularizer], RTPreprocessor] = lambda \
