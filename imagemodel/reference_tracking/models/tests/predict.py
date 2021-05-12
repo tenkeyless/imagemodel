@@ -17,7 +17,44 @@ if __name__ == "__main__":
     """
     Examples
     --------
-    # With CPU, GPU
+    # With CPU (O)
+    >>> docker run \
+    ...     -it \
+    ...     --rm \
+    ...     -u $(id -u):$(id -g) \
+    ...     -v /etc/localtime:/etc/localtime:ro \
+    ...     -v $(pwd):/imagemodel \
+    ...     -v /data:/data \
+    ...     -v ~/reference_tracking_results:/reference_tracking_results \
+    ...     -v /data/tensorflow_datasets:/tensorflow_datasets \
+    ...     --workdir="/imagemodel" \
+    ...     imagemodel/tkl:1.2
+    >>> python imagemodel/reference_tracking/models/tests/predict.py \
+    ...     --model_name ref_local_tracking_model_031_mh \
+    ...     --model_weight_path saved/\
+    ... training__model_ref_local_tracking_model_031_mh__run_reference_tracking__20210511_063754.epoch_23 \
+    ...     --run_id reference_tracking__20210512_104120 \
+    ...     --result_base_folder /reference_tracking_results \
+    ...     --predict_pipeline rt_cell_sample_test_1 \
+    ...     --batch_size 1
+    >>> python imagemodel/reference_tracking/models/tests/predict.py \
+    ...     --model_name ref_local_tracking_model_031_mh \
+    ...     --model_weight_path saved/\
+    ... training__model_ref_local_tracking_model_031_mh__run_reference_tracking__20210511_063754.epoch_23 \
+    ...     --run_id reference_tracking__20210512_163049 \
+    ...     --result_base_folder ~/reference_tracking_results \
+    ...     --predict_pipeline rt_cell_sample_2_test_1 \
+    ...     --batch_size 1
+    >>> python3 imagemodel/reference_tracking/models/tests/predict.py \
+    ...     --model_name ref_local_tracking_model_031_mh \
+    ...     --model_weight_path gs://cell_dataset/save/weights/\
+    ... training__model_ref_local_tracking_model_031_mh__run_reference_tracking__20210511_063754.epoch_12 \
+    ...     --run_id reference_tracking__20210511_213704 \
+    ...     --result_base_folder gs://cell_dataset \
+    ...     --predict_pipeline rt_gs_cell_sample_test_1 \
+    ...     --batch_size 1
+    
+    # With GPU (X)
     >>> docker run \
     ...     --gpus all \
     ...     -it \
@@ -29,16 +66,17 @@ if __name__ == "__main__":
     ...     -v ~/reference_tracking_results:/reference_tracking_results \
     ...     -v /data/tensorflow_datasets:/tensorflow_datasets \
     ...     --workdir="/imagemodel" \
-    ...     imagemodel/tkl:1.0
+    ...     imagemodel/tkl:1.2
     >>> python imagemodel/reference_tracking/models/tests/predict.py \
     ...     --model_name ref_local_tracking_model_031 \
-    ...     --model_weight_path saved/training__model_ref_local_tracking_model_031_mh__run_reference_tracking__20210511_063754.epoch_12 \
-    ...     --run_id reference_tracking__20210511_170914 \
-    ...     --result_base_folder gs://cell_dataset \
-    ...     --predict_pipeline rt_gs_cell_sample_test_1 \
-    ...     --batch_size 1
+    ...     --model_weight_path saved/\
+    ... training__model_ref_local_tracking_model_031__run_reference_tracking__20210510_215226.epoch_60 \
+    ...     --run_id reference_tracking__20210512_072032 \
+    ...     --result_base_folder /reference_tracking_results \
+    ...     --predict_pipeline rt_cell_sample_test_1 \
+    ...     --batch_size 2
 
-    # With TPU
+    # With TPU (X)
     >>> docker run \
     ...     -it \
     ...     --rm \
@@ -50,12 +88,15 @@ if __name__ == "__main__":
     ...     --workdir="/imagemodel" \
     ...     imagemodel_tpu/tkl:1.0
     >>> python imagemodel/reference_tracking/models/tests/predict.py \
-    ...     --model_name ref_local_tracking_model_031 \
-    ...     --model_weight_path saved/training__model_ref_local_tracking_model_031_mh__run_reference_tracking__20210511_063754.epoch_12 \
-    ...     --run_id reference_tracking__20210511_133606 \
+    ...     --model_name ref_local_tracking_model_031_mh \
+    ...     --model_weight_path gs://cell_dataset/save/weights/\
+    ... training__model_ref_local_tracking_model_031_mh__run_reference_tracking__20210511_063754.epoch_12 \
+    ...     --run_id reference_tracking__20210511_213704 \
     ...     --result_base_folder gs://cell_dataset \
     ...     --predict_pipeline rt_gs_cell_sample_test_1 \
-    ...     --batch_size 1
+    ...     --batch_size 4 \
+    ...     --ctpu_zone us-central1-b \
+    ...     --tpu_name leetaekyu-1-trainer
     """
     # Argument Parsing
     parser: ArgumentParser = ArgumentParser(
@@ -116,13 +157,28 @@ if __name__ == "__main__":
     # Dataset Setup
     rt_predict_pipeline = Datasets(predict_pipeline).get_pipeline(resize_to=(256, 256))
     
+    
+    def combine_folder_file(a, b):
+        return a + "/" + b
+    
+    
+    def post_processing(predicted_current_bin_label: tf.Tensor, bin_color_map: tf.Tensor, current_filenames: tf.Tensor):
+        current_arg_max_bin = tf.argmax(predicted_current_bin_label, axis=-1)
+        current_label = tf.gather(bin_color_map, current_arg_max_bin, axis=1, batch_dims=1)
+        
+        for index, current_filename in enumerate(current_filenames):
+            current_folder_filename = combine_folder_file(experiment_setup.save_result_images_folder, current_filename)
+            img = tf.image.encode_png(tf.cast(current_label[index], tf.uint8))
+            tf.io.write_file(current_folder_filename, img)
+    
+    
     # Trainer Setup
     predictor = RTPredictor(
             model=model,
             predict_pipeline=rt_predict_pipeline,
             predict_batch_size=batch_size,
             strategy_optional=strategy_optional,
-            filled_empty_with=(255, 255, 255))
+            post_processing=post_processing)
     
     # Report
     reporter = PredictorReporter(setup=experiment_setup, predictor=predictor)

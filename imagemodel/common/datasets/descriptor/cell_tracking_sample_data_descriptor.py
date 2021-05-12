@@ -23,16 +23,16 @@ class CellTrackingSampleTestDataDescriptor(CellTrackingDataDescriptor, BaseTFDat
         super().__init__(original_dataset=original_dataset, base_folder=base_folder)
         self.sample_folder: str = os.path.join(self.base_folder, "framed_sample")
     
-    def get_sample_filename_dataset(self) -> tf.data.Dataset:
+    def get_filename_dataset(self) -> tf.data.Dataset:
         """
-        Sample filename dataset.
+        Filename dataset.
 
         Returns
         -------
         tf.data.Dataset
             `tf.Tensor` of shape=(), dtype=string.
         """
-        dataset = CellTrackingSampleTestDataDescriptor.base_files(self.sample_folder)
+        dataset = CellTrackingDataDescriptor.base_files(self.sample_folder, shuffle_seed=None)
         return dataset
     
     def get_main_img_dataset(self) -> tf.data.Dataset:

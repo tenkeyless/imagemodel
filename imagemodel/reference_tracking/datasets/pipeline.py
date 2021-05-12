@@ -1,4 +1,4 @@
-from typing import Callable, Tuple
+from typing import Callable
 
 import tensorflow as tf
 
@@ -64,31 +64,6 @@ class RTPipeline(Pipeline[RTFeeder, RTAugmenter, RTRegularizer, RTPreprocessor])
         ...
         """
         super().__init__(feeder, augmenter_func, regularizer_func, preprocessor_func)
-    
-    def get_input_zipped_dataset(self) -> tf.data.Dataset:
-        return self.get_input_zipped_dataset_filled(filled_with=(255, 255, 255))
-    
-    def get_input_zipped_dataset_filled(self, filled_with: Tuple[int, int, int]) -> tf.data.Dataset:
-        zipped_dataset = super().get_input_zipped_dataset()
-        color_info_dataset = self.preprocessor.input_helper.ref_random_color_info_map(
-                dataset=self.preprocessor.input_helper.get_ref_color_label_dataset())
-        color_info_dataset = color_info_dataset.map(lambda img, color_info: color_info)
-        
-        def _color_fill(_color, _color_index, fill_with: Tuple[int, int, int]):
-            fill_empty_with = tf.repeat([fill_with], repeats=tf.shape(_color_index)[-1], axis=0)
-            fill_empty_with = tf.cast(fill_empty_with, tf.float32)
-            filled_bin = tf.concat([_color, fill_empty_with], axis=0)
-            filled_bin = filled_bin[:tf.shape(_color_index)[-1], :]
-            return filled_bin
-        
-        color_info_dataset = color_info_dataset.map(
-                lambda color_index, color: (color_index, _color_fill(color, color_index, filled_with)))
-        if self.feeder.filename_optional is not None:
-            filename_dataset = self.feeder.filename_optional
-            result_dataset = tf.data.Dataset.zip((zipped_dataset, color_info_dataset, filename_dataset))
-        else:
-            result_dataset = tf.data.Dataset.zip((zipped_dataset, color_info_dataset))
-        return result_dataset
     
     def get_zipped_dataset(self) -> tf.data.Dataset:
         return self.preprocessor.get_zipped_dataset()
