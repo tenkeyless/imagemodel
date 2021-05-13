@@ -14,7 +14,10 @@ from imagemodel.reference_tracking.datasets.cell_tracking.feeder import (
     RTGSCellTrackingTrainingFeeder,
     RTGSCellTrackingValidationFeeder
 )
-from imagemodel.reference_tracking.datasets.cell_tracking.preprocessor import RTCellTrackingPredictPreprocessor
+from imagemodel.reference_tracking.datasets.cell_tracking.preprocessor import (
+    RTCellTrackingPredictPreprocessor,
+    RTCellTrackingPreprocessor
+)
 from imagemodel.reference_tracking.datasets.pipeline import RTPipeline
 from imagemodel.reference_tracking.datasets.rt_augmenter import RTAugmenter
 from imagemodel.reference_tracking.datasets.rt_preprocessor import RTPreprocessor
@@ -63,28 +66,58 @@ class Datasets(Enum):
                 el_bs_augmenter,
                 resize_to)
         if self == Datasets.rt_cell_tracking_training_1:
+            preprocessor_func: Callable[[RTRegularizer], RTPreprocessor] = lambda \
+                    el_rt_augmenter: RTCellTrackingPreprocessor(el_rt_augmenter, 30)
             training_feeder = RTCellTrackingTrainingFeeder()
-            rt_training_pipeline = RTPipeline(training_feeder, regularizer_func=regularizer_func)
+            rt_training_pipeline = RTPipeline(
+                    training_feeder,
+                    regularizer_func=regularizer_func,
+                    preprocessor_func=preprocessor_func)
             return rt_training_pipeline
         elif self == Datasets.rt_cell_tracking_validation_1:
+            preprocessor_func: Callable[[RTRegularizer], RTPreprocessor] = lambda \
+                    el_rt_augmenter: RTCellTrackingPreprocessor(el_rt_augmenter, 30)
             validation_feeder = RTCellTrackingValidationFeeder()
-            rt_validation_pipeline = RTPipeline(validation_feeder, regularizer_func=regularizer_func)
+            rt_validation_pipeline = RTPipeline(
+                    validation_feeder,
+                    regularizer_func=regularizer_func,
+                    preprocessor_func=preprocessor_func)
             return rt_validation_pipeline
         elif self == Datasets.rt_cell_tracking_test_1:
+            preprocessor_func: Callable[[RTRegularizer], RTPreprocessor] = lambda \
+                    el_rt_augmenter: RTCellTrackingPreprocessor(el_rt_augmenter, 30)
             test_feeder = RTCellTrackingTestFeeder()
-            rt_test_pipeline = RTPipeline(test_feeder, regularizer_func=regularizer_func)
+            rt_test_pipeline = RTPipeline(
+                    test_feeder,
+                    regularizer_func=regularizer_func,
+                    preprocessor_func=preprocessor_func)
             return rt_test_pipeline
         elif self == Datasets.rt_gs_cell_tracking_training_1:
+            preprocessor_func: Callable[[RTRegularizer], RTPreprocessor] = lambda \
+                    el_rt_augmenter: RTCellTrackingPreprocessor(el_rt_augmenter, 30)
             training_feeder = RTGSCellTrackingTrainingFeeder()
-            rt_training_pipeline = RTPipeline(training_feeder, regularizer_func=regularizer_func)
+            rt_training_pipeline = RTPipeline(
+                    training_feeder,
+                    regularizer_func=regularizer_func,
+                    preprocessor_func=preprocessor_func)
             return rt_training_pipeline
         elif self == Datasets.rt_gs_cell_tracking_validation_1:
+            preprocessor_func: Callable[[RTRegularizer], RTPreprocessor] = lambda \
+                    el_rt_augmenter: RTCellTrackingPreprocessor(el_rt_augmenter, 30)
             validation_feeder = RTGSCellTrackingValidationFeeder()
-            rt_validation_pipeline = RTPipeline(validation_feeder, regularizer_func=regularizer_func)
+            rt_validation_pipeline = RTPipeline(
+                    validation_feeder,
+                    regularizer_func=regularizer_func,
+                    preprocessor_func=preprocessor_func)
             return rt_validation_pipeline
         elif self == Datasets.rt_gs_cell_tracking_test_1:
+            preprocessor_func: Callable[[RTRegularizer], RTPreprocessor] = lambda \
+                    el_rt_augmenter: RTCellTrackingPreprocessor(el_rt_augmenter, 30)
             test_feeder = RTGSCellTrackingTestFeeder()
-            rt_test_pipeline = RTPipeline(test_feeder, regularizer_func=regularizer_func)
+            rt_test_pipeline = RTPipeline(
+                    test_feeder,
+                    regularizer_func=regularizer_func,
+                    preprocessor_func=preprocessor_func)
             return rt_test_pipeline
         elif self == Datasets.rt_cell_sample_test_1:
             preprocessor_func: Callable[[RTRegularizer], RTPreprocessor] = lambda \
