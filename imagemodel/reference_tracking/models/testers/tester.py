@@ -24,7 +24,6 @@ class Tester:
         self.strategy_optional: Optional[TPUStrategy] = strategy_optional
         
         self.test_dataset: tf.data.Dataset = self.test_pipeline.get_zipped_dataset()
-        self.test_dataset_num: int = len(self.test_dataset)
         self.test_dataset = self.test_dataset.batch(self.test_batch_size, drop_remainder=True)
         self.test_dataset = self.test_dataset.prefetch(tf.data.experimental.AUTOTUNE)
         
