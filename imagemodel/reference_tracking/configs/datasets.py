@@ -5,10 +5,12 @@ from imagemodel.common.datasets.feeder import Feeder
 from imagemodel.common.datasets.pipeline import Pipeline
 from imagemodel.reference_tracking.datasets.cell_tracking.feeder import (
     RTCellTrackingSample2TestFeeder, RTCellTrackingSampleTestFeeder,
+    RTCellTrackingTestFeeder,
     RTCellTrackingTrainingFeeder,
     RTCellTrackingValidationFeeder,
     RTGSCellTrackingSample2TestFeeder,
     RTGSCellTrackingSampleTestFeeder,
+    RTGSCellTrackingTestFeeder,
     RTGSCellTrackingTrainingFeeder,
     RTGSCellTrackingValidationFeeder
 )
@@ -22,8 +24,10 @@ from imagemodel.reference_tracking.datasets.rt_regularizer import BaseRTRegulari
 class Datasets(Enum):
     rt_cell_tracking_training_1 = "rt_cell_tracking_training_1"
     rt_cell_tracking_validation_1 = "rt_cell_tracking_validation_1"
+    rt_cell_tracking_test_1 = "rt_cell_tracking_test_1"
     rt_gs_cell_tracking_training_1 = "rt_gs_cell_tracking_training_1"
     rt_gs_cell_tracking_validation_1 = "rt_gs_cell_tracking_validation_1"
+    rt_gs_cell_tracking_test_1 = "rt_gs_cell_tracking_test_1"
     rt_cell_sample_test_1 = "rt_cell_sample_test_1"  # for Predict
     rt_cell_sample_2_test_1 = "rt_cell_sample_2_test_1"  # for Predict
     rt_gs_cell_sample_test_1 = "rt_gs_cell_sample_test_1"  # for Predict
@@ -35,10 +39,14 @@ class Datasets(Enum):
             return RTCellTrackingTrainingFeeder()
         elif self == Datasets.rt_cell_tracking_validation_1:
             return RTCellTrackingValidationFeeder()
+        elif self == Datasets.rt_cell_tracking_test_1:
+            return RTCellTrackingTestFeeder()
         elif self == Datasets.rt_gs_cell_tracking_training_1:
             return RTGSCellTrackingTrainingFeeder()
         elif self == Datasets.rt_gs_cell_tracking_validation_1:
             return RTGSCellTrackingValidationFeeder()
+        elif self == Datasets.rt_gs_cell_tracking_test_1:
+            return RTGSCellTrackingTestFeeder()
         elif self == Datasets.rt_cell_sample_test_1:
             return RTCellTrackingSampleTestFeeder()
         elif self == Datasets.rt_cell_sample_2_test_1:
@@ -62,6 +70,10 @@ class Datasets(Enum):
             validation_feeder = RTCellTrackingValidationFeeder()
             rt_validation_pipeline = RTPipeline(validation_feeder, regularizer_func=regularizer_func)
             return rt_validation_pipeline
+        elif self == Datasets.rt_cell_tracking_test_1:
+            test_feeder = RTCellTrackingTestFeeder()
+            rt_test_pipeline = RTPipeline(test_feeder, regularizer_func=regularizer_func)
+            return rt_test_pipeline
         elif self == Datasets.rt_gs_cell_tracking_training_1:
             training_feeder = RTGSCellTrackingTrainingFeeder()
             rt_training_pipeline = RTPipeline(training_feeder, regularizer_func=regularizer_func)
@@ -70,6 +82,10 @@ class Datasets(Enum):
             validation_feeder = RTGSCellTrackingValidationFeeder()
             rt_validation_pipeline = RTPipeline(validation_feeder, regularizer_func=regularizer_func)
             return rt_validation_pipeline
+        elif self == Datasets.rt_gs_cell_tracking_test_1:
+            test_feeder = RTGSCellTrackingTestFeeder()
+            rt_test_pipeline = RTPipeline(test_feeder, regularizer_func=regularizer_func)
+            return rt_test_pipeline
         elif self == Datasets.rt_cell_sample_test_1:
             preprocessor_func: Callable[[RTRegularizer], RTPreprocessor] = lambda \
                     el_rt_augmenter: RTCellTrackingPredictPreprocessor(el_rt_augmenter, 30, fill_with=(255, 255, 255))

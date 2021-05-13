@@ -1,16 +1,22 @@
 import io
 import os
 import platform
-from typing import TypeVar
+from typing import Dict, TypeVar
 
 from tensorflow.keras import Model
 from tensorflow.keras.utils import plot_model
 
 from imagemodel.common.predictor import Predictor
-from imagemodel.common.setup import ExperimentSetup, PredictExperimentSetup, TrainingExperimentSetup
+from imagemodel.common.setup import (
+    ExperimentSetup,
+    PredictExperimentSetup,
+    TestExperimentSetup,
+    TrainingExperimentSetup
+)
 from imagemodel.common.trainer import Trainer
 from imagemodel.common.utils.gc_storage import upload_blob
 from imagemodel.common.utils.optional import optional_map
+from imagemodel.reference_tracking.models.testers.tester import Tester
 
 SE = TypeVar('SE', bound=ExperimentSetup)
 
@@ -172,3 +178,44 @@ Predict Data Folder: {}/{}
     
     def plotmodel(self):
         self._plotmodel(self.predictor.model, self.setup.predict_result_folder)
+
+
+class TestReporter(Reporter):
+    def __init__(self, setup: TestExperimentSetup, tester: Tester):
+        super().__init__(setup=setup)
+        self.tester = tester
+    
+    def test_report_text(self, setup: TestExperimentSetup, tester: Tester) -> str:
+        pass
+    
+    def report(self):
+        info: str = self.test_report_text(setup=self.setup, tester=self.tester)
+        print(info)
+        tmp_info = "/tmp/info_{}.txt".format(self.setup.run_id)
+        tmp_info_local = os.path.join(self.setup.test_result_folder, "info_{}.txt".format(self.setup.run_id))
+        self._save_txt_gs_or_local(self.setup.test_result_folder, tmp_info, tmp_info_local, info)
+        
+        # Model
+        model_summary_content: str = self._get_model_summary(self.tester.model)
+        tmp_model_summary = "/tmp/model_summary_{}.txt".format(self.setup.run_id)
+        tmp_model_summary_local = os.path.join(
+                self.setup.test_result_folder,
+                "model_summary_{}.txt".format(self.setup.run_id))
+        self._save_txt_gs_or_local(
+                self.setup.test_result_folder,
+                tmp_model_summary,
+                tmp_model_summary_local,
+                model_summary_content)
+    
+    def test_result_report_text(self, test_result: Dict[str, float]) -> str:
+        pass
+    
+    def report_result(self, test_result: Dict[str, float]):
+        result: str = self.test_result_report_text(test_result=test_result)
+        print(result)
+        tmp_result = "/tmp/result_{}.txt".format(self.setup.run_id)
+        tmp_result_local = os.path.join(self.setup.test_result_folder, "result_{}.txt".format(self.setup.run_id))
+        self._save_txt_gs_or_local(self.setup.test_result_folder, tmp_result, tmp_result_local, result)
+    
+    def plotmodel(self):
+        self._plotmodel(self.tester.model, self.setup.test_result_folder)

@@ -109,3 +109,26 @@ class PredictExperimentSetup(ExperimentSetup):
         if not self.predict_result_folder.startswith("gs://"):
             for folder in [self.predict_result_folder, self.save_result_images_folder]:
                 create_folder_if_not_exist(folder)
+
+
+class TestExperimentSetup(ExperimentSetup):
+    def __init__(
+            self,
+            result_base_folder: str,
+            model_name: str,
+            run_id: Optional[str],
+            experiment_id_generator: Callable[[str, str], str] = predict_experiment_id):
+        super().__init__(
+                result_base_folder=result_base_folder,
+                model_name=model_name,
+                run_id=run_id,
+                experiment_id_generator=experiment_id_generator)
+        
+        # data folder
+        self.base_data_folder: str = os.path.join(self.result_base_folder, "data")
+        self.test_result_folder: str = os.path.join(self.base_data_folder, self.experiment_id)
+        
+        # create folder not gs
+        if not self.test_result_folder.startswith("gs://"):
+            for folder in [self.test_result_folder]:
+                create_folder_if_not_exist(folder)

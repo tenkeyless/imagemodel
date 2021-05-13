@@ -56,6 +56,18 @@ class RTCellTrackingValidationFeeder(RTCellTrackingFeeder):
         super().__init__(cell_tracking_data_descriptor=cell_tracking_data_descriptor)
 
 
+class RTCellTrackingTestFeeder(RTCellTrackingFeeder):
+    @property
+    def feeder_data_description(self):
+        return "Cell Tracking Test Dataset"
+    
+    def __init__(self):
+        cell_tracking_data_descriptor = CellTrackingSampleTestDataDescriptor(
+                original_dataset=None,
+                base_folder="data/tracking_test")
+        super().__init__(cell_tracking_data_descriptor=cell_tracking_data_descriptor)
+
+
 class RTCellTrackingSampleTestFeeder(RTCellTrackingFeeder):
     @property
     def feeder_data_description(self):

@@ -115,7 +115,7 @@ if __name__ == "__main__":
     input_color_image: bool = args.input_color_image
     # trained model related
     model_weight_path: str = args.model_weight_path
-    # training related
+    # predict related
     run_id: Optional[str] = args.run_id
     result_base_folder: str = args.result_base_folder
     # dataset related
