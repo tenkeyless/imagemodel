@@ -5,14 +5,32 @@ import tf_clahe
 
 from imagemodel.reference_tracking.datasets.rt_preprocessor_helper import (
     BaseRTPreprocessorInputHelper,
+    BaseRTPreprocessorOutputHelper,
     RTPreprocessorInputHelper,
+    RTPreprocessorOutputHelper,
     apply_funcs_to,
     tf_color_to_random_map,
     tf_input_ref_label_preprocessing_function
 )
 
 
-class ClaheRTPreprocessorInputHelper(BaseRTPreprocessorInputHelper, RTPreprocessorInputHelper):
+class RTCellTrackingPreprocessorInputHelper(BaseRTPreprocessorInputHelper, RTPreprocessorInputHelper):
+    def get_inputs(self) -> List[tf.data.Dataset]:
+        main_image_dataset = apply_funcs_to(self.get_main_image_dataset(), self.main_image_preprocess_func())
+        ref_image_dataset = apply_funcs_to(self.get_ref_image_dataset(), self.ref_image_preprocess_func())
+        return [main_image_dataset,
+                ref_image_dataset,
+                self.get_ref_color_label_dataset()]
+
+
+class RTCellTrackingPreprocessorOutputHelper(BaseRTPreprocessorOutputHelper, RTPreprocessorOutputHelper):
+    def get_outputs(self) -> List[tf.data.Dataset]:
+        main_bw_mask_dataset = apply_funcs_to(self.get_main_bw_mask_dataset(), self.main_bw_mask_preprocess_func())
+        ref_bw_mask_dataset = apply_funcs_to(self.get_ref_bw_mask_dataset(), self.ref_bw_mask_preprocess_func())
+        return [main_bw_mask_dataset, ref_bw_mask_dataset, self.get_main_color_label_dataset()]
+
+
+class ClaheRTPreprocessorInputHelper(RTCellTrackingPreprocessorInputHelper, RTPreprocessorInputHelper):
     def main_image_preprocess_func(self) -> List[Callable[[tf.Tensor], tf.Tensor]]:
         @tf.autograph.experimental.do_not_convert
         def _clahe(img: tf.Tensor) -> tf.Tensor:
@@ -44,7 +62,7 @@ class ClaheRTPreprocessorInputHelper(BaseRTPreprocessorInputHelper, RTPreprocess
         return [_clahe, _reshape, _cast_norm]
 
 
-class ClaheRTPreprocessorPredictInputHelper(ClaheRTPreprocessorInputHelper):
+class ClaheRTPreprocessorPredictInputHelper(RTCellTrackingPreprocessorInputHelper):
     def __init__(self, datasets: List[tf.data.Dataset], bin_size: int, fill_with: Tuple[int, int, int]):
         super().__init__(datasets=datasets, bin_size=bin_size)
         self.fill_with = fill_with

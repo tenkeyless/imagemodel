@@ -61,22 +61,13 @@ class RTAugmenterOutputHelper(AugmenterOutputHelper):
     def main_color_label_augment_func(self) -> List[Tuple[Callable[[tf.Tensor], tf.Tensor], bool]]:
         pass
     
-    def get_ref_color_label_dataset(self) -> tf.data.Dataset:
-        pass
-    
-    def ref_color_label_augment_func(self) -> List[Tuple[Callable[[tf.Tensor], tf.Tensor], bool]]:
-        pass
-    
     def get_outputs(self) -> List[tf.data.Dataset]:
         main_bw_mask_dataset = apply_funcs_to(self.get_main_bw_mask_dataset(), self.main_bw_mask_augment_func())
         ref_bw_mask_dataset = apply_funcs_to(self.get_ref_bw_mask_dataset(), self.ref_bw_mask_augment_func())
-        ref_color_label_dataset = apply_funcs_to(
-                self.get_ref_color_label_dataset(),
-                self.ref_color_label_augment_func())
         main_color_label_dataset = apply_funcs_to(
                 self.get_main_color_label_dataset(),
                 self.main_color_label_augment_func())
-        return [main_bw_mask_dataset, ref_bw_mask_dataset, ref_color_label_dataset, main_color_label_dataset]
+        return [main_bw_mask_dataset, ref_bw_mask_dataset, main_color_label_dataset]
 
 
 class BaseRTAugmenterInputHelper(RTAugmenterInputHelper):
@@ -112,19 +103,13 @@ class BaseRTAugmenterOutputHelper(RTAugmenterOutputHelper):
     def get_ref_bw_mask_dataset(self) -> tf.data.Dataset:
         return self._datasets[1]
     
-    def get_ref_color_label_dataset(self) -> tf.data.Dataset:
-        return self._datasets[2]
-    
     def get_main_color_label_dataset(self) -> tf.data.Dataset:
-        return self._datasets[3]
+        return self._datasets[2]
     
     def main_bw_mask_augment_func(self) -> List[Tuple[Callable[[tf.Tensor], tf.Tensor], bool]]:
         return []
     
     def ref_bw_mask_augment_func(self) -> List[Tuple[Callable[[tf.Tensor], tf.Tensor], bool]]:
-        return []
-    
-    def ref_color_label_augment_func(self) -> List[Tuple[Callable[[tf.Tensor], tf.Tensor], bool]]:
         return []
     
     def main_color_label_augment_func(self) -> List[Tuple[Callable[[tf.Tensor], tf.Tensor], bool]]:
