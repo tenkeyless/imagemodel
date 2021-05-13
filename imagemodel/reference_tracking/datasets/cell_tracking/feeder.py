@@ -35,7 +35,7 @@ class RTCellTrackingFeeder(RTFeeder):
 class RTCellTrackingTrainingFeeder(RTCellTrackingFeeder):
     @property
     def feeder_data_description(self):
-        return "Cell Tracking Training Google Storage Dataset"
+        return "Cell Tracking Training Dataset"
     
     def __init__(self):
         cell_tracking_data_descriptor = CellTrackingDataDescriptor(
@@ -47,12 +47,13 @@ class RTCellTrackingTrainingFeeder(RTCellTrackingFeeder):
 class RTCellTrackingValidationFeeder(RTCellTrackingFeeder):
     @property
     def feeder_data_description(self):
-        return "Cell Tracking Validation Google Storage Dataset"
+        return "Cell Tracking Validation Dataset"
     
     def __init__(self):
         cell_tracking_data_descriptor = CellTrackingDataDescriptor(
                 original_dataset=None,
-                base_folder="data/tracking_validation")
+                base_folder="data/tracking_validation",
+                shuffle=False)
         super().__init__(cell_tracking_data_descriptor=cell_tracking_data_descriptor)
 
 
@@ -62,9 +63,10 @@ class RTCellTrackingTestFeeder(RTCellTrackingFeeder):
         return "Cell Tracking Test Dataset"
     
     def __init__(self):
-        cell_tracking_data_descriptor = CellTrackingSampleTestDataDescriptor(
+        cell_tracking_data_descriptor = CellTrackingDataDescriptor(
                 original_dataset=None,
-                base_folder="data/tracking_test")
+                base_folder="data/tracking_test",
+                shuffle=False)
         super().__init__(cell_tracking_data_descriptor=cell_tracking_data_descriptor)
 
 
@@ -76,7 +78,8 @@ class RTCellTrackingSampleTestFeeder(RTCellTrackingFeeder):
     def __init__(self):
         cell_tracking_data_descriptor = CellTrackingSampleTestDataDescriptor(
                 original_dataset=None,
-                base_folder="data/tracking_test")
+                base_folder="data/tracking_test",
+                shuffle=False)
         super().__init__(cell_tracking_data_descriptor=cell_tracking_data_descriptor)
 
 
@@ -88,7 +91,8 @@ class RTCellTrackingSample2TestFeeder(RTCellTrackingFeeder):
     def __init__(self):
         cell_tracking_data_descriptor = CellTrackingSampleTestDataDescriptor(
                 original_dataset=None,
-                base_folder="data/tracking_test2")
+                base_folder="data/tracking_test2",
+                shuffle=False)
         super().__init__(cell_tracking_data_descriptor=cell_tracking_data_descriptor)
 
 
@@ -100,7 +104,8 @@ class RTGSCellTrackingSample2TestFeeder(RTCellTrackingFeeder):
     def __init__(self):
         cell_tracking_data_descriptor = CellTrackingSampleTestDataDescriptor(
                 original_dataset=None,
-                base_folder="gs://cell_dataset/dataset/tracking_test2")
+                base_folder="gs://cell_dataset/dataset/tracking_test2",
+                shuffle=False)
         super().__init__(cell_tracking_data_descriptor=cell_tracking_data_descriptor)
 
 
@@ -124,7 +129,8 @@ class RTGSCellTrackingValidationFeeder(RTCellTrackingFeeder):
     def __init__(self):
         cell_tracking_data_descriptor = CellTrackingDataDescriptor(
                 original_dataset=None,
-                base_folder="gs://cell_dataset/dataset/tracking_validation")
+                base_folder="gs://cell_dataset/dataset/tracking_validation",
+                shuffle=False)
         super().__init__(cell_tracking_data_descriptor=cell_tracking_data_descriptor)
 
 
@@ -136,7 +142,8 @@ class RTGSCellTrackingTestFeeder(RTCellTrackingFeeder):
     def __init__(self):
         cell_tracking_data_descriptor = CellTrackingDataDescriptor(
                 original_dataset=None,
-                base_folder="gs://cell_dataset/dataset/tracking_test")
+                base_folder="gs://cell_dataset/dataset/tracking_test",
+                shuffle=False)
         super().__init__(cell_tracking_data_descriptor=cell_tracking_data_descriptor)
 
 
@@ -148,5 +155,6 @@ class RTGSCellTrackingSampleTestFeeder(RTCellTrackingFeeder):
     def __init__(self):
         cell_tracking_data_descriptor = CellTrackingSampleTestDataDescriptor(
                 original_dataset=None,
-                base_folder="gs://cell_dataset/dataset/tracking_test")
+                base_folder="gs://cell_dataset/dataset/tracking_test",
+                shuffle=False)
         super().__init__(cell_tracking_data_descriptor=cell_tracking_data_descriptor)
