@@ -40,7 +40,8 @@ class RTCellTrackingTrainingFeeder(RTCellTrackingFeeder):
     def __init__(self):
         cell_tracking_data_descriptor = CellTrackingDataDescriptor(
                 original_dataset=None,
-                base_folder="data/tracking_training")
+                base_folder="data/tracking_training",
+                cache=False)
         super().__init__(cell_tracking_data_descriptor=cell_tracking_data_descriptor)
 
 
@@ -53,7 +54,8 @@ class RTCellTrackingValidationFeeder(RTCellTrackingFeeder):
         cell_tracking_data_descriptor = CellTrackingDataDescriptor(
                 original_dataset=None,
                 base_folder="data/tracking_validation",
-                shuffle=False)
+                shuffle=False,
+                cache=False)
         super().__init__(cell_tracking_data_descriptor=cell_tracking_data_descriptor)
 
 
@@ -117,7 +119,8 @@ class RTGSCellTrackingTrainingFeeder(RTCellTrackingFeeder):
     def __init__(self):
         cell_tracking_data_descriptor = CellTrackingDataDescriptor(
                 original_dataset=None,
-                base_folder="gs://cell_dataset/dataset/tracking_training")
+                base_folder="gs://cell_dataset/dataset/tracking_training",
+                cache=True)
         super().__init__(cell_tracking_data_descriptor=cell_tracking_data_descriptor)
 
 
@@ -130,7 +133,8 @@ class RTGSCellTrackingValidationFeeder(RTCellTrackingFeeder):
         cell_tracking_data_descriptor = CellTrackingDataDescriptor(
                 original_dataset=None,
                 base_folder="gs://cell_dataset/dataset/tracking_validation",
-                shuffle=False)
+                shuffle=False,
+                cache=True)
         super().__init__(cell_tracking_data_descriptor=cell_tracking_data_descriptor)
 
 
