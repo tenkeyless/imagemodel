@@ -148,15 +148,11 @@ if __name__ == "__main__":
     
     # Dataset Setup
     feeder = Datasets(predict_pipeline).get_feeder()
-    regularizer_func: Callable[[RTAugmenter], RTRegularizer] = lambda el_bs_augmenter: BaseRTRegularizer(
-            el_bs_augmenter,
-            (256, 256))
+    regularizer_func: Callable[[RTAugmenter], RTRegularizer] = \
+        lambda el_bs_augmenter: BaseRTRegularizer(el_bs_augmenter, (256, 256))
     preprocessor_func: Callable[[RTRegularizer], RTPreprocessor] = \
         lambda el_rt_augmenter: RTCellTrackingPredictPreprocessor(el_rt_augmenter, 30, fill_with=(255, 255, 255))
-    rt_predict_pipeline = RTPipeline(
-            feeder,
-            regularizer_func=regularizer_func,
-            preprocessor_func=preprocessor_func)
+    rt_predict_pipeline = RTPipeline(feeder, regularizer_func=regularizer_func, preprocessor_func=preprocessor_func)
     
     
     def combine_folder_file(a, b):

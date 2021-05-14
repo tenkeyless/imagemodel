@@ -4,7 +4,8 @@ from typing import Callable, Optional, Tuple
 from imagemodel.common.datasets.feeder import Feeder
 from imagemodel.common.datasets.pipeline import Pipeline
 from imagemodel.reference_tracking.datasets.cell_tracking.feeder import (
-    RTCellTrackingSample2TestFeeder, RTCellTrackingSampleTestFeeder,
+    RTCellTrackingSample2TestFeeder,
+    RTCellTrackingSampleTestFeeder,
     RTCellTrackingTestFeeder,
     RTCellTrackingTrainingFeeder,
     RTCellTrackingValidationFeeder,
