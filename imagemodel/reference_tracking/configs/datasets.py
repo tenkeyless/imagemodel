@@ -67,7 +67,7 @@ class Datasets(Enum):
                 resize_to)
         if self == Datasets.rt_cell_tracking_training_1:
             preprocessor_func: Callable[[RTRegularizer], RTPreprocessor] = lambda \
-                    el_rt_augmenter: RTCellTrackingPreprocessor(el_rt_augmenter, 30)
+                    el_rt_augmenter: RTCellTrackingPreprocessor(el_rt_augmenter, bin_size=30, cache_inout=True)
             training_feeder = RTCellTrackingTrainingFeeder()
             rt_training_pipeline = RTPipeline(
                     training_feeder,
@@ -76,7 +76,7 @@ class Datasets(Enum):
             return rt_training_pipeline
         elif self == Datasets.rt_cell_tracking_validation_1:
             preprocessor_func: Callable[[RTRegularizer], RTPreprocessor] = lambda \
-                    el_rt_augmenter: RTCellTrackingPreprocessor(el_rt_augmenter, 30)
+                    el_rt_augmenter: RTCellTrackingPreprocessor(el_rt_augmenter, bin_size=30, cache_inout=True)
             validation_feeder = RTCellTrackingValidationFeeder()
             rt_validation_pipeline = RTPipeline(
                     validation_feeder,
@@ -85,7 +85,7 @@ class Datasets(Enum):
             return rt_validation_pipeline
         elif self == Datasets.rt_cell_tracking_test_1:
             preprocessor_func: Callable[[RTRegularizer], RTPreprocessor] = lambda \
-                    el_rt_augmenter: RTCellTrackingPreprocessor(el_rt_augmenter, 30)
+                    el_rt_augmenter: RTCellTrackingPreprocessor(el_rt_augmenter, bin_size=30, cache_inout=False)
             test_feeder = RTCellTrackingTestFeeder()
             rt_test_pipeline = RTPipeline(
                     test_feeder,
@@ -94,7 +94,7 @@ class Datasets(Enum):
             return rt_test_pipeline
         elif self == Datasets.rt_gs_cell_tracking_training_1:
             preprocessor_func: Callable[[RTRegularizer], RTPreprocessor] = lambda \
-                    el_rt_augmenter: RTCellTrackingPreprocessor(el_rt_augmenter, 30)
+                    el_rt_augmenter: RTCellTrackingPreprocessor(el_rt_augmenter, bin_size=30, cache_inout=True)
             training_feeder = RTGSCellTrackingTrainingFeeder()
             rt_training_pipeline = RTPipeline(
                     training_feeder,
@@ -103,7 +103,7 @@ class Datasets(Enum):
             return rt_training_pipeline
         elif self == Datasets.rt_gs_cell_tracking_validation_1:
             preprocessor_func: Callable[[RTRegularizer], RTPreprocessor] = lambda \
-                    el_rt_augmenter: RTCellTrackingPreprocessor(el_rt_augmenter, 30)
+                    el_rt_augmenter: RTCellTrackingPreprocessor(el_rt_augmenter, bin_size=30, cache_inout=True)
             validation_feeder = RTGSCellTrackingValidationFeeder()
             rt_validation_pipeline = RTPipeline(
                     validation_feeder,
@@ -112,7 +112,7 @@ class Datasets(Enum):
             return rt_validation_pipeline
         elif self == Datasets.rt_gs_cell_tracking_test_1:
             preprocessor_func: Callable[[RTRegularizer], RTPreprocessor] = lambda \
-                    el_rt_augmenter: RTCellTrackingPreprocessor(el_rt_augmenter, 30)
+                    el_rt_augmenter: RTCellTrackingPreprocessor(el_rt_augmenter, bin_size=30, cache_inout=False)
             test_feeder = RTGSCellTrackingTestFeeder()
             rt_test_pipeline = RTPipeline(
                     test_feeder,

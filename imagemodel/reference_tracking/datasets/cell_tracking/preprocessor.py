@@ -13,7 +13,7 @@ from imagemodel.reference_tracking.datasets.rt_preprocessor_helper import (
 
 
 class RTCellTrackingPreprocessor(BaseRTPreprocessor, RTPreprocessor):
-    def __init__(self, manipulator: SupervisedManipulator, bin_size: int):
+    def __init__(self, manipulator: SupervisedManipulator, bin_size: int, cache_inout: bool = False):
         super().__init__(manipulator, bin_size)
         self._input_helper = RTCellTrackingPreprocessorInputHelper(
                 datasets=manipulator.get_input_dataset(),
@@ -21,6 +21,7 @@ class RTCellTrackingPreprocessor(BaseRTPreprocessor, RTPreprocessor):
         self._output_helper = RTCellTrackingPreprocessorOutputHelper(
                 datasets=manipulator.get_output_dataset(),
                 bin_size=bin_size)
+        self.cache_inout = cache_inout
     
     def get_zipped_dataset(self) -> tf.data.Dataset:
         """
@@ -37,6 +38,8 @@ class RTCellTrackingPreprocessor(BaseRTPreprocessor, RTPreprocessor):
         output_dataset = tf.data.Dataset.zip(tuple(self._output_helper.get_outputs()))
         
         inout_dataset = tf.data.Dataset.zip((input_dataset, output_dataset))
+        if self.cache_inout:
+            inout_dataset = inout_dataset.cache()
         
         def generate_color_map(_input_dataset, _output_dataset):
             color_map = tf_color_to_random_map(_input_dataset[2], bin_size, 1)
