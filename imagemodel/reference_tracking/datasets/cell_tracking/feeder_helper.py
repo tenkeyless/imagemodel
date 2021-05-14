@@ -28,8 +28,5 @@ class CellTrackingFeederOutputHelper(RTFeederOutputHelper):
     def get_ref_bw_mask(self) -> tf.data.Dataset:
         return self._data_descriptor.get_ref_bw_mask_dataset()
     
-    def get_ref_color_label(self) -> tf.data.Dataset:
-        return self._data_descriptor.get_ref_mask_dataset()
-    
     def get_main_color_label(self) -> tf.data.Dataset:
         return self._data_descriptor.get_main_mask_dataset()

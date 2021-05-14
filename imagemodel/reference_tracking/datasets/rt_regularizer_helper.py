@@ -54,12 +54,6 @@ class RTRegularizerOutputHelper(RegularizerOutputHelper):
     def ref_bw_mask_regularizer_func(self) -> List[Callable[[tf.Tensor], tf.Tensor]]:
         pass
     
-    def get_ref_color_label_dataset(self) -> tf.data.Dataset:
-        pass
-    
-    def ref_color_label_regularizer_func(self) -> List[Callable[[tf.Tensor], tf.Tensor]]:
-        pass
-    
     def get_main_color_label_dataset(self) -> tf.data.Dataset:
         pass
     
@@ -69,13 +63,10 @@ class RTRegularizerOutputHelper(RegularizerOutputHelper):
     def get_outputs(self) -> List[tf.data.Dataset]:
         main_bw_mask_dataset = apply_funcs_to(self.get_main_bw_mask_dataset(), self.main_bw_mask_regularizer_func())
         ref_bw_mask_dataset = apply_funcs_to(self.get_ref_bw_mask_dataset(), self.ref_bw_mask_regularizer_func())
-        ref_color_label_dataset = apply_funcs_to(
-                self.get_ref_color_label_dataset(),
-                self.ref_color_label_regularizer_func())
         main_color_label_dataset = apply_funcs_to(
                 self.get_main_color_label_dataset(),
                 self.main_color_label_regularizer_func())
-        return [main_bw_mask_dataset, ref_bw_mask_dataset, ref_color_label_dataset, main_color_label_dataset]
+        return [main_bw_mask_dataset, ref_bw_mask_dataset, main_color_label_dataset]
 
 
 class BaseRTRegularizerInputHelper(RTRegularizerInputHelper):
@@ -139,18 +130,8 @@ class BaseRTRegularizerOutputHelper(RTRegularizerOutputHelper):
         
         return [_resize]
     
-    def get_ref_color_label_dataset(self) -> tf.data.Dataset:
-        return self._datasets[2]
-    
-    def ref_color_label_regularizer_func(self) -> List[Callable[[tf.Tensor], tf.Tensor]]:
-        @tf.autograph.experimental.do_not_convert
-        def _resize_nn(img: tf.Tensor) -> tf.Tensor:
-            return tf.image.resize(img, self._height_width_tuple, method=ResizeMethod.NEAREST_NEIGHBOR)
-        
-        return [_resize_nn]
-    
     def get_main_color_label_dataset(self) -> tf.data.Dataset:
-        return self._datasets[3]
+        return self._datasets[2]
     
     def main_color_label_regularizer_func(self) -> List[Callable[[tf.Tensor], tf.Tensor]]:
         @tf.autograph.experimental.do_not_convert

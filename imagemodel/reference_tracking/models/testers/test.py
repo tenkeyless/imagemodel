@@ -1,19 +1,26 @@
 from argparse import ArgumentParser, RawTextHelpFormatter
-from typing import Optional, Tuple
+from typing import Callable, Optional, Tuple
 
+import tensorflow as tf
 from tensorflow.keras import losses, metrics, optimizers
+from tensorflow.keras.models import Model
 from tensorflow.python.distribute.tpu_strategy import TPUStrategy
 
 import _path  # noqa
-from imagemodel.binary_segmentations.models.unet_level import UNetLevelModelManager
 from imagemodel.common.models.common_compile_options import CompileOptions
-from imagemodel.common.reporter import TrainerReporter
-from imagemodel.common.setup import TrainingExperimentSetup
-from imagemodel.common.trainer import Trainer
+from imagemodel.common.setup import TestExperimentSetup, test_experiment_id
 from imagemodel.common.utils.common_tpu import create_tpu, delete_tpu, tpu_initialize
-from imagemodel.common.utils.optional import optional_map
+from imagemodel.common.utils.gpu_check import check_first_gpu
 from imagemodel.reference_tracking.configs.datasets import Datasets
-from imagemodel.reference_tracking.models.ref_local_tracking_model_031_mh import RefLocalTrackingModel031MHManager
+from imagemodel.reference_tracking.datasets.cell_tracking.preprocessor import RTCellTrackingPreprocessor
+from imagemodel.reference_tracking.datasets.pipeline import RTPipeline
+from imagemodel.reference_tracking.datasets.rt_augmenter import RTAugmenter
+from imagemodel.reference_tracking.datasets.rt_preprocessor import RTPreprocessor
+from imagemodel.reference_tracking.datasets.rt_regularizer import BaseRTRegularizer, RTRegularizer
+from imagemodel.reference_tracking.models.testers.rt_test_reporter import RTTestReporter
+from imagemodel.reference_tracking.models.testers.tester import Tester
+
+check_first_gpu()
 
 # noinspection DuplicatedCode
 if __name__ == "__main__":
@@ -32,14 +39,14 @@ if __name__ == "__main__":
     ...     -v /data/tensorflow_datasets:/tensorflow_datasets \
     ...     --workdir="/imagemodel" \
     ...     imagemodel/tkl:1.2
-    >>> python imagemodel/reference_tracking/models/trainers/ref_local_tracking_model_031_mh_trainer.py \
+    >>> python imagemodel/reference_tracking/models/testers/test.py \
     ...     --model_name ref_local_tracking_model_031_mh \
     ...     --result_base_folder /reference_tracking_results \
     ...     --training_epochs 100 \
     ...     --validation_freq 1 \
-    ...     --training_pipeline rt_cell_tracking_training_1 \
-    ...     --validation_pipeline rt_cell_tracking_validation_1 \
-    ...     --run_id reference_tracking__20210514_025537 \
+    ...     --training_pipeline rt_cell_tracking_training_2 \
+    ...     --validation_pipeline rt_cell_tracking_validation_2 \
+    ...     --run_id binary_segmentations__unet_level_test__20210510_2120915 \
     ...     --without_early_stopping \
     ...     --batch_size 2
     
@@ -56,18 +63,15 @@ if __name__ == "__main__":
     ...     -v /data/tensorflow_datasets:/tensorflow_datasets \
     ...     --workdir="/imagemodel" \
     ...     imagemodel/tkl:1.2
-    >>> python imagemodel/reference_tracking/models/trainers/ref_local_tracking_model_031_mh_trainer.py \
+    >>> python imagemodel/reference_tracking/models/testers/test.py \
     ...     --model_name ref_local_tracking_model_031_mh \
-    ...     --head_num 4 \
+    ...     --model_weight_path /reference_tracking_results/save/weights/\
+    ... training__model_ref_local_tracking_model_031_mh__run_reference_tracking__20210513_194150.epoch_23 \
+    ...     --run_id reference_tracking__20210513_101705 \
     ...     --result_base_folder /reference_tracking_results \
-    ...     --training_epochs 100 \
-    ...     --validation_freq 1 \
-    ...     --training_pipeline rt_cell_tracking_training_1 \
-    ...     --validation_pipeline rt_cell_tracking_validation_1 \
-    ...     --run_id reference_tracking__20210514_025537 \
-    ...     --without_early_stopping \
+    ...     --test_pipeline rt_cell_sample_test_1 \
     ...     --batch_size 2
-    
+# training__model_ref_local_tracking_model_031_mh__run_reference_tracking__20210514_025537.epoch_14
     # With TPU
     >>> docker run \
     ...     -it \
@@ -78,16 +82,15 @@ if __name__ == "__main__":
     ...     -v ~/.local:/.local \
     ...     -v $(pwd):/imagemodel \
     ...     --workdir="/imagemodel" \
-    ...     imagemodel_tpu/tkl:1.0
-    >>> python imagemodel/reference_tracking/models/trainers/ref_local_tracking_model_031_mh_trainer.py \
+    ...     imagemodel_tpu/tkl:1.4
+    >>> python imagemodel/reference_tracking/models/tester/test.py \
     ...     --model_name ref_local_tracking_model_031_mh \
-    ...     --head_num 4 \
     ...     --result_base_folder gs://cell_dataset \
     ...     --training_epochs 100 \
     ...     --validation_freq 1 \
-    ...     --training_pipeline rt_gs_cell_tracking_training_1 \
-    ...     --validation_pipeline rt_gs_cell_tracking_validation_1 \
-    ...     --run_id reference_tracking__20210514_094212 \
+    ...     --training_pipeline rt_gs_cell_tracking_training_2 \
+    ...     --validation_pipeline rt_gs_cell_tracking_validation_2 \
+    ...     --run_id reference_tracking__20210511_055305 \
     ...     --without_early_stopping \
     ...     --batch_size 8 \
     ...     --ctpu_zone us-central1-b \
@@ -95,21 +98,18 @@ if __name__ == "__main__":
     """
     # Argument Parsing
     parser: ArgumentParser = ArgumentParser(
-            description="Arguments for Ref Local Tracking model 031 in Reference Tracking",
+            description="Arguments for Test in Reference Tracking",
             formatter_class=RawTextHelpFormatter)
     # model related
     parser.add_argument("--model_name", type=str, required=True)
     parser.add_argument("--input_color_image", action="store_true")
-    parser.add_argument("--head_num", type=int)
-    # training related
-    parser.add_argument("--training_epochs", type=int)
-    parser.add_argument("--validation_freq", type=int)
+    # trained model related
+    parser.add_argument("--model_weight_path", required=True, type=str)
+    # test related
     parser.add_argument("--run_id", type=str)
-    parser.add_argument("--without_early_stopping", action="store_true")
     parser.add_argument("--result_base_folder", type=str, required=True)
     # dataset related
-    parser.add_argument("--training_pipeline", type=str, required=True)
-    parser.add_argument("--validation_pipeline", type=str)
+    parser.add_argument("--test_pipeline", type=str, required=True)
     parser.add_argument("--batch_size", type=int)
     # tpu related
     parser.add_argument("--ctpu_zone", type=str, help="VM, TPU zone. ex) 'us-central1-b'")
@@ -119,16 +119,13 @@ if __name__ == "__main__":
     # model related
     model_name: str = args.model_name
     input_color_image: bool = args.input_color_image
-    head_num: int = args.head_num
-    # training related
-    training_epochs: int = args.training_epochs or 200
-    validation_freq: int = args.validation_freq or 1
+    # trained model related
+    model_weight_path: str = args.model_weight_path
+    # test related
     run_id: Optional[str] = args.run_id
-    without_early_stopping: bool = args.without_early_stopping
     result_base_folder: str = args.result_base_folder
     # dataset related
-    training_pipeline: str = args.training_pipeline
-    validation_pipeline: Optional[str] = args.validation_pipeline
+    test_pipeline: str = args.test_pipeline
     batch_size: int = args.batch_size or 4
     # tpu related
     ctpu_zone: str = args.ctpu_zone or "us-central1-b"
@@ -141,76 +138,73 @@ if __name__ == "__main__":
         strategy_optional = tpu_initialize(tpu_address=tpu_name_optional, tpu_zone=ctpu_zone)
     
     # Experiment Setup
-    experiment_setup = TrainingExperimentSetup(result_base_folder, model_name, run_id)
-    callback_list = experiment_setup.setup_callbacks(
-            training_epochs=training_epochs,
-            without_early_stopping=without_early_stopping,
-            validation_freq=validation_freq)
+    experiment_setup = TestExperimentSetup(
+            result_base_folder=result_base_folder,
+            model_name=model_name,
+            run_id=run_id,
+            experiment_id_generator=test_experiment_id)
     
     # Model Setup
     input_shape: Tuple[int, int, int] = (256, 256, 3) if input_color_image else (256, 256, 1)
     if tpu_name_optional:
         with strategy_optional.scope():
-            u_net_model = UNetLevelModelManager.unet_level(input_shape=input_shape)
-            # u_net_model2 = tf.keras.models.clone_model(u_net_model)
-            # u_net_model2.set_weights(u_net_model.get_weights())
+            model: Model = tf.keras.models.load_model(model_weight_path)
     else:
-        u_net_model = UNetLevelModelManager.unet_level(input_shape=input_shape)
-        # u_net_model2 = tf.keras.models.clone_model(u_net_model)
-        # u_net_model2.set_weights(u_net_model.get_weights())
-    manager = RefLocalTrackingModel031MHManager(
-            unet_l4_model_main=u_net_model,
-            unet_l4_model_ref=u_net_model,
-            bin_num=30,
-            input_main_image_shape=(256, 256, 1),
-            input_ref_image_shape=(256, 256, 1),
-            input_ref_bin_label_shape=(256, 256, 30),
-            head_num=head_num)
+        model: Model = tf.keras.models.load_model(model_weight_path)
+    
     # Output - [Main BW Mask, Ref BW Mask, Main Color Bin Label]
     if tpu_name_optional:
         with strategy_optional.scope():
             helper = CompileOptions(
                     optimizer=optimizers.Adam(lr=1e-4),
-                    loss_functions=[losses.BinaryCrossentropy(), losses.BinaryCrossentropy(),
-                                    losses.CategoricalCrossentropy()],
+                    loss_functions=[losses.BinaryCrossentropy(name="main_u-net_binary_crossentropy"),
+                                    losses.BinaryCrossentropy(name="ref_u-net_binary_crossentropy"),
+                                    losses.CategoricalCrossentropy(name="main_label_categorical_crossentropy")],
                     # loss_weights_optional=[0.1, 0.1, 0.8],
                     loss_weights_optional=[0.25, 0.25, 0.5],
-                    metrics=[[metrics.BinaryAccuracy()], [metrics.BinaryAccuracy()], [metrics.CategoricalAccuracy()]])
+                    metrics=[[metrics.BinaryAccuracy(name="main_u-net_binary_accuracy")],
+                             [metrics.BinaryAccuracy(name="ref_u-net_binary_accuracy")],
+                             [metrics.CategoricalAccuracy(name="main_label_categorical_accuracy")]])
     else:
         helper = CompileOptions(
                 optimizer=optimizers.Adam(lr=1e-4),
-                loss_functions=[losses.BinaryCrossentropy(), losses.BinaryCrossentropy(),
-                                losses.CategoricalCrossentropy()],
+                loss_functions=[losses.BinaryCrossentropy(name="main_u-net_binary_crossentropy"),
+                                losses.BinaryCrossentropy(name="ref_u-net_binary_crossentropy"),
+                                losses.CategoricalCrossentropy(name="main_label_categorical_crossentropy")],
                 # loss_weights_optional=[0.1, 0.1, 0.8],
                 loss_weights_optional=[0.25, 0.25, 0.5],
-                metrics=[[metrics.BinaryAccuracy()], [metrics.BinaryAccuracy()], [metrics.CategoricalAccuracy()]])
+                metrics=[[metrics.BinaryAccuracy(name="main_u-net_binary_accuracy")],
+                         [metrics.BinaryAccuracy(name="ref_u-net_binary_accuracy")],
+                         [metrics.CategoricalAccuracy(name="main_label_categorical_accuracy")]])
     
     # Dataset Setup
-    rt_training_pipeline = Datasets(training_pipeline).get_pipeline(resize_to=(256, 256))
-    rt_validation_pipeline = optional_map(
-            validation_pipeline,
-            lambda el: Datasets(el).get_pipeline(resize_to=(256, 256)))
+    # rt_test_pipeline = Datasets(test_pipeline).get_pipeline(resize_to=(256, 256))
+    
+    # Dataset Setup
+    feeder = Datasets(test_pipeline).get_feeder()
+    regularizer_func: Callable[[RTAugmenter], RTRegularizer] = \
+        lambda el_bs_augmenter: BaseRTRegularizer(el_bs_augmenter, (256, 256))
+    preprocessor_func: Callable[[RTRegularizer], RTPreprocessor] = \
+        lambda el_rt_augmenter: RTCellTrackingPreprocessor(el_rt_augmenter, bin_size=30, cache_inout=False)
+    rt_test_pipeline = RTPipeline(feeder, regularizer_func=regularizer_func, preprocessor_func=preprocessor_func)
     
     # Trainer Setup
-    trainer = Trainer(
-            model_manager=manager,
+    tester = Tester(
+            model=model,
             compile_helper=helper,
             strategy_optional=strategy_optional,
-            training_pipeline=rt_training_pipeline,
-            training_batch_size=batch_size,
-            training_shuffle_in_buffer=False,
-            training_shuffle_buffer_size=None,
-            validation_pipeline=rt_validation_pipeline,
-            validation_batch_size=batch_size,
-            validation_freq=validation_freq)
+            test_pipeline=rt_test_pipeline,
+            test_batch_size=batch_size)
     
     # Report
-    reporter = TrainerReporter(setup=experiment_setup, trainer=trainer)
+    reporter = RTTestReporter(setup=experiment_setup, tester=tester)
     reporter.report()
     reporter.plotmodel()
     
-    # Training
-    trainer.fit(training_epochs=training_epochs, callbacks=callback_list)
+    # Test
+    test_result = tester.test(callbacks=[])
+    
+    reporter.report_result(test_result)
     
     if tpu_name_optional:
         delete_tpu(tpu_name=tpu_name_optional, ctpu_zone=ctpu_zone)

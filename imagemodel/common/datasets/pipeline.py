@@ -1,4 +1,4 @@
-from typing import Callable, TypeVar, Generic
+from typing import Callable, Generic, TypeVar
 
 import tensorflow as tf
 
@@ -25,10 +25,13 @@ class Pipeline(Generic[F, A, R, P]):
         self.augmenter: A = augmenter_func(self.feeder)
         self.regularizer: R = regularizer_func(self.augmenter)
         self.preprocessor: P = preprocessor_func(self.regularizer)
-
+    
     @property
     def data_description(self):
         return self.feeder.feeder_data_description
-
+    
+    def get_input_zipped_dataset(self) -> tf.data.Dataset:
+        return tf.data.Dataset.zip(tuple(self.preprocessor.get_input_dataset()))
+    
     def get_zipped_dataset(self) -> tf.data.Dataset:
         return self.preprocessor.get_zipped_dataset()

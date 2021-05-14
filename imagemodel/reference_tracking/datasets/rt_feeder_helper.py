@@ -26,12 +26,8 @@ class RTFeederOutputHelper(FeederOutputHelper):
     def get_ref_bw_mask(self) -> tf.data.Dataset:
         pass
     
-    def get_ref_color_label(self) -> tf.data.Dataset:
-        pass
-    
     def get_main_color_label(self) -> tf.data.Dataset:
         pass
     
     def get_outputs(self) -> List[tf.data.Dataset]:
-        return [self.get_main_bw_mask(), self.get_ref_bw_mask(), self.get_ref_color_label(),
-                self.get_main_color_label()]
+        return [self.get_main_bw_mask(), self.get_ref_bw_mask(), self.get_main_color_label()]

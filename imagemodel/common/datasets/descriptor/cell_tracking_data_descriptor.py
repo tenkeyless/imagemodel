@@ -18,7 +18,12 @@ def combine_folder_file(a, b):
 # Don't use this.
 # Example for read from disk or google cloud storage.
 class CellTrackingDataDescriptor(BaseTFDataDescriptor):
-    def __init__(self, original_dataset: Optional[tf.data.Dataset], base_folder: str):
+    def __init__(
+            self,
+            original_dataset: Optional[tf.data.Dataset],
+            base_folder: str,
+            shuffle: bool = True,
+            cache: bool = False):
         super().__init__(original_dataset=original_dataset)
         self.base_folder: str = base_folder
         
@@ -29,17 +34,12 @@ class CellTrackingDataDescriptor(BaseTFDataDescriptor):
         self.ref_image_folder: str = os.path.join(self.base_folder, "framed_image", "p1")
         self.ref_label_folder: str = os.path.join(self.base_folder, "framed_label", "p1")
         self.ref_bw_label_folder: str = os.path.join(self.base_folder, "framed_bw_label", "p1")
-    
-    @staticmethod
-    def __base_files(folder_name: str, shuffle_seed: Optional[int] = 42) -> tf.data.Dataset:
-        shuffle = True if shuffle_seed else False
-        return tf.data.Dataset.list_files(folder_name + "/*", shuffle=shuffle, seed=shuffle_seed).map(
-                get_filename_from_fullpath)
-    
-    @staticmethod
-    def __base_files_with_folder(folder_name: str, shuffle_seed: Optional[int] = 42) -> tf.data.Dataset:
-        file_dataset: tf.data.Dataset = CellTrackingDataDescriptor.__base_files(folder_name, shuffle_seed)
-        return file_dataset.map(lambda fname: combine_folder_file(folder_name, fname))
+        
+        self.shuffle = shuffle
+        self.random_seed = 42
+        self.cache = cache
+        
+        self.filename_base_folder: str = self.main_image_folder
     
     def get_filename_dataset(self) -> tf.data.Dataset:
         """
@@ -50,8 +50,15 @@ class CellTrackingDataDescriptor(BaseTFDataDescriptor):
         tf.data.Dataset
             `tf.Tensor` of shape=(), dtype=string.
         """
-        dataset = CellTrackingDataDescriptor.__base_files(self.main_image_folder)
-        return dataset
+        if self.shuffle:
+            filename_dataset = tf.data.Dataset.list_files(
+                    self.filename_base_folder + "/*",
+                    shuffle=True,
+                    seed=self.random_seed)
+        else:
+            filename_dataset = tf.data.Dataset.list_files(self.filename_base_folder + "/*", shuffle=False)
+        filename_dataset = filename_dataset.map(get_filename_from_fullpath)
+        return filename_dataset
     
     def get_main_img_dataset(self) -> tf.data.Dataset:
         """
@@ -62,8 +69,11 @@ class CellTrackingDataDescriptor(BaseTFDataDescriptor):
         tf.data.Dataset
             `tf.Tensor` of shape=(height, width, 1), dtype=uint8.
         """
-        dataset = CellTrackingDataDescriptor.__base_files_with_folder(self.main_image_folder)
+        dataset = self.get_filename_dataset()
+        dataset = dataset.map(lambda fname: combine_folder_file(self.main_image_folder, fname))
         dataset = dataset.map(decode_png, num_parallel_calls=tf.data.experimental.AUTOTUNE)
+        if self.cache:
+            dataset = dataset.cache()
         return dataset
     
     def get_main_mask_dataset(self) -> tf.data.Dataset:
@@ -75,8 +85,11 @@ class CellTrackingDataDescriptor(BaseTFDataDescriptor):
         tf.data.Dataset
             `tf.Tensor` of shape=(height, width, 3), dtype=uint8.
         """
-        dataset = CellTrackingDataDescriptor.__base_files_with_folder(os.path.join(self.main_label_folder))
+        dataset = self.get_filename_dataset()
+        dataset = dataset.map(lambda fname: combine_folder_file(self.main_label_folder, fname))
         dataset = dataset.map(lambda el: decode_png(el, 3), num_parallel_calls=tf.data.experimental.AUTOTUNE)
+        if self.cache:
+            dataset = dataset.cache()
         return dataset
     
     def get_main_bw_mask_dataset(self) -> tf.data.Dataset:
@@ -88,9 +101,11 @@ class CellTrackingDataDescriptor(BaseTFDataDescriptor):
         tf.data.Dataset
             `tf.Tensor` of shape=(height, width, 1), dtype=uint8.
         """
-        
-        dataset = CellTrackingDataDescriptor.__base_files_with_folder(self.main_bw_label_folder)
+        dataset = self.get_filename_dataset()
+        dataset = dataset.map(lambda fname: combine_folder_file(self.main_bw_label_folder, fname))
         dataset = dataset.map(decode_png, num_parallel_calls=tf.data.experimental.AUTOTUNE)
+        if self.cache:
+            dataset = dataset.cache()
         return dataset
     
     def get_ref_img_dataset(self) -> tf.data.Dataset:
@@ -102,8 +117,11 @@ class CellTrackingDataDescriptor(BaseTFDataDescriptor):
         tf.data.Dataset
             `tf.Tensor` of shape=(height, width, 1), dtype=uint8.
         """
-        dataset = CellTrackingDataDescriptor.__base_files_with_folder(self.ref_image_folder)
+        dataset = self.get_filename_dataset()
+        dataset = dataset.map(lambda fname: combine_folder_file(self.ref_image_folder, fname))
         dataset = dataset.map(decode_png, num_parallel_calls=tf.data.experimental.AUTOTUNE)
+        if self.cache:
+            dataset = dataset.cache()
         return dataset
     
     def get_ref_mask_dataset(self) -> tf.data.Dataset:
@@ -115,8 +133,11 @@ class CellTrackingDataDescriptor(BaseTFDataDescriptor):
         tf.data.Dataset
             `tf.Tensor` of shape=(height, width, 3), dtype=uint8.
         """
-        dataset = CellTrackingDataDescriptor.__base_files_with_folder(self.ref_label_folder)
+        dataset = self.get_filename_dataset()
+        dataset = dataset.map(lambda fname: combine_folder_file(self.ref_label_folder, fname))
         dataset = dataset.map(lambda el: decode_png(el, 3), num_parallel_calls=tf.data.experimental.AUTOTUNE)
+        if self.cache:
+            dataset = dataset.cache()
         return dataset
     
     def get_ref_bw_mask_dataset(self) -> tf.data.Dataset:
@@ -128,6 +149,9 @@ class CellTrackingDataDescriptor(BaseTFDataDescriptor):
         tf.data.Dataset
             `tf.Tensor` of shape=(height, width, 1), dtype=uint8.
         """
-        dataset = CellTrackingDataDescriptor.__base_files_with_folder(self.ref_bw_label_folder)
+        dataset = self.get_filename_dataset()
+        dataset = dataset.map(lambda fname: combine_folder_file(self.ref_bw_label_folder, fname))
         dataset = dataset.map(decode_png, num_parallel_calls=tf.data.experimental.AUTOTUNE)
+        if self.cache:
+            dataset = dataset.cache()
         return dataset

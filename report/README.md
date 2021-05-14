@@ -13,8 +13,6 @@
     - Example) "my_image@MY IMAGE"
   - `-t`: "[Target file path]"
     - Target file path and file name
-    - If you have space in folder or file name, you need to write like this.
-      - 'folder\ or/file\ name\ with\ space.pdf'
     - Example) "/folder/path/my_result.pdf"
 
 - Requirements
@@ -27,15 +25,45 @@
   
   ```shell
   ./merge_pdf.sh \
-  -f "[folder 1]@[text label below image 1]" \
-  -f "[folder 2]@[text label below image 2]" \
-  -f "[folder 3]@[text label below image 3]" \
-  -t "[target folder]/[filename.pdf]"
+  -f "[input] current image@[input] current image" \
+  -f "[input] p1 label@[input] prev label" \
+  -f "[output] _predict__model_ref_local_tracking_model_022__run_leetaekyu_20210127_091102@[predict]" \
+  -f "[target] current label@[target] current label" \
+  -t "predict__model_ref_local_tracking_model_022__run_leetaekyu_20210127_091102.pdf"
   ```
 
-## 2. Get Results
+## 2. Compare Image
 
-### 2.1. Training Result
+`compare.sh`
+
+- Options
+  - `-f`: "[Folder Path]"
+    - Compare from folder
+    - Example) "my_image_target"
+  - `-t`: "[Folder Path]"
+    - Compare with folder
+    - Example) "my_image_predict"
+  - `-s`: "[Target Folder]"
+    - Path for the target result files
+
+- Requirements
+  - [imagemagick](https://imagemagick.org/)
+
+- Usage
+  - `compare.sh` -f "[Folder Path]" -t "[Folder Path]" -s "[Folder Path]"
+
+- Example
+  
+  ```shell
+  ./compare.sh \
+  -f "/Users/tklee/workspace/cell segmentation/results/[target] current label" \
+  -t "/Users/tklee/workspace/cell segmentation/results/predict_testset__model_ref_local_tracking_model_033__run_leetaekyu_20210317_135008/predict_result/images" \
+  -s "/Users/tklee/workspace/cell segmentation/results/predict_testset__model_ref_local_tracking_model_033__run_leetaekyu_20210317_135008/compare_with_target"
+  ```
+
+## 3. Get Results
+
+### 3.1. Training Result
 
 `get_training_result.sh`
 
@@ -53,7 +81,7 @@ Get 1) a training info, model structure, sample images and 2) a log for TensorBo
   ./get_training_result.sh training__model_ref_local_tracking_model_011__run_leetaekyu_20210109_012720 ~/Downloads/result/test
   ```
 
-### 2.2. Test Result
+### 3.2. Test Result
 
 `get_test_result.sh`
 
@@ -71,7 +99,7 @@ Get 1) a test info.
   ./get_test_result.sh test__model_ref_local_tracking_model_011__run_leetaekyu_20210109_012720 ~/Downloads/result/test
   ```
 
-### 2.3. Predict Result
+### 3.3. Predict Result
 
 `get_predict_result.sh`
 
