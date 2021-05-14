@@ -20,7 +20,30 @@ if __name__ == "__main__":
     """
     Examples
     --------
-    # With CPU, GPU
+    # With CPU
+    >>> docker run \
+    ...     -it \
+    ...     --rm \
+    ...     -u $(id -u):$(id -g) \
+    ...     -v /etc/localtime:/etc/localtime:ro \
+    ...     -v $(pwd):/imagemodel \
+    ...     -v /data:/data \
+    ...     -v ~/reference_tracking_results:/reference_tracking_results \
+    ...     -v /data/tensorflow_datasets:/tensorflow_datasets \
+    ...     --workdir="/imagemodel" \
+    ...     imagemodel/tkl:1.2
+    >>> python imagemodel/reference_tracking/models/trainers/ref_local_tracking_model_031_trainer.py \
+    ...     --model_name ref_local_tracking_model_031 \
+    ...     --result_base_folder /reference_tracking_results \
+    ...     --training_epochs 100 \
+    ...     --validation_freq 1 \
+    ...     --training_pipeline rt_cell_tracking_training_1 \
+    ...     --validation_pipeline rt_cell_tracking_validation_1 \
+    ...     --run_id reference_tracking__20210510_215226 \
+    ...     --without_early_stopping \
+    ...     --batch_size 2
+    
+    # With GPU
     >>> docker run \
     ...     --gpus all \
     ...     -it \
@@ -34,13 +57,13 @@ if __name__ == "__main__":
     ...     --workdir="/imagemodel" \
     ...     imagemodel/tkl:1.2
     >>> python imagemodel/reference_tracking/models/trainers/ref_local_tracking_model_031_trainer.py \
-    ...     --model_name unet_level \
-    ...     --result_base_folder reference_tracking_results \
+    ...     --model_name ref_local_tracking_model_031 \
+    ...     --result_base_folder /reference_tracking_results \
     ...     --training_epochs 100 \
     ...     --validation_freq 1 \
-    ...     --training_pipeline rt_cell_tracking_training_2 \
-    ...     --validation_pipeline rt_cell_tracking_validation_2 \
-    ...     --run_id binary_segmentations__unet_level_test__20210510_2120915 \
+    ...     --training_pipeline rt_cell_tracking_training_1 \
+    ...     --validation_pipeline rt_cell_tracking_validation_1 \
+    ...     --run_id reference_tracking__20210510_215226 \
     ...     --without_early_stopping \
     ...     --batch_size 2
     
@@ -60,8 +83,8 @@ if __name__ == "__main__":
     ...     --result_base_folder gs://cell_dataset \
     ...     --training_epochs 100 \
     ...     --validation_freq 1 \
-    ...     --training_pipeline rt_gs_cell_tracking_training_2 \
-    ...     --validation_pipeline rt_gs_cell_tracking_validation_2 \
+    ...     --training_pipeline rt_gs_cell_tracking_training_1 \
+    ...     --validation_pipeline rt_gs_cell_tracking_validation_1 \
     ...     --run_id reference_tracking__20210510_215226 \
     ...     --without_early_stopping \
     ...     --batch_size 8 \
@@ -145,14 +168,16 @@ if __name__ == "__main__":
                     optimizer=optimizers.Adam(lr=1e-4),
                     loss_functions=[losses.BinaryCrossentropy(), losses.BinaryCrossentropy(),
                                     losses.CategoricalCrossentropy()],
-                    loss_weights_optional=[0.1, 0.1, 0.8],
+                    # loss_weights_optional=[0.1, 0.1, 0.8],
+                    loss_weights_optional=[0.25, 0.25, 0.5],
                     metrics=[[metrics.BinaryAccuracy()], [metrics.BinaryAccuracy()], [metrics.CategoricalAccuracy()]])
     else:
         helper = CompileOptions(
                 optimizer=optimizers.Adam(lr=1e-4),
                 loss_functions=[losses.BinaryCrossentropy(), losses.BinaryCrossentropy(),
                                 losses.CategoricalCrossentropy()],
-                loss_weights_optional=[0.1, 0.1, 0.8],
+                # loss_weights_optional=[0.1, 0.1, 0.8],
+                loss_weights_optional=[0.25, 0.25, 0.5],
                 metrics=[[metrics.BinaryAccuracy()], [metrics.BinaryAccuracy()], [metrics.CategoricalAccuracy()]])
     
     # Dataset Setup
