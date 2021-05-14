@@ -1,5 +1,5 @@
 from argparse import ArgumentParser, RawTextHelpFormatter
-from typing import Optional, Tuple
+from typing import Callable, Optional, Tuple
 
 import tensorflow as tf
 from tensorflow.keras import losses, metrics, optimizers
@@ -12,6 +12,11 @@ from imagemodel.common.setup import TestExperimentSetup, test_experiment_id
 from imagemodel.common.utils.common_tpu import create_tpu, delete_tpu, tpu_initialize
 from imagemodel.common.utils.gpu_check import check_first_gpu
 from imagemodel.reference_tracking.configs.datasets import Datasets
+from imagemodel.reference_tracking.datasets.cell_tracking.preprocessor import RTCellTrackingPreprocessor
+from imagemodel.reference_tracking.datasets.pipeline import RTPipeline
+from imagemodel.reference_tracking.datasets.rt_augmenter import RTAugmenter
+from imagemodel.reference_tracking.datasets.rt_preprocessor import RTPreprocessor
+from imagemodel.reference_tracking.datasets.rt_regularizer import BaseRTRegularizer, RTRegularizer
 from imagemodel.reference_tracking.models.testers.rt_test_reporter import RTTestReporter
 from imagemodel.reference_tracking.models.testers.tester import Tester
 
@@ -60,13 +65,13 @@ if __name__ == "__main__":
     ...     imagemodel/tkl:1.2
     >>> python imagemodel/reference_tracking/models/testers/test.py \
     ...     --model_name ref_local_tracking_model_031_mh \
-    ...     --model_weight_path saved/\
-    ... training__model_ref_local_tracking_model_031_mh__run_reference_tracking__20210511_063754.epoch_23 \
+    ...     --model_weight_path /reference_tracking_results/save/weights/\
+    ... training__model_ref_local_tracking_model_031_mh__run_reference_tracking__20210513_194150.epoch_23 \
     ...     --run_id reference_tracking__20210513_101705 \
     ...     --result_base_folder /reference_tracking_results \
-    ...     --test_pipeline rt_cell_tracking_test_1 \
+    ...     --test_pipeline rt_cell_sample_test_1 \
     ...     --batch_size 2
-
+# training__model_ref_local_tracking_model_031_mh__run_reference_tracking__20210514_025537.epoch_14
     # With TPU
     >>> docker run \
     ...     -it \
@@ -155,7 +160,8 @@ if __name__ == "__main__":
                     loss_functions=[losses.BinaryCrossentropy(name="main_u-net_binary_crossentropy"),
                                     losses.BinaryCrossentropy(name="ref_u-net_binary_crossentropy"),
                                     losses.CategoricalCrossentropy(name="main_label_categorical_crossentropy")],
-                    loss_weights_optional=[0.1, 0.1, 0.8],
+                    # loss_weights_optional=[0.1, 0.1, 0.8],
+                    loss_weights_optional=[0.25, 0.25, 0.5],
                     metrics=[[metrics.BinaryAccuracy(name="main_u-net_binary_accuracy")],
                              [metrics.BinaryAccuracy(name="ref_u-net_binary_accuracy")],
                              [metrics.CategoricalAccuracy(name="main_label_categorical_accuracy")]])
@@ -165,13 +171,22 @@ if __name__ == "__main__":
                 loss_functions=[losses.BinaryCrossentropy(name="main_u-net_binary_crossentropy"),
                                 losses.BinaryCrossentropy(name="ref_u-net_binary_crossentropy"),
                                 losses.CategoricalCrossentropy(name="main_label_categorical_crossentropy")],
-                loss_weights_optional=[0.1, 0.1, 0.8],
+                # loss_weights_optional=[0.1, 0.1, 0.8],
+                loss_weights_optional=[0.25, 0.25, 0.5],
                 metrics=[[metrics.BinaryAccuracy(name="main_u-net_binary_accuracy")],
                          [metrics.BinaryAccuracy(name="ref_u-net_binary_accuracy")],
                          [metrics.CategoricalAccuracy(name="main_label_categorical_accuracy")]])
     
     # Dataset Setup
-    rt_test_pipeline = Datasets(test_pipeline).get_pipeline(resize_to=(256, 256))
+    # rt_test_pipeline = Datasets(test_pipeline).get_pipeline(resize_to=(256, 256))
+    
+    # Dataset Setup
+    feeder = Datasets(test_pipeline).get_feeder()
+    regularizer_func: Callable[[RTAugmenter], RTRegularizer] = \
+        lambda el_bs_augmenter: BaseRTRegularizer(el_bs_augmenter, (256, 256))
+    preprocessor_func: Callable[[RTRegularizer], RTPreprocessor] = \
+        lambda el_rt_augmenter: RTCellTrackingPreprocessor(el_rt_augmenter, bin_size=30, cache_inout=False)
+    rt_test_pipeline = RTPipeline(feeder, regularizer_func=regularizer_func, preprocessor_func=preprocessor_func)
     
     # Trainer Setup
     tester = Tester(
