@@ -32,7 +32,7 @@ class Reporter:
         f.close()
     
     @staticmethod
-    def __upload_file_to_google_storage(gs_folder_name: str, path_filename: str):
+    def upload_file_to_google_storage(gs_folder_name: str, path_filename: str):
         bucket_name = gs_folder_name.replace("gs://", "").split("/")[0]
         folder_without_gs = gs_folder_name.replace("gs://", "")[gs_folder_name.replace("gs://", "").find("/") + 1:]
         upload_blob(bucket_name, path_filename, os.path.join(folder_without_gs, os.path.basename(path_filename)))
@@ -49,7 +49,7 @@ class Reporter:
         # Upload to gs bucket
         if folder_name.startswith("gs://"):
             self.__save_str_to_file(tmp_path_filename, content)
-            self.__upload_file_to_google_storage(folder_name, tmp_path_filename)
+            self.upload_file_to_google_storage(folder_name, tmp_path_filename)
         # Save on local
         else:
             self.__save_str_to_file(local_path_filename, content)
@@ -63,7 +63,7 @@ class Reporter:
         if result_folder.startswith("gs://"):
             tmp_plot_model_img_path = "/tmp/model_{}.png".format(self.setup.run_id)
             plot_model(model, show_shapes=True, to_file=tmp_plot_model_img_path, dpi=144)
-            self.__upload_file_to_google_storage(result_folder, tmp_plot_model_img_path)
+            self.upload_file_to_google_storage(result_folder, tmp_plot_model_img_path)
         # Save on local
         else:
             tmp_plot_model_img_path = os.path.join(result_folder, "model.png")
@@ -79,7 +79,7 @@ class Reporter:
                     to_file=tmp_plot_model_nested_img_path,
                     expand_nested=True,
                     dpi=144)
-            self.__upload_file_to_google_storage(result_folder, tmp_plot_model_nested_img_path)
+            self.upload_file_to_google_storage(result_folder, tmp_plot_model_nested_img_path)
         # Save on local
         else:
             tmp_plot_model_img_path = os.path.join(result_folder, "model_nested.png")

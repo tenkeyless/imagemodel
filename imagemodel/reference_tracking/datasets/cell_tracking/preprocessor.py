@@ -1,8 +1,11 @@
-from typing import Tuple
+import os
+from typing import List, Tuple
 
+import cv2
 import tensorflow as tf
 
 from imagemodel.common.datasets.manipulator.manipulator import SupervisedManipulator
+from imagemodel.common.reporter import Reporter
 from imagemodel.reference_tracking.datasets.cell_tracking.preprocessor_helper import (
     ClaheRTPreprocessorPredictInputHelper, RTCellTrackingPreprocessorInputHelper, RTCellTrackingPreprocessorOutputHelper
 )
@@ -60,6 +63,56 @@ class RTCellTrackingPreprocessor(BaseRTPreprocessor, RTPreprocessor):
                 ))
         
         return inout_dataset.map(generate_color_map).map(generate_bin_label)
+    
+    def plot_zipped_dataset(self, sample_num: int, target_base_folder: str):
+        dataset = self.get_zipped_dataset()
+        
+        files: List[str] = []
+        _base_folder: str = target_base_folder
+        
+        if target_base_folder.startswith("gs://"):
+            _base_folder = "/tmp"
+        
+        for i, d in enumerate(dataset.take(sample_num)):
+            inputs = d[0]
+            
+            main_img_file_name = "{}_RTCellTrackingPreprocessor_input_main_img.png".format(i)
+            main_img_fullpath = os.path.join(_base_folder, main_img_file_name)
+            cv2.imwrite(main_img_fullpath, inputs[0].numpy() * 255)
+            files.append(main_img_fullpath)
+            
+            ref_img_file_name = "{}_RTCellTrackingPreprocessor_input_ref_img.png".format(i)
+            ref_img_fullpath = os.path.join(_base_folder, ref_img_file_name)
+            cv2.imwrite(ref_img_fullpath, inputs[1].numpy() * 255)
+            files.append(ref_img_fullpath)
+            
+            for b in range(inputs[2].shape[-1]):
+                ref_bin_file_name = "{}_RTCellTrackingPreprocessor_bin_{:02d}_input.png".format(i, b)
+                ref_bin_fullpath = os.path.join(_base_folder, ref_bin_file_name)
+                cv2.imwrite(ref_bin_fullpath, inputs[2][..., b:b + 1].numpy() * 255)
+                files.append(ref_bin_fullpath)
+            
+            outputs = d[1]
+            
+            main_bw_label_file_name = "{}_RTCellTrackingPreprocessor_output_main_bw_label.png".format(i)
+            main_bw_label_fullpath = os.path.join(_base_folder, main_bw_label_file_name)
+            cv2.imwrite(main_bw_label_fullpath, outputs[0].numpy() * 255)
+            files.append(main_bw_label_fullpath)
+            
+            ref_bw_label_file_name = "{}_RTCellTrackingPreprocessor_output_ref_bw_label.png".format(i)
+            ref_bw_label_fullpath = os.path.join(_base_folder, ref_bw_label_file_name)
+            cv2.imwrite(ref_bw_label_fullpath, outputs[1].numpy() * 255)
+            files.append(ref_bw_label_fullpath)
+            
+            for b in range(outputs[2].shape[-2]):
+                main_bin_file_name = "{}_RTCellTrackingPreprocessor_bin_{:02d}_output.png".format(i, b)
+                main_bin_fullpath = os.path.join(_base_folder, main_bin_file_name)
+                cv2.imwrite(main_bin_fullpath, outputs[2][..., b:b + 1, 0].numpy() * 255)
+                files.append(main_bin_fullpath)
+        
+        if target_base_folder.startswith("gs://"):
+            for file in files:
+                Reporter.upload_file_to_google_storage(target_base_folder, file)
 
 
 class RTCellTrackingPredictPreprocessor(RTCellTrackingPreprocessor):
