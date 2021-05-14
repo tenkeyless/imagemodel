@@ -39,14 +39,7 @@ class CellTrackingDataDescriptor(BaseTFDataDescriptor):
         self.random_seed = 42
         self.cache = cache
         
-        # if self.shuffle:
-        #     self.base_file_dataset = tf.data.Dataset.list_files(
-        #             self.main_image_folder + "/*",
-        #             shuffle=True,
-        #             seed=random_seed)
-        # else:
-        #     self.base_file_dataset = tf.data.Dataset.list_files(self.main_image_folder + "/*", shuffle=False)
-        # self.base_file_dataset = self.base_file_dataset.map(get_filename_from_fullpath)
+        self.filename_base_folder: str = self.main_image_folder
     
     def get_filename_dataset(self) -> tf.data.Dataset:
         """
@@ -59,11 +52,11 @@ class CellTrackingDataDescriptor(BaseTFDataDescriptor):
         """
         if self.shuffle:
             filename_dataset = tf.data.Dataset.list_files(
-                    self.main_image_folder + "/*",
+                    self.filename_base_folder + "/*",
                     shuffle=True,
                     seed=self.random_seed)
         else:
-            filename_dataset = tf.data.Dataset.list_files(self.main_image_folder + "/*", shuffle=False)
+            filename_dataset = tf.data.Dataset.list_files(self.filename_base_folder + "/*", shuffle=False)
         filename_dataset = filename_dataset.map(get_filename_from_fullpath)
         return filename_dataset
     
