@@ -62,7 +62,9 @@ class RTCellTrackingPreprocessor(BaseRTPreprocessor, RTPreprocessor):
                     tf_output_label_processing(_output_dataset[2], _input_dataset[3], bin_size)
                 ))
         
-        return inout_dataset.map(generate_color_map).map(generate_bin_label)
+        return inout_dataset.map(
+                generate_color_map, num_parallel_calls=tf.data.experimental.AUTOTUNE).map(
+                generate_bin_label, num_parallel_calls=tf.data.experimental.AUTOTUNE)
     
     def plot_zipped_dataset(self, sample_num: int, target_base_folder: str):
         """
