@@ -19,9 +19,6 @@ class Trainer:
             training_pipeline: Pipeline,
             training_batch_size: int,
             strategy_optional: Optional[TPUStrategy] = None,
-            training_shuffle_in_buffer: bool = False,
-            training_shuffle_buffer_size: Optional[int] = None,
-            training_shuffle_buffer_seed: int = 42,
             validation_pipeline: Optional[Pipeline] = None,
             validation_batch_size: int = 4,
             validation_freq: int = 1):
@@ -36,12 +33,6 @@ class Trainer:
         
         self.training_dataset: tf.data.Dataset = self.training_pipeline.get_zipped_dataset()
         self.training_dataset_num: int = len(self.training_dataset)
-        if training_shuffle_in_buffer:
-            training_shuffle_buffer_size = training_shuffle_buffer_size or self.training_dataset_num
-            self.training_dataset = self.training_dataset.shuffle(
-                    buffer_size=training_shuffle_buffer_size,
-                    seed=training_shuffle_buffer_seed,
-                    reshuffle_each_iteration=True)
         self.training_dataset = self.training_dataset.batch(self.training_batch_size, drop_remainder=True)
         self.training_dataset = self.training_dataset.prefetch(tf.data.experimental.AUTOTUNE)
         

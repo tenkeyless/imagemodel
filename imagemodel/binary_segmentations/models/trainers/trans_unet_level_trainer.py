@@ -93,8 +93,6 @@ if __name__ == "__main__":
             compile_helper=helper,
             training_pipeline=bs_training_pipeline,
             training_batch_size=batch_size,
-            training_shuffle_in_buffer=False,
-            training_shuffle_buffer_size=None,
             validation_pipeline=bs_validation_pipeline,
             validation_batch_size=batch_size,
             validation_freq=validation_freq)

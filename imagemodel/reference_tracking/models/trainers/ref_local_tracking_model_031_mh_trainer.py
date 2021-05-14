@@ -198,8 +198,6 @@ if __name__ == "__main__":
             strategy_optional=strategy_optional,
             training_pipeline=rt_training_pipeline,
             training_batch_size=batch_size,
-            training_shuffle_in_buffer=False,
-            training_shuffle_buffer_size=None,
             validation_pipeline=rt_validation_pipeline,
             validation_batch_size=batch_size,
             validation_freq=validation_freq)
