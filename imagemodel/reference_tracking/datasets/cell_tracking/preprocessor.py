@@ -65,6 +65,25 @@ class RTCellTrackingPreprocessor(BaseRTPreprocessor, RTPreprocessor):
         return inout_dataset.map(generate_color_map).map(generate_bin_label)
     
     def plot_zipped_dataset(self, sample_num: int, target_base_folder: str):
+        """
+        Plot zipped dataset.
+        
+        Examples
+        --------
+        >>> from imagemodel.reference_tracking.configs.datasets import Datasets
+        >>> pipeline = Datasets("rt_cell_tracking_training_1").get_pipeline(resize_to=(256, 256))
+        >>> pipeline.preprocessor.plot_zipped_dataset(
+        ...     sample_num=4, target_base_folder="/reference_tracking_results/test")
+        
+        Parameters
+        ----------
+        sample_num
+        target_base_folder
+
+        Returns
+        -------
+
+        """
         dataset = self.get_zipped_dataset()
         
         files: List[str] = []
