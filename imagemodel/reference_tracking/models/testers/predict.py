@@ -6,6 +6,7 @@ from tensorflow.keras.models import Model
 from tensorflow.python.distribute.tpu_strategy import TPUStrategy
 
 import _path  # noqa
+from imagemodel.common.datasets.pipeline import Pipeline
 from imagemodel.common.reporter import PredictorReporter
 from imagemodel.common.setup import PredictExperimentSetup, predict_experiment_id
 from imagemodel.common.utils.common_tpu import create_tpu, delete_tpu, tpu_initialize
@@ -152,7 +153,13 @@ if __name__ == "__main__":
         lambda el_bs_augmenter: BaseRTRegularizer(el_bs_augmenter, (256, 256))
     preprocessor_func: Callable[[RTRegularizer], RTPreprocessor] = \
         lambda el_rt_augmenter: RTCellTrackingPredictPreprocessor(el_rt_augmenter, 30, fill_with=(255, 255, 255))
-    rt_predict_pipeline = RTPipeline(feeder, regularizer_func=regularizer_func, preprocessor_func=preprocessor_func)
+    rt_predict_pipeline: Pipeline = RTPipeline(
+            feeder,
+            regularizer_func=regularizer_func,
+            preprocessor_func=preprocessor_func)
+    rt_predict_dataset: tf.data.Dataset = rt_predict_pipeline.get_zipped_dataset()
+    rt_predict_dataset_description: str = rt_predict_pipeline.data_description
+    rt_predict_filename_dataset: Optional[tf.data.Dataset] = rt_predict_pipeline.feeder.filename_optional
     
     
     def combine_folder_file(a, b):
@@ -172,7 +179,9 @@ if __name__ == "__main__":
     # Trainer Setup
     predictor = RTPredictor(
             model=model,
-            predict_pipeline=rt_predict_pipeline,
+            predict_dataset=rt_predict_dataset,
+            predict_dataset_description=rt_predict_dataset_description,
+            predict_filename_dataset=rt_predict_filename_dataset,
             predict_batch_size=batch_size,
             strategy_optional=strategy_optional,
             post_processing=post_processing)

@@ -15,7 +15,6 @@ from imagemodel.common.setup import (
 )
 from imagemodel.common.trainer import Trainer
 from imagemodel.common.utils.gc_storage import upload_blob
-from imagemodel.common.utils.optional import optional_map
 from imagemodel.reference_tracking.models.testers.tester import Tester
 
 SE = TypeVar('SE', bound=ExperimentSetup)
@@ -113,8 +112,8 @@ Training Data Folder: {}/{}
         """.format(
                 platform.node(),
                 self.setup.experiment_id,
-                self.trainer.training_pipeline.data_description,
-                optional_map(self.trainer.validation_pipeline_optional, lambda vp: vp.data_description) or "",
+                self.trainer.training_dataset_description,
+                self.trainer.validation_dataset_description,
                 self.setup.tf_run_log_dir,
                 self.setup.base_data_folder,
                 self.setup.experiment_id)
@@ -156,7 +155,7 @@ Predict Data Folder: {}/{}
         """.format(
                 platform.node(),
                 self.setup.experiment_id,
-                self.predictor.predict_pipeline.data_description,
+                self.predictor.predict_dataset_description,
                 self.setup.base_data_folder,
                 self.setup.experiment_id)
         print(info)

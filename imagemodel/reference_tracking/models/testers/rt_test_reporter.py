@@ -21,7 +21,7 @@ Test Data Folder: {}/{}
         """.format(
                 platform.node(),
                 setup.experiment_id,
-                tester.test_pipeline.data_description,
+                tester.test_dataset_description,
                 setup.base_data_folder,
                 setup.experiment_id)
         return info

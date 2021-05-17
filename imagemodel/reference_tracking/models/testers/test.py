@@ -7,6 +7,7 @@ from tensorflow.keras.models import Model
 from tensorflow.python.distribute.tpu_strategy import TPUStrategy
 
 import _path  # noqa
+from imagemodel.common.datasets.pipeline import Pipeline
 from imagemodel.common.models.common_compile_options import CompileOptions
 from imagemodel.common.setup import TestExperimentSetup, test_experiment_id
 from imagemodel.common.utils.common_tpu import create_tpu, delete_tpu, tpu_initialize
@@ -186,14 +187,20 @@ if __name__ == "__main__":
         lambda el_bs_augmenter: BaseRTRegularizer(el_bs_augmenter, (256, 256))
     preprocessor_func: Callable[[RTRegularizer], RTPreprocessor] = \
         lambda el_rt_augmenter: RTCellTrackingPreprocessor(el_rt_augmenter, bin_size=30, cache_inout=False)
-    rt_test_pipeline = RTPipeline(feeder, regularizer_func=regularizer_func, preprocessor_func=preprocessor_func)
+    rt_test_pipeline: Pipeline = RTPipeline(
+            feeder,
+            regularizer_func=regularizer_func,
+            preprocessor_func=preprocessor_func)
+    rt_test_dataset: tf.data.Dataset = rt_test_pipeline.get_zipped_dataset()
+    rt_test_dataset_description: str = rt_test_pipeline.data_description
     
     # Trainer Setup
     tester = Tester(
             model=model,
             compile_helper=helper,
             strategy_optional=strategy_optional,
-            test_pipeline=rt_test_pipeline,
+            test_dataset=rt_test_dataset,
+            test_dataset_description=rt_test_dataset_description,
             test_batch_size=batch_size)
     
     # Report

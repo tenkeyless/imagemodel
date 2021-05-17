@@ -5,24 +5,23 @@ from tensorflow.keras.models import Model
 from tensorflow.python.distribute.tpu_strategy import TPUStrategy
 
 from imagemodel.common.predictor import Predictor
-from imagemodel.reference_tracking.datasets.pipeline import RTPipeline
 
 
-class RTPredictor(Predictor[RTPipeline]):
+class RTPredictor(Predictor):
     def __init__(
             self,
             model: Model,
-            predict_pipeline: RTPipeline,
+            predict_dataset: tf.data.Dataset,
+            predict_dataset_description: str,
+            predict_filename_dataset: Optional[tf.data.Dataset],
             predict_batch_size: int,
             post_processing: Callable[[tf.Tensor, tf.Tensor, tf.Tensor], None],
             strategy_optional: Optional[TPUStrategy] = None):
-        super().__init__(model, predict_pipeline, predict_batch_size, strategy_optional)
+        super().__init__(model, predict_dataset, predict_dataset_description, predict_batch_size, strategy_optional)
         self.post_processing: Callable[[tf.Tensor, tf.Tensor, tf.Tensor], None] = post_processing
         
-        filename_dataset = self.predict_pipeline.feeder.filename_optional
-        self.predict_dataset: tf.data.Dataset = self.predict_pipeline.get_input_zipped_dataset()
         self.predict_dataset_num: int = len(self.predict_dataset)
-        self.predict_dataset = tf.data.Dataset.zip((self.predict_dataset, filename_dataset))
+        self.predict_dataset = tf.data.Dataset.zip((self.predict_dataset, predict_filename_dataset))
         self.predict_dataset = self.predict_dataset.batch(self.predict_batch_size, drop_remainder=True)
     
     def predict(self):

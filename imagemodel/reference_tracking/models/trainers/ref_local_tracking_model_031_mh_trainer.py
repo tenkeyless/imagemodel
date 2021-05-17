@@ -1,11 +1,13 @@
 from argparse import ArgumentParser, RawTextHelpFormatter
 from typing import Optional, Tuple
 
+import tensorflow as tf
 from tensorflow.keras import losses, metrics, optimizers
 from tensorflow.python.distribute.tpu_strategy import TPUStrategy
 
 import _path  # noqa
 from imagemodel.binary_segmentations.models.unet_level import UNetLevelModelManager
+from imagemodel.common.datasets.pipeline import Pipeline
 from imagemodel.common.models.common_compile_options import CompileOptions
 from imagemodel.common.reporter import TrainerReporter
 from imagemodel.common.setup import TrainingExperimentSetup
@@ -186,19 +188,27 @@ if __name__ == "__main__":
                 metrics=[[metrics.BinaryAccuracy()], [metrics.BinaryAccuracy()], [metrics.CategoricalAccuracy()]])
     
     # Dataset Setup
-    rt_training_pipeline = Datasets(training_pipeline).get_pipeline(resize_to=(256, 256))
-    rt_validation_pipeline = optional_map(
+    rt_training_pipeline: Pipeline = Datasets(training_pipeline).get_pipeline(resize_to=(256, 256))
+    rt_training_dataset: tf.data.Dataset = rt_training_pipeline.get_zipped_dataset()
+    rt_training_dataset_description: str = rt_training_pipeline.data_description
+    rt_validation_pipeline: Optional[Pipeline] = optional_map(
             validation_pipeline,
             lambda el: Datasets(el).get_pipeline(resize_to=(256, 256)))
+    rt_validation_dataset: Optional[tf.data.Dataset] = optional_map(
+            rt_validation_pipeline,
+            lambda el: el.get_zipped_dataset())
+    rt_validation_description: Optional[str] = optional_map(rt_validation_pipeline, lambda el: el.data_description)
     
     # Trainer Setup
     trainer = Trainer(
             model_manager=manager,
             compile_helper=helper,
             strategy_optional=strategy_optional,
-            training_pipeline=rt_training_pipeline,
+            training_dataset=rt_training_dataset,
+            training_dataset_description=rt_training_dataset_description,
             training_batch_size=batch_size,
-            validation_pipeline=rt_validation_pipeline,
+            validation_dataset=rt_validation_dataset,
+            validation_dataset_description=rt_validation_description,
             validation_batch_size=batch_size,
             validation_freq=validation_freq)
     

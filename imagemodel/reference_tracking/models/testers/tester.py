@@ -5,7 +5,6 @@ from tensorflow.keras.callbacks import Callback
 from tensorflow.keras.models import Model
 from tensorflow.python.distribute.tpu_strategy import TPUStrategy
 
-from imagemodel.common.datasets.pipeline import Pipeline
 from imagemodel.common.models.common_compile_options import CompileOptions
 
 
@@ -14,16 +13,17 @@ class Tester:
             self,
             model: Model,
             compile_helper: CompileOptions,
-            test_pipeline: Pipeline,
+            test_dataset: tf.data.Dataset,
+            test_dataset_description: str,
             test_batch_size: int,
             strategy_optional: Optional[TPUStrategy] = None):
         self.model: Model = model
         self.compile_helper: CompileOptions = compile_helper
-        self.test_pipeline: Pipeline = test_pipeline
+        self.test_dataset: tf.data.Dataset = test_dataset
+        self.test_dataset_description: str = test_dataset_description
         self.test_batch_size: int = test_batch_size
         self.strategy_optional: Optional[TPUStrategy] = strategy_optional
         
-        self.test_dataset: tf.data.Dataset = self.test_pipeline.get_zipped_dataset()
         self.test_dataset = self.test_dataset.batch(self.test_batch_size, drop_remainder=True)
         self.test_dataset = self.test_dataset.prefetch(tf.data.experimental.AUTOTUNE)
         
