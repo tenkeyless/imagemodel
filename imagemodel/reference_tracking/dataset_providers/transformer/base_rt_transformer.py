@@ -45,7 +45,7 @@ class BaseRTTransformerT(RTTransformerT):
     >>> from imagemodel.reference_tracking.dataset_providers.cell_tracking_dataset.\
     ...     rt_cell_tracking_drafter import RTCellTrackingDrafterT
     >>> dt = RTCellTrackingDrafterT(folders, shuffle_for_trainer=True, shuffle=True, random_seed=42)
-    >>> from imagemodel.reference_tracking.dataset_providers.base_rt_transformer import BaseRTTransformerT
+    >>> from imagemodel.reference_tracking.dataset_providers.transformer.base_rt_transformer import BaseRTTransformerT
     >>> brt = BaseRTTransformerT(dt.out_dataset, (256, 256), 30)
     >>> brt.plot_out_dataset(10, "/reference_tracking_results/test3")
     >>> for d in brt.out_dataset.take(1):
@@ -316,7 +316,7 @@ class BaseRTTransformerP(RTTransformerP):
     ...     rt_cell_tracking_drafter import RTCellTrackingDrafterP
     >>> dt = RTCellTrackingDrafterP(folders, shuffle=False, random_seed=42)
     >>>
-    >>> from imagemodel.reference_tracking.dataset_providers.base_rt_transformer import BaseRTTransformerP
+    >>> from imagemodel.reference_tracking.dataset_providers.transformer.base_rt_transformer import BaseRTTransformerP
     >>> brt = BaseRTTransformerP(dt.out_dataset, (256, 256), 30)
     >>>
     >>> brt.plot_out_dataset(10, "/reference_tracking_results/test3")
