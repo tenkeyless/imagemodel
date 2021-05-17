@@ -41,6 +41,7 @@ class RTCellTrackingProviderP(RTProviderP):
         ref_image_folder: str = os.path.join(base_folder, "framed_image", "p1")
         ref_label_folder: str = os.path.join(base_folder, "framed_label", "p1")
         self.folders: Tuple[str, str, str] = (main_image_folder, ref_image_folder, ref_label_folder)
+        self.base_folder: str = base_folder
         self.shuffle: bool = shuffle
         self.random_seed: int = random_seed
         self.bin_size: int = bin_size
@@ -58,4 +59,5 @@ class RTCellTrackingProviderP(RTProviderP):
     
     @property
     def data_description(self):
-        return "Reference Tracking Predict provider for Cell Tracking Dataset, `BaseRTTransformerP`."
+        return "Reference Tracking Predict provider for Cell Tracking Dataset, `BaseRTTransformerP`. " \
+               "Base folder is {}.".format(self.base_folder)

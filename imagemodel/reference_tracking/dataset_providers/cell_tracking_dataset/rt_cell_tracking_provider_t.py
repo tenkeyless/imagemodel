@@ -53,6 +53,7 @@ class RTCellTrackingProviderT(RTProviderT):
             main_bw_label_folder,
             ref_bw_label_folder)
         
+        self.base_folder: str = base_folder
         self.shuffle_for_trainer: bool = shuffle_for_trainer
         self.shuffle: bool = shuffle
         self.random_seed: int = random_seed
@@ -78,4 +79,5 @@ class RTCellTrackingProviderT(RTProviderT):
     
     @property
     def data_description(self):
-        return "Reference Tracking Training, Tester provider for Cell Tracking Dataset, `BaseRTTransformerT`."
+        return "Reference Tracking Training, Tester provider for Cell Tracking Dataset, `BaseRTTransformerT`. " \
+               "Base folder is {}.".format(self.base_folder)
