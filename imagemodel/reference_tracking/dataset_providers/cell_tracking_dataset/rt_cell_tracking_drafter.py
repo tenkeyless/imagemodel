@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Optional, Tuple
 
 import tensorflow as tf
 
@@ -111,6 +111,7 @@ class RTCellTrackingDrafterP(RTDrafterP):
     >>> main_image_folder: str = os.path.join(base_folder, "framed_image", "zero")
     >>> ref_image_folder: str = os.path.join(base_folder, "framed_image", "p1")
     >>> ref_label_folder: str = os.path.join(base_folder, "framed_label", "p1")
+    >>> filename_folder: str = "/data/tracking_test2/framed_sample"
     >>> folders = (
     ...      main_image_folder,
     ...      ref_image_folder,
@@ -118,14 +119,14 @@ class RTCellTrackingDrafterP(RTDrafterP):
     ...
     >>> from imagemodel.reference_tracking.dataset_providers.cell_tracking_dataset.\
     ...     rt_cell_tracking_drafter import RTCellTrackingDrafterP
-    >>> dt = RTCellTrackingDrafterP(folders, False, 42)
+    >>> dt = RTCellTrackingDrafterP(filename_folder, folders, False, 42)
     >>> for d in dt.out_dataset.take(1):
     ...      print(d)
     ...
     """
     
-    def __init__(self, folders: Tuple[str, str, str], shuffle: bool, random_seed: int):
-        self.filename_base_folder = folders[0]
+    def __init__(self, filename_folder: Optional[str], folders: Tuple[str, str, str], shuffle: bool, random_seed: int):
+        self.filename_base_folder = filename_folder or folders[0]
         self.folders = folders
         self.shuffle = shuffle
         self.random_seed = random_seed

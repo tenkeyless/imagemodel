@@ -1,5 +1,5 @@
 import os
-from typing import Tuple
+from typing import Optional, Tuple
 
 import tensorflow as tf
 
@@ -32,6 +32,7 @@ class RTCellTrackingProviderP(RTProviderP):
     
     def __init__(
             self,
+            filename_folder: Optional[str],
             base_folder: str,
             bin_size: int,
             shuffle: bool = False,
@@ -40,6 +41,8 @@ class RTCellTrackingProviderP(RTProviderP):
         main_image_folder: str = os.path.join(base_folder, "framed_image", "zero")
         ref_image_folder: str = os.path.join(base_folder, "framed_image", "p1")
         ref_label_folder: str = os.path.join(base_folder, "framed_label", "p1")
+        
+        self.filename_folder: Optional[str] = filename_folder
         self.folders: Tuple[str, str, str] = (main_image_folder, ref_image_folder, ref_label_folder)
         self.base_folder: str = base_folder
         self.shuffle: bool = shuffle
@@ -48,7 +51,7 @@ class RTCellTrackingProviderP(RTProviderP):
         self.resize_to: Tuple[int, int] = resize_to
     
     def get_drafter(self, shuffle: bool, random_seed: int = 42) -> RTDrafterP:
-        return RTCellTrackingDrafterP(self.folders, shuffle=shuffle, random_seed=random_seed)
+        return RTCellTrackingDrafterP(self.filename_folder, self.folders, shuffle=shuffle, random_seed=random_seed)
     
     def get_transformer(self, dataset: tf.data.Dataset, resize_to: Tuple[int, int]) -> RTTransformerP:
         return BaseRTTransformerP(dataset, resize_to, self.bin_size)

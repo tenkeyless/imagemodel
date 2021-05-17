@@ -314,7 +314,7 @@ class BaseRTTransformerP(RTTransformerP):
     ...
     >>> from imagemodel.reference_tracking.dataset_providers.cell_tracking_dataset.\
     ...     rt_cell_tracking_drafter import RTCellTrackingDrafterP
-    >>> dt = RTCellTrackingDrafterP(folders, shuffle=False, random_seed=42)
+    >>> dt = RTCellTrackingDrafterP(None, folders, shuffle=True, random_seed=42)
     >>>
     >>> from imagemodel.reference_tracking.dataset_providers.transformer.base_rt_transformer import BaseRTTransformerP
     >>> brt = BaseRTTransformerP(dt.out_dataset, (256, 256), 30)
@@ -326,13 +326,19 @@ class BaseRTTransformerP(RTTransformerP):
     ...
     """
     
-    def __init__(self, in_dataset: tf.data.Dataset, resize_to: Tuple[int, int], bin_size: int):
+    def __init__(
+            self,
+            in_dataset: tf.data.Dataset,
+            resize_to: Tuple[int, int],
+            bin_size: int,
+            fill_with: Tuple[int, int, int] = (255, 255, 255)):
         self.__in_dataset: tf.data.Dataset = in_dataset
         self.__in_dataset_length: int = 4
         check_in_dataset(self.in_dataset, self.__in_dataset_length)
         
         self.__resize_to: Tuple[int, int] = resize_to
         self.__bin_size: int = bin_size
+        self.fill_with: Tuple[int, int, int] = fill_with
     
     @property
     def resize_to(self) -> Tuple[int, int]:
@@ -378,7 +384,7 @@ class BaseRTTransformerP(RTTransformerP):
             ref_img: tf.Tensor,
             ref_label: tf.Tensor,
             ref_label_color_map: Tuple[tf.Tensor, tf.Tensor]) -> \
-            Tuple[tf.Tensor, tf.Tensor, tf.Tensor, tf.Tensor, Tuple[tf.Tensor, tf.Tensor]]:
+            Tuple[tf.Tensor, tf.Tensor, tf.Tensor, tf.Tensor, tf.Tensor]:
         @tf.autograph.experimental.do_not_convert
         def tf_image_detach_with_id_color_probability_list(
                 color_img,
@@ -399,12 +405,25 @@ class BaseRTTransformerP(RTTransformerP):
             result = tf.squeeze(result)
             return result
         
+        def generate_filled_color_map(color_map):
+            @tf.autograph.experimental.do_not_convert
+            def _color_fill(_color, _color_index, fill_with: Tuple[int, int, int]):
+                fill_empty_with = tf.repeat([fill_with], repeats=tf.shape(_color_index)[-1], axis=0)
+                fill_empty_with = tf.cast(fill_empty_with, tf.float32)
+                filled_bin = tf.concat([_color, fill_empty_with], axis=0)
+                filled_bin = filled_bin[:tf.shape(_color_index)[-1], :]
+                result = tf.gather(filled_bin, tf.cast(_color_index, tf.int32), axis=0)
+                return result
+            
+            return _color_fill(color_map[1], color_map[0], self.fill_with)
+        
+        ref_label_color_map_filled = generate_filled_color_map(ref_label_color_map)
         return (
             filename,
             main_img,
             ref_img,
             __tf_input_ref_label_preprocessing_function(ref_label, ref_label_color_map, self.bin_size),
-            ref_label_color_map)
+            ref_label_color_map_filled)
     
     def __apply_filter(
             self,
@@ -412,8 +431,8 @@ class BaseRTTransformerP(RTTransformerP):
             main_img: tf.Tensor,
             ref_img: tf.Tensor,
             bin_ref_label: tf.Tensor,
-            ref_label_color_map: Tuple[tf.Tensor, tf.Tensor]) -> \
-            Tuple[tf.Tensor, tf.Tensor, tf.Tensor, tf.Tensor, Tuple[tf.Tensor, tf.Tensor]]:
+            ref_label_color_map: tf.Tensor) -> \
+            Tuple[tf.Tensor, tf.Tensor, tf.Tensor, tf.Tensor, tf.Tensor]:
         @tf.autograph.experimental.do_not_convert
         def __clahe(img: tf.Tensor) -> tf.Tensor:
             return tf_clahe.clahe(img, tile_grid_size=[8, 8], clip_limit=2.0)
@@ -435,8 +454,8 @@ class BaseRTTransformerP(RTTransformerP):
             main_img: tf.Tensor,
             ref_img: tf.Tensor,
             bin_ref_label: tf.Tensor,
-            ref_label_color_map: Tuple[tf.Tensor, tf.Tensor]) -> \
-            Tuple[tf.Tensor, tf.Tensor, tf.Tensor, tf.Tensor, Tuple[tf.Tensor, tf.Tensor]]:
+            ref_label_color_map: tf.Tensor) -> \
+            Tuple[tf.Tensor, tf.Tensor, tf.Tensor, tf.Tensor, tf.Tensor]:
         @tf.autograph.experimental.do_not_convert
         def __cast_norm(img: tf.Tensor) -> tf.Tensor:
             return tf.cast(img, tf.float32) / 255.0
@@ -454,8 +473,8 @@ class BaseRTTransformerP(RTTransformerP):
             main_img: tf.Tensor,
             ref_img: tf.Tensor,
             bin_ref_label: tf.Tensor,
-            ref_label_color_map: Tuple[tf.Tensor, tf.Tensor]) -> \
-            Tuple[Tuple[tf.Tensor, tf.Tensor, tf.Tensor], Tuple[tf.Tensor, Tuple[tf.Tensor, tf.Tensor]]]:
+            ref_label_color_map: tf.Tensor) -> \
+            Tuple[Tuple[tf.Tensor, tf.Tensor, tf.Tensor], Tuple[tf.Tensor, tf.Tensor]]:
         return (main_img, ref_img, bin_ref_label), (filename, ref_label_color_map)
     
     @property
@@ -510,21 +529,8 @@ class BaseRTTransformerP(RTTransformerP):
                 cv2.imwrite(ref_bin_fullpath, inputs[2][..., b:b + 1].numpy() * 255)
                 files.append(ref_bin_fullpath)
             
-            def generate_filled_color_map(_color_map):
-                @tf.autograph.experimental.do_not_convert
-                def _color_fill(_color, _color_index, fill_with: Tuple[int, int, int]):
-                    fill_empty_with = tf.repeat([fill_with], repeats=tf.shape(_color_index)[-1], axis=0)
-                    fill_empty_with = tf.cast(fill_empty_with, tf.float32)
-                    filled_bin = tf.concat([_color, fill_empty_with], axis=0)
-                    filled_bin = filled_bin[:tf.shape(_color_index)[-1], :]
-                    result = tf.gather(filled_bin, tf.cast(_color_index, tf.int32), axis=0)
-                    return result
-                
-                return _color_fill(_color_map[1], _color_map[0], (255, 255, 255))
-            
-            color_map2 = generate_filled_color_map(color_map)
             ref_arg_max_bin = tf.argmax(inputs[2], axis=-1)
-            ref_label = tf.gather(color_map2, ref_arg_max_bin, axis=0, batch_dims=1)
+            ref_label = tf.gather(color_map, ref_arg_max_bin, axis=0, batch_dims=1)
             ref_label_file_name = "predict_{}_ref_color_label_argmaxed.png".format(filename)
             ref_label_fullpath = os.path.join(_base_folder, ref_label_file_name)
             img = tf.image.encode_png(tf.cast(ref_label, tf.uint8))
