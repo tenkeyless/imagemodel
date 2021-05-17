@@ -55,3 +55,7 @@ class RTCellTrackingProviderP(RTProviderP):
     def get_drafted_transformer(self) -> RTTransformerP:
         drafter: RTDrafterP = self.get_drafter(shuffle=self.shuffle, random_seed=self.random_seed)
         return self.get_transformer(drafter.out_dataset, resize_to=self.resize_to)
+    
+    @property
+    def data_description(self):
+        return "Reference Tracking Predict provider for Cell Tracking Dataset, `BaseRTTransformerP`."

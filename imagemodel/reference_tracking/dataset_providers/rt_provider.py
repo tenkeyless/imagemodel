@@ -4,8 +4,12 @@ from imagemodel.common.dataset_providers.provider import ProviderP, ProviderT
 
 
 class RTProviderT(ProviderT, metaclass=ABCMeta):
-    pass
+    @property
+    def data_description(self):
+        return "Reference Tracking Training, Tester provider"
 
 
 class RTProviderP(ProviderP, metaclass=ABCMeta):
-    pass
+    @property
+    def data_description(self):
+        return "Reference Tracking Predict provider"

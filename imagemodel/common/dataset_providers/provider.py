@@ -19,6 +19,10 @@ class Provider(metaclass=ABCMeta):
     
     def get_drafted_transformer(self) -> Transformer:
         pass
+    
+    @property
+    def data_description(self):
+        return "Data Provider"
 
 
 class ProviderT(Provider, metaclass=ABCMeta):

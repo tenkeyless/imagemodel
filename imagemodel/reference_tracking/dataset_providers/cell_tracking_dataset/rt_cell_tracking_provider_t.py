@@ -75,3 +75,7 @@ class RTCellTrackingProviderT(RTProviderT):
                 shuffle=self.shuffle,
                 random_seed=self.random_seed)
         return self.get_transformer(drafter.out_dataset, resize_to=self.resize_to)
+    
+    @property
+    def data_description(self):
+        return "Reference Tracking Training, Tester provider for Cell Tracking Dataset, `BaseRTTransformerT`."
