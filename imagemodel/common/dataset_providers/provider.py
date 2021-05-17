@@ -1,5 +1,5 @@
 from abc import ABCMeta
-from typing import Tuple
+from typing import Optional, Tuple
 
 import tensorflow as tf
 
@@ -26,10 +26,10 @@ class Provider(metaclass=ABCMeta):
 
 
 class ProviderT(Provider, metaclass=ABCMeta):
-    def get_drafter(self, shuffle_for_trainer: bool, shuffle: bool, random_seed: int = 42) -> DrafterT:
+    def get_drafter(self, shuffle_for_trainer: bool, shuffle: bool, random_seed: Optional[int] = 42) -> DrafterT:
         pass
 
 
 class ProviderP(Provider, metaclass=ABCMeta):
-    def get_drafter(self, shuffle: bool, random_seed: int = 42) -> DrafterP:
+    def get_drafter(self, shuffle: bool, random_seed: Optional[int] = 42) -> DrafterP:
         pass

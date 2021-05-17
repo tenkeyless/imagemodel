@@ -1,5 +1,5 @@
 import os
-from typing import Tuple
+from typing import Optional, Tuple
 
 import tensorflow as tf
 
@@ -21,14 +21,14 @@ class RTCellTrackingProviderT(RTProviderT):
     ...     base_folder="/data/tracking_training",
     ...     shuffle_for_trainer=True,
     ...     shuffle=True,
-    ...     random_seed=42,
+    ...     random_seed=None,
     ...     bin_size=30,
     ...     resize_to=(256,256))
     >>> provider.get_output_dataset()
     # <ParallelMapDataset
     #     shapes: (((256, 256, 1), (256, 256, 1), (256, 256, 30)), ((256, 256, 1), (256, 256, 1), (256, 256, 30, 1))),
     #     types: ((tf.float32, tf.float32, tf.float32), (tf.float32, tf.float32, tf.float32))>
-    >>> provider.plot_output_dataset(sample_num=4, target_base_folder="/reference_tracking_results/test5")
+    >>> provider.plot_output_dataset(sample_num=8, target_base_folder="/reference_tracking_results/test5")
     """
     
     def __init__(
@@ -36,7 +36,7 @@ class RTCellTrackingProviderT(RTProviderT):
             base_folder: str,
             shuffle_for_trainer: bool,
             shuffle: bool,
-            random_seed: int,
+            random_seed: Optional[int],
             bin_size: int,
             resize_to: Tuple[int, int] = (256, 256)):
         main_image_folder: str = os.path.join(base_folder, "framed_image", "zero")
@@ -56,11 +56,11 @@ class RTCellTrackingProviderT(RTProviderT):
         self.base_folder: str = base_folder
         self.shuffle_for_trainer: bool = shuffle_for_trainer
         self.shuffle: bool = shuffle
-        self.random_seed: int = random_seed
+        self.random_seed: Optional[int] = random_seed
         self.bin_size: int = bin_size
         self.resize_to: Tuple[int, int] = resize_to
     
-    def get_drafter(self, shuffle_for_trainer: bool, shuffle: bool, random_seed: int = 42) -> RTDrafterT:
+    def get_drafter(self, shuffle_for_trainer: bool, shuffle: bool, random_seed: Optional[int] = 42) -> RTDrafterT:
         return RTCellTrackingDrafterT(
                 self.folders,
                 shuffle_for_trainer=shuffle_for_trainer,

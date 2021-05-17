@@ -40,12 +40,12 @@ class RTCellTrackingDrafterT(RTDrafterT):
             folders: Tuple[str, str, str, str, str, str],
             shuffle_for_trainer: bool,
             shuffle: bool,
-            random_seed: int):
+            random_seed: Optional[int]):
         self.filename_base_folder: str = folders[0]
         self.folders: Tuple[str, str, str, str, str, str] = folders
         self.shuffle_for_trainer: bool = shuffle_for_trainer
         self.shuffle: bool = shuffle
-        self.random_seed: int = random_seed
+        self.random_seed: Optional[int] = random_seed
     
     def get_filename_dataset(self) -> tf.data.Dataset:
         def get_filename_from_fullpath(name):
@@ -125,7 +125,12 @@ class RTCellTrackingDrafterP(RTDrafterP):
     ...
     """
     
-    def __init__(self, filename_folder: Optional[str], folders: Tuple[str, str, str], shuffle: bool, random_seed: int):
+    def __init__(
+            self,
+            filename_folder: Optional[str],
+            folders: Tuple[str, str, str],
+            shuffle: bool,
+            random_seed: Optional[int]):
         self.filename_base_folder = filename_folder or folders[0]
         self.folders = folders
         self.shuffle = shuffle

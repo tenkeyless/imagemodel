@@ -36,7 +36,7 @@ class RTCellTrackingProviderP(RTProviderP):
             base_folder: str,
             bin_size: int,
             shuffle: bool = False,
-            random_seed: int = 42,
+            random_seed: Optional[int] = 42,
             resize_to: Tuple[int, int] = (256, 256)):
         main_image_folder: str = os.path.join(base_folder, "framed_image", "zero")
         ref_image_folder: str = os.path.join(base_folder, "framed_image", "p1")
@@ -46,7 +46,7 @@ class RTCellTrackingProviderP(RTProviderP):
         self.folders: Tuple[str, str, str] = (main_image_folder, ref_image_folder, ref_label_folder)
         self.base_folder: str = base_folder
         self.shuffle: bool = shuffle
-        self.random_seed: int = random_seed
+        self.random_seed: Optional[int] = random_seed
         self.bin_size: int = bin_size
         self.resize_to: Tuple[int, int] = resize_to
     
