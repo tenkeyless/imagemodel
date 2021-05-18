@@ -92,8 +92,10 @@ class RTCellTrackingDrafterT(RTDrafterT):
     @property
     def out_dataset(self) -> tf.data.Dataset:
         filename_dataset = self.get_filename_dataset()
+        # TODO: Resolves an issue where memory usage increases without limit when using shuffle.
         if self.shuffle_for_trainer:
-            filename_dataset = filename_dataset.shuffle(len(filename_dataset))
+            # filename_dataset = filename_dataset.shuffle(len(filename_dataset))
+            filename_dataset = filename_dataset.shuffle(512)
         file_folder_dataset = filename_dataset.map(
                 self.__to_file_folder_dataset,
                 num_parallel_calls=tf.data.experimental.AUTOTUNE)
