@@ -157,7 +157,7 @@ if __name__ == "__main__":
             feeder,
             regularizer_func=regularizer_func,
             preprocessor_func=preprocessor_func)
-    rt_predict_dataset: tf.data.Dataset = rt_predict_pipeline.get_zipped_dataset()
+    rt_predict_dataset: tf.data.Dataset = rt_predict_pipeline.get_input_zipped_dataset()
     rt_predict_dataset_description: str = rt_predict_pipeline.data_description
     rt_predict_filename_dataset: Optional[tf.data.Dataset] = rt_predict_pipeline.feeder.filename_optional
     
