@@ -1,12 +1,14 @@
 from argparse import ArgumentParser, RawTextHelpFormatter
 from typing import Optional
 
+import tensorflow as tf
 from tensorflow.keras import losses, metrics, optimizers
 
 import _path  # noqa
 from imagemodel.binary_segmentations.configs.datasets import Datasets
 from imagemodel.binary_segmentations.models.unet import UNetModelManager
 from imagemodel.binary_segmentations.run.common import get_run_id
+from imagemodel.common.datasets.pipeline import Pipeline
 from imagemodel.common.models.common_compile_options import CompileOptions
 from imagemodel.common.reporter import TrainerReporter
 from imagemodel.common.setup import TrainingExperimentSetup
@@ -79,20 +81,27 @@ if __name__ == "__main__":
             optimizer=optimizers.Adam(lr=1e-4),
             loss_functions=[losses.BinaryCrossentropy()],
             metrics=[metrics.BinaryAccuracy()])
-    bs_training_pipeline = Datasets(training_pipeline).get_pipeline(resize_to=(256, 256))
-    bs_validation_pipeline = optional_map(
+    
+    bs_training_pipeline: Pipeline = Datasets(training_pipeline).get_pipeline(resize_to=(256, 256))
+    bs_training_dataset: tf.data.Dataset = bs_training_pipeline.get_zipped_dataset()
+    bs_training_dataset_description: str = bs_training_pipeline.data_description
+    bs_validation_pipeline: Optional[Pipeline] = optional_map(
             validation_pipeline,
             lambda el: Datasets(el).get_pipeline(resize_to=(256, 256)))
+    bs_validation_dataset: Optional[tf.data.Dataset] = optional_map(
+            bs_validation_pipeline,
+            lambda el: el.get_zipped_dataset())
+    bs_validation_description: Optional[str] = optional_map(bs_validation_pipeline, lambda el: el.data_description)
     
     # Trainer Setup
     trainer = Trainer(
             model_manager=manager,
             compile_helper=helper,
-            training_pipeline=bs_training_pipeline,
+            training_dataset=bs_training_dataset,
+            training_dataset_description=bs_training_dataset_description,
             training_batch_size=batch_size,
-            training_shuffle_in_buffer=False,
-            training_shuffle_buffer_size=None,
-            validation_pipeline=bs_validation_pipeline,
+            validation_dataset=bs_validation_dataset,
+            validation_dataset_description=bs_validation_description,
             validation_batch_size=batch_size,
             validation_freq=validation_freq)
     

@@ -7,15 +7,16 @@ from tensorflow.python.distribute.tpu_strategy import TPUStrategy
 
 import _path  # noqa
 from imagemodel.binary_segmentations.models.unet_level import UNetLevelModelManager
-from imagemodel.common.datasets.pipeline import Pipeline
 from imagemodel.common.models.common_compile_options import CompileOptions
 from imagemodel.common.reporter import TrainerReporter
 from imagemodel.common.setup import TrainingExperimentSetup
 from imagemodel.common.trainer import Trainer
 from imagemodel.common.utils.common_tpu import create_tpu, delete_tpu, tpu_initialize
 from imagemodel.common.utils.optional import optional_map
-from imagemodel.reference_tracking.configs.datasets import Datasets
-from imagemodel.reference_tracking.models.ref_local_tracking_model_031_mh import RefLocalTrackingModel031MHManager
+from imagemodel.reference_tracking.dataset_providers.cell_tracking_dataset.rt_cell_tracking_provider_t import \
+    RTCellTrackingProviderT
+from imagemodel.reference_tracking.dataset_providers.rt_provider import RTProviderT
+from imagemodel.reference_tracking.models.ref_local_tracking_model_031 import RefLocalTrackingModel031Manager
 
 # noinspection DuplicatedCode
 if __name__ == "__main__":
@@ -34,14 +35,14 @@ if __name__ == "__main__":
     ...     -v /data/tensorflow_datasets:/tensorflow_datasets \
     ...     --workdir="/imagemodel" \
     ...     imagemodel/tkl:1.2
-    >>> python imagemodel/reference_tracking/models/trainers/ref_local_tracking_model_031_mh_trainer.py \
-    ...     --model_name ref_local_tracking_model_031_mh \
+    >>> python imagemodel/reference_tracking/models/trainers/ref_local_tracking_model_031_provider_trainer.py \
+    ...     --model_name ref_local_tracking_model_031 \
     ...     --result_base_folder /reference_tracking_results \
     ...     --training_epochs 100 \
     ...     --validation_freq 1 \
-    ...     --training_pipeline rt_cell_tracking_training_1 \
-    ...     --validation_pipeline rt_cell_tracking_validation_1 \
-    ...     --run_id reference_tracking__20210514_025537 \
+    ...     --training_base_folder /data/tracking_training \
+    ...     --validation_base_folder /data/tracking_validation \
+    ...     --run_id reference_tracking__20210510_215226 \
     ...     --without_early_stopping \
     ...     --batch_size 2
     
@@ -58,15 +59,14 @@ if __name__ == "__main__":
     ...     -v /data/tensorflow_datasets:/tensorflow_datasets \
     ...     --workdir="/imagemodel" \
     ...     imagemodel/tkl:1.2
-    >>> python imagemodel/reference_tracking/models/trainers/ref_local_tracking_model_031_mh_trainer.py \
-    ...     --model_name ref_local_tracking_model_031_mh \
-    ...     --head_num 4 \
+    >>> python imagemodel/reference_tracking/models/trainers/ref_local_tracking_model_031_provider_trainer.py \
+    ...     --model_name ref_local_tracking_model_031 \
     ...     --result_base_folder /reference_tracking_results \
     ...     --training_epochs 100 \
     ...     --validation_freq 1 \
-    ...     --training_pipeline rt_cell_tracking_training_1 \
-    ...     --validation_pipeline rt_cell_tracking_validation_1 \
-    ...     --run_id reference_tracking__20210514_025537 \
+    ...     --training_base_folder /data/tracking_training \
+    ...     --validation_base_folder /data/tracking_validation \
+    ...     --run_id reference_tracking__20210517_163254 \
     ...     --without_early_stopping \
     ...     --batch_size 2
     
@@ -80,16 +80,15 @@ if __name__ == "__main__":
     ...     -v ~/.local:/.local \
     ...     -v $(pwd):/imagemodel \
     ...     --workdir="/imagemodel" \
-    ...     imagemodel_tpu/tkl:1.0
-    >>> python imagemodel/reference_tracking/models/trainers/ref_local_tracking_model_031_mh_trainer.py \
-    ...     --model_name ref_local_tracking_model_031_mh \
-    ...     --head_num 4 \
+    ...     imagemodel_tpu/tkl:1.4
+    >>> python imagemodel/reference_tracking/models/trainers/ref_local_tracking_model_031_provider_trainer.py \
+    ...     --model_name ref_local_tracking_model_031 \
     ...     --result_base_folder gs://cell_dataset \
     ...     --training_epochs 100 \
     ...     --validation_freq 1 \
-    ...     --training_pipeline rt_gs_cell_tracking_training_1 \
-    ...     --validation_pipeline rt_gs_cell_tracking_validation_1 \
-    ...     --run_id reference_tracking__20210514_094212 \
+    ...     --training_base_folder gs://cell_dataset/dataset/tracking_training \
+    ...     --validation_base_folder gs://cell_dataset/dataset/tracking_validation \
+    ...     --run_id reference_tracking__20210510_215226 \
     ...     --without_early_stopping \
     ...     --batch_size 8 \
     ...     --ctpu_zone us-central1-b \
@@ -102,7 +101,6 @@ if __name__ == "__main__":
     # model related
     parser.add_argument("--model_name", type=str, required=True)
     parser.add_argument("--input_color_image", action="store_true")
-    parser.add_argument("--head_num", type=int)
     # training related
     parser.add_argument("--training_epochs", type=int)
     parser.add_argument("--validation_freq", type=int)
@@ -110,8 +108,8 @@ if __name__ == "__main__":
     parser.add_argument("--without_early_stopping", action="store_true")
     parser.add_argument("--result_base_folder", type=str, required=True)
     # dataset related
-    parser.add_argument("--training_pipeline", type=str, required=True)
-    parser.add_argument("--validation_pipeline", type=str)
+    parser.add_argument("--training_base_folder", type=str, required=True)
+    parser.add_argument("--validation_base_folder", type=str)
     parser.add_argument("--batch_size", type=int)
     # tpu related
     parser.add_argument("--ctpu_zone", type=str, help="VM, TPU zone. ex) 'us-central1-b'")
@@ -121,7 +119,6 @@ if __name__ == "__main__":
     # model related
     model_name: str = args.model_name
     input_color_image: bool = args.input_color_image
-    head_num: int = args.head_num
     # training related
     training_epochs: int = args.training_epochs or 200
     validation_freq: int = args.validation_freq or 1
@@ -129,8 +126,8 @@ if __name__ == "__main__":
     without_early_stopping: bool = args.without_early_stopping
     result_base_folder: str = args.result_base_folder
     # dataset related
-    training_pipeline: str = args.training_pipeline
-    validation_pipeline: Optional[str] = args.validation_pipeline
+    training_base_folder: str = args.training_base_folder
+    validation_base_folder: Optional[str] = args.validation_base_folder
     batch_size: int = args.batch_size or 4
     # tpu related
     ctpu_zone: str = args.ctpu_zone or "us-central1-b"
@@ -160,14 +157,13 @@ if __name__ == "__main__":
         u_net_model = UNetLevelModelManager.unet_level(input_shape=input_shape)
         # u_net_model2 = tf.keras.models.clone_model(u_net_model)
         # u_net_model2.set_weights(u_net_model.get_weights())
-    manager = RefLocalTrackingModel031MHManager(
+    manager = RefLocalTrackingModel031Manager(
             unet_l4_model_main=u_net_model,
             unet_l4_model_ref=u_net_model,
             bin_num=30,
             input_main_image_shape=(256, 256, 1),
             input_ref_image_shape=(256, 256, 1),
-            input_ref_bin_label_shape=(256, 256, 30),
-            head_num=head_num)
+            input_ref_bin_label_shape=(256, 256, 30))
     # Output - [Main BW Mask, Ref BW Mask, Main Color Bin Label]
     if tpu_name_optional:
         with strategy_optional.scope():
@@ -188,16 +184,28 @@ if __name__ == "__main__":
                 metrics=[[metrics.BinaryAccuracy()], [metrics.BinaryAccuracy()], [metrics.CategoricalAccuracy()]])
     
     # Dataset Setup
-    rt_training_pipeline: Pipeline = Datasets(training_pipeline).get_pipeline(resize_to=(256, 256))
-    rt_training_dataset: tf.data.Dataset = rt_training_pipeline.get_zipped_dataset()
-    rt_training_dataset_description: str = rt_training_pipeline.data_description
-    rt_validation_pipeline: Optional[Pipeline] = optional_map(
-            validation_pipeline,
-            lambda el: Datasets(el).get_pipeline(resize_to=(256, 256)))
+    rt_training_provider: RTProviderT = RTCellTrackingProviderT(
+            base_folder=training_base_folder,
+            shuffle_for_trainer=True,
+            shuffle=True,
+            random_seed=42,
+            bin_size=30,
+            resize_to=(256, 256))
+    rt_training_dataset: tf.data.Dataset = rt_training_provider.get_output_dataset()
+    rt_training_dataset_description: str = rt_training_provider.data_description
+    rt_validation_provider_optional: Optional[RTProviderT] = RTCellTrackingProviderT(
+            base_folder=validation_base_folder,
+            shuffle_for_trainer=False,
+            shuffle=False,
+            random_seed=42,
+            bin_size=30,
+            resize_to=(256, 256)) if validation_base_folder else None
     rt_validation_dataset: Optional[tf.data.Dataset] = optional_map(
-            rt_validation_pipeline,
-            lambda el: el.get_zipped_dataset())
-    rt_validation_description: Optional[str] = optional_map(rt_validation_pipeline, lambda el: el.data_description)
+            rt_validation_provider_optional,
+            lambda el: el.get_output_dataset())
+    rt_validation_description: Optional[str] = optional_map(
+            rt_validation_provider_optional,
+            lambda el: el.data_description)
     
     # Trainer Setup
     trainer = Trainer(

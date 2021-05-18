@@ -1,23 +1,19 @@
 from argparse import ArgumentParser, RawTextHelpFormatter
-from typing import Callable, Optional, Tuple
+from typing import Optional, Tuple
 
 import tensorflow as tf
 from tensorflow.keras.models import Model
 from tensorflow.python.distribute.tpu_strategy import TPUStrategy
 
 import _path  # noqa
-from imagemodel.common.datasets.pipeline import Pipeline
 from imagemodel.common.reporter import PredictorReporter
 from imagemodel.common.setup import PredictExperimentSetup, predict_experiment_id
 from imagemodel.common.utils.common_tpu import create_tpu, delete_tpu, tpu_initialize
 from imagemodel.common.utils.gpu_check import check_first_gpu
-from imagemodel.reference_tracking.configs.datasets import Datasets
-from imagemodel.reference_tracking.datasets.cell_tracking.preprocessor import RTCellTrackingPredictPreprocessor
-from imagemodel.reference_tracking.datasets.pipeline import RTPipeline
-from imagemodel.reference_tracking.datasets.rt_augmenter import RTAugmenter
-from imagemodel.reference_tracking.datasets.rt_preprocessor import RTPreprocessor
-from imagemodel.reference_tracking.datasets.rt_regularizer import BaseRTRegularizer, RTRegularizer
-from imagemodel.reference_tracking.models.testers.rt_predictor import RTPredictor
+from imagemodel.reference_tracking.dataset_providers.cell_tracking_dataset.rt_cell_tracking_provider_p import \
+    RTCellTrackingProviderP
+from imagemodel.reference_tracking.dataset_providers.rt_provider import RTProviderP
+from imagemodel.reference_tracking.models.testers.rt_provider_predictor import RTProviderPredictor
 
 check_first_gpu()
 
@@ -38,7 +34,7 @@ if __name__ == "__main__":
     ...     -v /data/tensorflow_datasets:/tensorflow_datasets \
     ...     --workdir="/imagemodel" \
     ...     imagemodel/tkl:1.2
-    >>> python imagemodel/reference_tracking/models/testers/predict.py \
+    >>> python imagemodel/reference_tracking/models/testers/provider_predict.py \
     ...     --model_name ref_local_tracking_model_031_mh \
     ...     --model_weight_path saved/\
     ... training__model_ref_local_tracking_model_031_mh__run_reference_tracking__20210511_063754.epoch_23 \
@@ -60,13 +56,14 @@ if __name__ == "__main__":
     ...     -v /data/tensorflow_datasets:/tensorflow_datasets \
     ...     --workdir="/imagemodel" \
     ...     imagemodel/tkl:1.2
-    >>> python imagemodel/reference_tracking/models/testers/predict.py \
-    ...     --model_name ref_local_tracking_model_031_mh \
-    ...     --model_weight_path saved/\
-    ... training__model_ref_local_tracking_model_031_mh__run_reference_tracking__20210511_063754.epoch_23 \
-    ...     --run_id reference_tracking__20210513_053050 \
+    >>> python imagemodel/reference_tracking/models/testers/provider_predict.py \
+    ...     --model_name ref_local_tracking_model_031 \
+    ...     --model_weight_path /reference_tracking_results/save/weights/\
+    ... training__model_ref_local_tracking_model_031__run_reference_tracking__20210517_163254.epoch_02 \
+    ...     --run_id reference_tracking__20210517_170230 \
     ...     --result_base_folder /reference_tracking_results \
-    ...     --predict_pipeline rt_cell_sample_2_test_1 \
+    ...     --predict_base_folder /data/tracking_test2 \
+    ...     --predict_filename_folder /data/tracking_test2/framed_sample \
     ...     --batch_size 2
 
     # With TPU (X)
@@ -104,7 +101,8 @@ if __name__ == "__main__":
     parser.add_argument("--run_id", type=str)
     parser.add_argument("--result_base_folder", type=str, required=True)
     # dataset related
-    parser.add_argument("--predict_pipeline", type=str, required=True)
+    parser.add_argument("--predict_filename_folder", type=str)
+    parser.add_argument("--predict_base_folder", type=str, required=True)
     parser.add_argument("--batch_size", type=int)
     # tpu related
     parser.add_argument("--ctpu_zone", type=str, help="VM, TPU zone. ex) 'us-central1-b'")
@@ -119,8 +117,9 @@ if __name__ == "__main__":
     # predict related
     run_id: Optional[str] = args.run_id
     result_base_folder: str = args.result_base_folder
+    predict_filename_folder: Optional[str] = args.predict_filename_folder
     # dataset related
-    predict_pipeline: str = args.predict_pipeline
+    predict_base_folder: str = args.predict_base_folder
     batch_size: int = args.batch_size or 4
     # tpu related
     ctpu_zone: str = args.ctpu_zone or "us-central1-b"
@@ -148,18 +147,15 @@ if __name__ == "__main__":
         model: Model = tf.keras.models.load_model(model_weight_path)
     
     # Dataset Setup
-    feeder = Datasets(predict_pipeline).get_feeder()
-    regularizer_func: Callable[[RTAugmenter], RTRegularizer] = \
-        lambda el_bs_augmenter: BaseRTRegularizer(el_bs_augmenter, (256, 256))
-    preprocessor_func: Callable[[RTRegularizer], RTPreprocessor] = \
-        lambda el_rt_augmenter: RTCellTrackingPredictPreprocessor(el_rt_augmenter, 30, fill_with=(255, 255, 255))
-    rt_predict_pipeline: Pipeline = RTPipeline(
-            feeder,
-            regularizer_func=regularizer_func,
-            preprocessor_func=preprocessor_func)
-    rt_predict_dataset: tf.data.Dataset = rt_predict_pipeline.get_input_zipped_dataset()
-    rt_predict_dataset_description: str = rt_predict_pipeline.data_description
-    rt_predict_filename_dataset: Optional[tf.data.Dataset] = rt_predict_pipeline.feeder.filename_optional
+    rt_predict_provider: RTProviderP = RTCellTrackingProviderP(
+            filename_folder=predict_filename_folder,
+            base_folder=predict_base_folder,
+            shuffle=False,
+            random_seed=42,
+            bin_size=30,
+            resize_to=(256, 256))
+    rt_predict_dataset: tf.data.Dataset = rt_predict_provider.get_output_dataset()
+    rt_predict_dataset_description: str = rt_predict_provider.data_description
     
     
     def combine_folder_file(a, b):
@@ -177,11 +173,10 @@ if __name__ == "__main__":
     
     
     # Trainer Setup
-    predictor = RTPredictor(
+    predictor = RTProviderPredictor(
             model=model,
             predict_dataset=rt_predict_dataset,
             predict_dataset_description=rt_predict_dataset_description,
-            predict_filename_dataset=rt_predict_filename_dataset,
             predict_batch_size=batch_size,
             strategy_optional=strategy_optional,
             post_processing=post_processing)
