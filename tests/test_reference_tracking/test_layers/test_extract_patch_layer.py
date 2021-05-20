@@ -1,7 +1,7 @@
 import numpy as np
 import tensorflow as tf
 
-from imagemodel.reference_tracking.layers.extract_patch_layer import ExtractPatchLayer
+from imagemodel.experimental.reference_tracking.layers.extract_patch_layer import ExtractPatchLayer
 
 
 class TestExtractPatchLayer(tf.test.TestCase):

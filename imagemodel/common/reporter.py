@@ -15,7 +15,7 @@ from imagemodel.common.setup import (
 )
 from imagemodel.common.trainer import Trainer
 from imagemodel.common.utils.gc_storage import upload_blob
-from imagemodel.reference_tracking.models.testers.tester import Tester
+from imagemodel.experimental.reference_tracking.models.testers.tester import Tester
 
 SE = TypeVar('SE', bound=ExperimentSetup)
 
