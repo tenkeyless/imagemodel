@@ -59,13 +59,14 @@ class RefLocal7MH(Layer):
                      self.k_size * self.k_size,
                      self.input_intermediate_dim // self.head_num))
             self.ref_extracted_reshape_layers.append(ref_extracted_reshape_layer)
-        
-        self.aggregation_conv_layer = Conv2D(
-                filters=(self.k_size * self.k_size) + 1,
-                kernel_size=1,
-                padding="same",
-                use_bias=False,
-                kernel_initializer="he_normal")
+
+        if self.aggregation_mode == "conv":
+            self.aggregation_conv_layer = Conv2D(
+                    filters=(self.k_size * self.k_size) + 1,
+                    kernel_size=1,
+                    padding="same",
+                    use_bias=False,
+                    kernel_initializer="he_normal")
     
     def get_config(self):
         config = super().get_config()
