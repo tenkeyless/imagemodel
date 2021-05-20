@@ -4,15 +4,11 @@ from typing import List, Tuple
 import cv2
 import tensorflow as tf
 import tf_clahe
-from image_keras.tf.utils.images import (
-    tf_change_order,
-    tf_generate_random_color_map,
-    tf_image_detach_with_id_color_list
-)
+from image_keras.tf.utils.images import tf_change_order, tf_image_detach_with_id_color_list
 from tensorflow.python.ops.image_ops_impl import ResizeMethod
 
 from imagemodel.common.reporter import Reporter
-from imagemodel.common.utils.tf_images import tf_shrink3D
+from imagemodel.common.utils.tf_images import tf_generate_color_map, tf_shrink3D
 from imagemodel.experimental.reference_tracking.dataset_providers.rt_transformer import RTTransformerP, RTTransformerT
 
 
@@ -20,6 +16,87 @@ def check_in_dataset(dataset: tf.data.Dataset, target_dataset_length: int):
     dataset_length = len(dataset.element_spec)
     if dataset_length != target_dataset_length:
         return False
+
+
+def tf_set_random_bucket(index, bin_size: int, shuffle_exclude_first: int = 0):
+    """
+    Shuffle tensor in list.
+
+    Parameters
+    ----------
+    index : `Tensor`
+        Tensor will be shuffled.
+    bin_size : int
+        Result bin number
+    shuffle_exclude_first : int, optional
+        First `shuffle_exclude_first` elements will be excluded from shuffle, by default 0
+    seed : int, optional
+        Random seed value, by default 42
+
+    Returns
+    -------
+    `Tensor`
+        Shuffled array.
+
+    Examples
+    --------
+    >>> ordered_index = tf.range(10, dtype=tf.int32)
+    >>> tf_images.tf_set_random_bucket(
+    ...     ordered_index, bin_size=5, shuffle_exclude_first=2
+    ... )
+    tf.Tensor([0 1 3 4 2], shape=(5,), dtype=int32)
+    """
+    bin_bucket = tf.range(start=shuffle_exclude_first, limit=bin_size, dtype=index.dtype)
+    shuffled_bin_bucket = tf.random.shuffle(bin_bucket)
+    return tf.concat(
+            [
+                index[:shuffle_exclude_first],
+                shuffled_bin_bucket[: bin_size - shuffle_exclude_first],
+            ],
+            axis=-1)
+
+
+def tf_generate_random_color_map(
+        img, shuffle_exclude_first: int, bin_size: int
+):
+    """
+    Get colors and random color index in image.
+
+    Parameters
+    ----------
+    img : `Tensor`
+        Tensor to generate color map.
+    shuffle_exclude_first : int
+        Random index calculate after this value.
+    bin_size : int
+        Result bin number
+
+    Returns
+    -------
+    Tuple of `Tensor`
+        (Tensor of map random index, Tensor of colors)
+
+    Examples
+    --------
+    >>> test_file_name: str = "sample.png"
+    >>> test_image_fullpath: str = os.path.join(
+    ...     self.test_path, self.test_resource_folder_name, test_file_name
+    ... )
+    >>> tf_image = tf_images.decode_png(test_image_fullpath, 3)
+    >>> #.
+    >>> tf_images.tf_generate_random_color_map(
+    ...     tf_image, shuffle_exclude_first=1, bin_size=5, seed=42
+    ... )
+    (<tf.Tensor: shape=(5,), dtype=float32, numpy=array([0., 4., 1., 2., 3.], dtype=float32)>, <tf.Tensor: shape=(5, 3), dtype=float32, numpy=
+    array([[  0.,   0.,   0.],
+        [245., 245., 245.],
+        [255., 145.,  77.],
+        [ 71.,  71.,  71.],
+        [ 72.,  72.,  72.]], dtype=float32)>)
+    """
+    img_color_index, img_color = tf_generate_color_map(img)
+    img_color_index = tf_set_random_bucket(img_color_index, bin_size, shuffle_exclude_first)
+    return img_color_index, img_color
 
 
 class BaseRTTransformerT(RTTransformerT):
