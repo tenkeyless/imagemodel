@@ -15,7 +15,8 @@ from imagemodel.common.trainer import Trainer
 from imagemodel.common.utils.common_tpu import create_tpu, delete_tpu, tpu_initialize
 from imagemodel.common.utils.optional import optional_map
 from imagemodel.experimental.reference_tracking.configs.datasets import Datasets
-from imagemodel.experimental.reference_tracking.models.ref_local_tracking_model_031_mh import RefLocalTrackingModel031MHManager
+from imagemodel.experimental.reference_tracking.models.ref_local_tracking_model_031_mh import \
+    RefLocalTrackingModel031MHManager
 
 # noinspection DuplicatedCode
 if __name__ == "__main__":
@@ -34,7 +35,7 @@ if __name__ == "__main__":
     ...     -v /data/tensorflow_datasets:/tensorflow_datasets \
     ...     --workdir="/imagemodel" \
     ...     imagemodel/tkl:1.2
-    >>> python imagemodel/reference_tracking/models/trainers/ref_local_tracking_model_031_mh_trainer.py \
+    >>> python imagemodel/experimental/reference_tracking/models/trainers/ref_local_tracking_model_031_mh_trainer.py \
     ...     --model_name ref_local_tracking_model_031_mh \
     ...     --result_base_folder /reference_tracking_results \
     ...     --training_epochs 100 \
@@ -58,7 +59,7 @@ if __name__ == "__main__":
     ...     -v /data/tensorflow_datasets:/tensorflow_datasets \
     ...     --workdir="/imagemodel" \
     ...     imagemodel/tkl:1.2
-    >>> python imagemodel/reference_tracking/models/trainers/ref_local_tracking_model_031_mh_trainer.py \
+    >>> python imagemodel/experimental/reference_tracking/models/trainers/ref_local_tracking_model_031_mh_trainer.py \
     ...     --model_name ref_local_tracking_model_031_mh \
     ...     --head_num 4 \
     ...     --result_base_folder /reference_tracking_results \
@@ -81,7 +82,7 @@ if __name__ == "__main__":
     ...     -v $(pwd):/imagemodel \
     ...     --workdir="/imagemodel" \
     ...     imagemodel_tpu/tkl:1.0
-    >>> python imagemodel/reference_tracking/models/trainers/ref_local_tracking_model_031_mh_trainer.py \
+    >>> python imagemodel/experimental/reference_tracking/models/trainers/ref_local_tracking_model_031_mh_trainer.py \
     ...     --model_name ref_local_tracking_model_031_mh \
     ...     --head_num 4 \
     ...     --result_base_folder gs://cell_dataset \
