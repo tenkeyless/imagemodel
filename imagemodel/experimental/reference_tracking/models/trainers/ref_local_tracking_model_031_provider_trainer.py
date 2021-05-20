@@ -13,10 +13,11 @@ from imagemodel.common.setup import TrainingExperimentSetup
 from imagemodel.common.trainer import Trainer
 from imagemodel.common.utils.common_tpu import create_tpu, delete_tpu, tpu_initialize
 from imagemodel.common.utils.optional import optional_map
-from imagemodel.experimental.reference_tracking.dataset_providers.cell_tracking_dataset.rt_cell_tracking_provider_t import \
-    RTCellTrackingProviderT
+from imagemodel.experimental.reference_tracking.dataset_providers.cell_tracking_dataset. \
+    rt_cell_tracking_provider_t import RTCellTrackingProviderT
 from imagemodel.experimental.reference_tracking.dataset_providers.rt_provider import RTProviderT
-from imagemodel.experimental.reference_tracking.models.ref_local_tracking_model_031 import RefLocalTrackingModel031Manager
+from imagemodel.experimental.reference_tracking.models. \
+    ref_local_tracking_model_031 import RefLocalTrackingModel031Manager
 
 # noinspection DuplicatedCode
 if __name__ == "__main__":
@@ -35,7 +36,8 @@ if __name__ == "__main__":
     ...     -v /data/tensorflow_datasets:/tensorflow_datasets \
     ...     --workdir="/imagemodel" \
     ...     imagemodel/tkl:1.2
-    >>> python imagemodel/reference_tracking/models/trainers/ref_local_tracking_model_031_provider_trainer.py \
+    >>> python imagemodel/experimental/reference_tracking/models/trainers/\
+    ... ref_local_tracking_model_031_provider_trainer.py \
     ...     --model_name ref_local_tracking_model_031 \
     ...     --result_base_folder /reference_tracking_results \
     ...     --training_epochs 100 \
@@ -59,14 +61,15 @@ if __name__ == "__main__":
     ...     -v /data/tensorflow_datasets:/tensorflow_datasets \
     ...     --workdir="/imagemodel" \
     ...     imagemodel/tkl:1.2
-    >>> python imagemodel/reference_tracking/models/trainers/ref_local_tracking_model_031_provider_trainer.py \
+    >>> python imagemodel/experimental/reference_tracking/models/trainers/\
+    ... ref_local_tracking_model_031_provider_trainer.py \
     ...     --model_name ref_local_tracking_model_031 \
     ...     --result_base_folder /reference_tracking_results \
     ...     --training_epochs 100 \
     ...     --validation_freq 1 \
     ...     --training_base_folder /data/tracking_training \
     ...     --validation_base_folder /data/tracking_validation \
-    ...     --run_id reference_tracking__20210517_163254 \
+    ...     --run_id reference_tracking__20210520_190144 \
     ...     --without_early_stopping \
     ...     --batch_size 2
     
@@ -81,7 +84,8 @@ if __name__ == "__main__":
     ...     -v $(pwd):/imagemodel \
     ...     --workdir="/imagemodel" \
     ...     imagemodel_tpu/tkl:1.4
-    >>> python imagemodel/reference_tracking/models/trainers/ref_local_tracking_model_031_provider_trainer.py \
+    >>> python imagemodel/experimental/reference_tracking/models/trainers/\
+    ... ref_local_tracking_model_031_provider_trainer.py \
     ...     --model_name ref_local_tracking_model_031 \
     ...     --result_base_folder gs://cell_dataset \
     ...     --training_epochs 100 \
@@ -186,7 +190,7 @@ if __name__ == "__main__":
     # Dataset Setup
     rt_training_provider: RTProviderT = RTCellTrackingProviderT(
             base_folder=training_base_folder,
-            shuffle_for_trainer=True,
+            shuffle_for_trainer=False,
             shuffle=True,
             random_seed=42,
             bin_size=30,

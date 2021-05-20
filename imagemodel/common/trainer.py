@@ -35,13 +35,13 @@ class Trainer:
         self.validation_freq: int = validation_freq
         
         self.training_dataset_num: int = len(self.training_dataset)
-        self.training_dataset = self.training_dataset.batch(self.training_batch_size, drop_remainder=True)
+        self.training_dataset = self.training_dataset.batch(self.training_batch_size, drop_remainder=True).repeat()
         self.training_dataset = self.training_dataset.prefetch(tf.data.experimental.AUTOTUNE)
         
         self.validation_dataset_num: int = optional_map(self.validation_dataset_optional, len) or 0
         self.validation_dataset_optional = optional_map(
                 self.validation_dataset_optional,
-                lambda el: el.batch(self.validation_batch_size, drop_remainder=True))
+                lambda el: el.batch(self.validation_batch_size, drop_remainder=True).repeat())
         self.validation_dataset_optional = optional_map(
                 self.validation_dataset_optional,
                 lambda el: el.prefetch(tf.data.experimental.AUTOTUNE))
