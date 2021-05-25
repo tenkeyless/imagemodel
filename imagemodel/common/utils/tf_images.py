@@ -243,6 +243,8 @@ def tf_extract_patches(tf_array, ksize, img_wh, channel):
     Other implementation of `tf.image.extract_patches`.
 
     Improved `tf_extract_patches`.
+    
+    Should be reshape after with `tf.reshape(results, (batch, img_wh, img_wh, ksize*ksize, channel))`.
 
     - Conditions.
         - Padding is "SAME".
