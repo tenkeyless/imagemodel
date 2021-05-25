@@ -8,7 +8,7 @@ For a description of each image deep learning, please refer to the "README.md" f
 
 * Image segmentation (binary)
   * `imagemodel/binary_segmentations`
-* Image segmentation (category)
+* Image segmentation (categorical)
   * `imagemodel/category_segmentations`
   * Models
     * U-Net
