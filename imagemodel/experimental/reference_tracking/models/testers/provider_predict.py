@@ -67,6 +67,7 @@ if __name__ == "__main__":
     ...     --batch_size 2
 
     # With TPU (X)
+    
     >>> docker run \
     ...     -it \
     ...     --rm \
